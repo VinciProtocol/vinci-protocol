@@ -1,0 +1,53 @@
+{
+  "name": "vinci-protocol",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "doc": "doc"
+  },
+  "scripts": {
+    "initenv": "npm i",
+    "compile": "SKIP_LOAD=true hardhat compile",
+    "test": "npm run compile && hardhat test ./test-suites/*.spec.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BestMinr-defi/vinci-protocol.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/BestMinr-defi/vinci-protocol/issues"
+  },
+  "homepage": "https://github.com/BestMinr-defi/vinci-protocol#readme",
+  "devDependencies": {
+    "@nomiclabs/buidler": "^1.4.8",
+    "@nomiclabs/buidler-ethers": "^2.0.2",
+    "@nomiclabs/buidler-etherscan": "^2.1.0",
+    "@nomiclabs/buidler-waffle": "^2.1.0",
+    "@nomiclabs/hardhat-ethers": "^2.0.3",
+    "@nomiclabs/hardhat-ganache": "^2.0.1",
+    "@nomiclabs/hardhat-waffle": "^2.0.1",
+    "@openzeppelin/contracts": "^3.4.2-solc-0.7",
+    "@openzeppelin/hardhat-upgrades": "^1.12.0",
+    "@tenderly/hardhat-tenderly": "^1.1.0-beta.5",
+    "@typechain/ethers-v5": "^8.0.5",
+    "@typechain/hardhat": "^3.1.0",
+    "@types/chai": "^4.3.0",
+    "@types/lowdb": "1.0.9",
+    "@types/mocha": "^9.1.0",
+    "@types/node": "^17.0.15",
+    "chai": "^4.3.4",
+    "chai-bignumber": "^3.0.0",
+    "defender-relay-client": "^1.7.0",
+    "ethereum-waffle": "^3.4.0",
+    "ethers": "^5.5.2",
+    "hardhat": "^2.8.3",
+    "hardhat-tenderly": "^1.0.1",
+    "lowdb": "^1.0.0",
+    "tmp-promise": "^3.0.2",
+    "ts-node": "^10.4.0"
+  }
+}
