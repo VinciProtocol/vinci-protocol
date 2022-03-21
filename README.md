@@ -12,8 +12,8 @@ And to test:
 
 `npm run test`
 
-Sometimes it will report an error likes:
+Sometimes it will report an error like this:
 
 `Error: Cannot find module './test-suites/__setup.spec.ts'`
 
-You can safe ignore it. The result of test is above that line.
+It's not an error. You could just ignore it. The result of the test run is above that line.
