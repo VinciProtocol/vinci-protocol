@@ -1,17 +1,17 @@
 {
   "compilerOptions": {
     "target": "es2019",
-    "module": "commonjs",
+    "module": "es2022",
     "strict": false,
     "esModuleInterop": true,
     "outDir": "dist",
     "noImplicitAny": false,
-    "resolveJsonModule": true
+    "moduleResolution": "node",
+    "allowJs": true,
   },
   "include": ["./tasks", "./helpers"],
   "files": [
     "./hardhat.config.ts",
-    "./modules/tenderly/tenderly.d.ts",
     "node_modules/@nomiclabs/buidler-ethers/src/type-extensions.d.ts",
     "node_modules/buidler-typechain/src/type-extensions.d.ts",
     "node_modules/@nomiclabs/buidler-waffle/src/type-extensions.d.ts",
