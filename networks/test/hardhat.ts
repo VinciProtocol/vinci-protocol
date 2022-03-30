@@ -1,4 +1,4 @@
-import { accounts } from "./test-wallets.js";
+import { accounts } from "../../test-wallets";
 
 const UNLIMITED_BYTECODE_SIZE = process.env.UNLIMITED_BYTECODE_SIZE === "true";
 

@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "es2019",
-    "module": "es2022",
+    "module": "commonjs",
     "strict": false,
     "esModuleInterop": true,
     "outDir": "dist",

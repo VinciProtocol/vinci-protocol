@@ -3,3 +3,4 @@
 /node_modules/
 /types/
 /.ipynb_checkpoints/
+/hardhat.config.ts
