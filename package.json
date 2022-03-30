@@ -8,6 +8,7 @@
   },
   "scripts": {
     "initenv": "npm i",
+    "pre": "node scripts/pre.js",
     "compile": "SKIP_LOAD=true hardhat compile",
     "test": "npm run compile && hardhat test ./test-suites/*.spec.ts"
   },

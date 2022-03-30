@@ -1,7 +1,4 @@
-
-  import hardhat from './networks/test/hardhat'
-import localhost from './networks/test/localhost'
-  /**
+/**
  * @type import('hardhat/config').HardhatUserConfig
  */
 import path from "path";
@@ -41,6 +38,3 @@ export const solidity = {
 export const mocha = {
   timeout: 0,
 };
-
-  export const networks = {hardhat,localhost};
-  
