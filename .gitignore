@@ -4,3 +4,8 @@
 /types/
 /.ipynb_checkpoints/
 /hardhat.config.ts
+/deployment/
+networks/deployment
+tasks/dev
+tasks/migrations
+tasks/single
