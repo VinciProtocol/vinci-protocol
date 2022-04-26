@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: agpl-3.0
 pragma solidity 0.8.11;
 
-import {IERC1155} from '../dependencies/openzeppelin/contracts/IERC1155.sol';
+import {IERC721} from '../dependencies/openzeppelin/contracts/IERC721.sol';
 import {IInitializableNToken} from './IInitializableNToken.sol';
 
-interface INToken is IERC1155, IInitializableNToken {
+interface INToken is IERC721, IInitializableNToken {
     /**
     * @dev Emitted after the mint action
     * @param from The address performing the mint
@@ -104,4 +104,9 @@ interface INToken is IERC1155, IInitializableNToken {
    * @dev Returns the address of the underlying asset of this nToken
    **/
   function UNDERLYING_ASSET_ADDRESS() external view returns (address);
+
+  /**
+   * @dev Returns the contract-level metadata.
+   */
+  function contractURI() external view returns (string memory);
 }

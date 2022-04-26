@@ -9,10 +9,10 @@ import {ILendingPool} from '../../interfaces/ILendingPool.sol';
 import {WadRayMath} from '../libraries/math/WadRayMath.sol';
 import {Errors} from '../libraries/helpers/Errors.sol';
 import {VersionedInitializable} from '../libraries/aave-upgradeability/VersionedInitializable.sol';
-import {WrappedERC1155} from './WrappedERC1155.sol';
+import {WrappedERC721} from './WrappedERC721.sol';
 import {SafeERC721} from '../libraries/helpers/SafeERC721.sol';
 import {IERC721Receiver} from '../../dependencies/openzeppelin/contracts/IERC721Receiver.sol';
-import {IERC1155Receiver} from '../../dependencies/openzeppelin/contracts/IERC1155Receiver.sol';
+import {IERC721Stat} from '../../interfaces/IERC721Stat.sol';
 
 /**
  * @title Vinci ERC1155 NToken
@@ -21,10 +21,11 @@ import {IERC1155Receiver} from '../../dependencies/openzeppelin/contracts/IERC11
  */
  contract NToken is
    VersionedInitializable,
-   WrappedERC1155, 
+   WrappedERC721, 
+   IERC721Stat,
    IERC721Receiver, 
-   IERC1155Receiver,
    INToken
+
 {
     // TODO ERC1155 or ERC1155Burnable?
     using WadRayMath for uint256;
@@ -46,7 +47,9 @@ import {IERC1155Receiver} from '../../dependencies/openzeppelin/contracts/IERC11
     ILendingPool internal _pool;
     address internal _underlyingNFT;
 
-      modifier onlyLendingPool {
+    event BurnBatch(address user, address receiverOfUnderlying, uint256[] tokenIds, uint256[] amounts);
+
+    modifier onlyLendingPool {
         require(_msgSender() == address(_pool), Errors.CT_CALLER_MUST_BE_LENDING_POOL);
         _;
     }
@@ -286,6 +289,33 @@ import {IERC1155Receiver} from '../../dependencies/openzeppelin/contracts/IERC11
   function _safeBatchTransferFrom(address from, address to, uint256[] calldata tokenIds, uint256[] calldata amounts, bytes memory data) internal override {
     _safeBatchTransferFrom(from, to, tokenIds, amounts, data, true);
   }
+
+  /**
+     * @dev See {IERC1155-balanceOfBatch}.
+     *
+     * Requirements:
+     *
+     * - `accounts` and `ids` must have the same length.
+     */
+    function balanceOfBatch(address[] memory accounts, uint256[] memory ids)
+        external
+        view
+        virtual
+        override
+        returns (uint256[] memory)
+    {
+        return _balanceOfBatch(accounts, ids);
+    }
+
+    function balanceOfBatch(address account, uint256[] memory ids)
+        external
+        view
+        virtual
+        override
+        returns (uint256[] memory)
+    {
+        return _balanceOfBatch(account, ids);
+    }
 
 
 }
