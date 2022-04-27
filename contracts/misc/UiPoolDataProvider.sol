@@ -9,7 +9,7 @@ import {ILendingPoolAddressesProviderRegistry} from '../interfaces/ILendingPoolA
 import {IUiPoolDataProvider} from './interfaces/IUiPoolDataProvider.sol';
 import {ILendingPool} from '../interfaces/ILendingPool.sol';
 import {IAaveOracle} from '../interfaces/IAaveOracle.sol';
-import {IERC1155Stat} from '../interfaces/IERC1155Stat.sol';
+import {IERC721Stat} from '../interfaces/IERC721Stat.sol';
 import {IVToken} from '../interfaces/IVToken.sol';
 import {IVariableDebtToken} from '../interfaces/IVariableDebtToken.sol';
 //import {IStableDebtToken} from '../interfaces/IStableDebtToken.sol';
@@ -296,7 +296,7 @@ contract UiPoolDataProvider is IUiPoolDataProvider {
 
     for (uint256 i = 0; i < vaults.length; i++) {
       DataTypes.NFTVaultData memory baseData = lendingPool.getNFTVaultData(vaults[i]);
-      IERC1155Stat nToken = IERC1155Stat(baseData.nTokenAddress);
+      IERC721Stat nToken = IERC721Stat(baseData.nTokenAddress);
 
       // user reserve data
       userVaultsData[i].underlyingAsset = vaults[i];

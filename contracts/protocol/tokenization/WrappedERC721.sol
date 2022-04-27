@@ -8,21 +8,21 @@ import {ERC165} from '../../dependencies/openzeppelin/contracts/ERC165.sol';
 import {IERC721Enumerable} from '../../dependencies/openzeppelin/contracts/IERC721Enumerable.sol';
 import {IERC721Metadata} from '../../dependencies/openzeppelin/contracts/IERC721Metadata.sol';
 import {IERC721Receiver} from '../../dependencies/openzeppelin/contracts/IERC721Receiver.sol';
-import {SafeMath} from '../../dependencies/openzeppelin/contracts/SafeMath.sol';
+import {Strings} from '../../dependencies/openzeppelin/contracts/Strings.sol';
 import {EnumerableSet} from "../../dependencies/openzeppelin/contracts/EnumerableSet.sol";
 import {EnumerableMap} from "../../dependencies/openzeppelin/contracts/EnumerableMap.sol";
 
 abstract contract WrappedERC721 is Context, ERC165, IERC721Enumerable, IERC721Metadata{
-    using SafeMath for uint256;
     using Address for address;
+    using Strings for uint256;
 
     uint256 internal _totalSupply;
 
     // Mapping from token ID to owner address
-    mapping(uint256 => address) private _owners;
+    mapping(uint256 => address) internal _owners;
 
     // Mapping owner address to token count
-    mapping(address => uint256) private _balances;
+    mapping(address => uint256) internal _balances;
 
     // Mapping from token ID to approved address
     mapping(uint256 => address) private _tokenApprovals;
@@ -31,21 +31,21 @@ abstract contract WrappedERC721 is Context, ERC165, IERC721Enumerable, IERC721Me
     mapping(address => mapping(address => bool)) private _operatorApprovals;
 
     // Mapping from owner to list of owned token IDs
-    mapping(address => mapping(uint256 => uint256)) private _ownedTokens;
+    mapping(address => mapping(uint256 => uint256)) internal _ownedTokens;
 
     // Mapping from token ID to index of the owner tokens list
-    mapping(uint256 => uint256) private _ownedTokensIndex;
+    mapping(uint256 => uint256) internal _ownedTokensIndex;
 
     // Array with all token ids, used for enumeration
-    uint256[] private _allTokens;
+    uint256[] internal _allTokens;
 
     // Mapping from token id to position in the allTokens array
-    mapping(uint256 => uint256) private _allTokensIndex;
+    mapping(uint256 => uint256) internal _allTokensIndex;
 
-    string private _uri;
+    string internal _uri;
 
-    string private _name;
-    string private _symbol;
+    string internal _name;
+    string internal _symbol;
 
     /*constructor(
         string memory uri_,
@@ -461,7 +461,7 @@ abstract contract WrappedERC721 is Context, ERC165, IERC721Enumerable, IERC721Me
      * @dev See {IERC721Enumerable-tokenByIndex}.
      */
     function tokenByIndex(uint256 index) public view virtual override returns (uint256) {
-        require(index < ERC721Enumerable.totalSupply(), "ERC721Enumerable: global index out of bounds");
+        require(index < totalSupply(), "ERC721Enumerable: global index out of bounds");
         return _allTokens[index];
     }
 
@@ -484,8 +484,8 @@ abstract contract WrappedERC721 is Context, ERC165, IERC721Enumerable, IERC721Me
         address from,
         address to,
         uint256 tokenId
-    ) internal virtual override {
-        super._beforeTokenTransfer(from, to, tokenId);
+    ) internal virtual {
+        _beforeTokenTransfer(from, to, tokenId);
 
         if (from == address(0)) {
             _addTokenToAllTokensEnumeration(tokenId);
@@ -572,5 +572,15 @@ abstract contract WrappedERC721 is Context, ERC165, IERC721Enumerable, IERC721Me
         _allTokens.pop();
     }
 
-
+    function _balanceOfBatch(address account, uint256[] memory tokenIds) internal view returns (uint256[] memory){
+        uint256[] memory amounts = new uint256[](tokenIds.length);
+        for(uint256 i = 0; i < tokenIds.length; ++i){
+            if(_owners[tokenIds[i]] == account){
+                amounts[i] = 1;
+            } else {
+                amounts[i] = 0;
+            }
+        }
+        return amounts;
+    }
 }

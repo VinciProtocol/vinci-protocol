@@ -104,9 +104,4 @@ interface INToken is IERC721, IInitializableNToken {
    * @dev Returns the address of the underlying asset of this nToken
    **/
   function UNDERLYING_ASSET_ADDRESS() external view returns (address);
-
-  /**
-   * @dev Returns the contract-level metadata.
-   */
-  function contractURI() external view returns (string memory);
 }

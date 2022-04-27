@@ -10,7 +10,7 @@ import {Address} from '../../dependencies/openzeppelin/contracts/Address.sol';
 import {ILendingPoolAddressesProvider} from '../../interfaces/ILendingPoolAddressesProvider.sol';
 import {IVToken} from '../../interfaces/IVToken.sol';
 import {INToken} from '../../interfaces/INToken.sol';
-import {IERC1155Stat} from '../../interfaces/IERC1155Stat.sol';
+import {IERC721Stat} from '../../interfaces/IERC721Stat.sol';
 import {IVariableDebtToken} from '../../interfaces/IVariableDebtToken.sol';
 import {IPriceOracleGetter} from '../../interfaces/IPriceOracleGetter.sol';
 import {INFTXEligibility} from '../../interfaces/INFTXEligibility.sol';
@@ -247,7 +247,7 @@ contract LendingPool is VersionedInitializable, ILendingPool, LendingPoolStorage
 
     address nToken = vault.nTokenAddress;
 
-    uint256[] memory userBalances = IERC1155Stat(nToken).balanceOfBatch(msg.sender, tokenIds);
+    uint256[] memory userBalances = IERC721Stat(nToken).balanceOfBatch(msg.sender, tokenIds);
 
     uint256[] memory amountsToWithdraw = amounts;
 
@@ -271,7 +271,7 @@ contract LendingPool is VersionedInitializable, ILendingPool, LendingPoolStorage
       _addressesProvider.getPriceOracle()
     );
 
-    if (amountToWithdraw == IERC1155Stat(nToken).balanceOf(msg.sender)) {
+    if (amountToWithdraw == IERC721Stat(nToken).balanceOf(msg.sender)) {
       _usersConfig[msg.sender].setUsingNFTVaultAsCollateral(vault.id, false);
       emit NFTVaultUsedAsCollateralDisabled(nft, msg.sender);
     }

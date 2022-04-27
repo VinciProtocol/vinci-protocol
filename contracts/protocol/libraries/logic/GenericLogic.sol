@@ -3,7 +3,7 @@ pragma solidity 0.8.11;
 pragma abicoder v2;
 
 import {IERC20} from '../../../dependencies/openzeppelin/contracts/IERC20.sol';
-import {IERC1155Stat} from '../../../interfaces/IERC1155Stat.sol';
+import {IERC721Stat} from '../../../interfaces/IERC721Stat.sol';
 import {ReserveLogic} from './ReserveLogic.sol';
 import {ReserveConfiguration} from '../configuration/ReserveConfiguration.sol';
 import {NFTVaultLogic} from './NFTVaultLogic.sol';
@@ -217,7 +217,7 @@ library GenericLogic {
       vars.reserveUnitPrice = IPriceOracleGetter(oracle).getAssetPrice(vars.currentReserveAddress);
 
       if (vars.liquidationThreshold != 0 && userConfig.isUsingNFTVaultAsCollateral(vars.i)) {
-        vars.compoundedLiquidityBalance = IERC1155Stat(currentVault.nTokenAddress).balanceOf(user);
+        vars.compoundedLiquidityBalance = IERC721Stat(currentVault.nTokenAddress).balanceOf(user);
 
         uint256 liquidityBalanceETH =
           vars.reserveUnitPrice * vars.compoundedLiquidityBalance;

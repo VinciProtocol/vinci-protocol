@@ -12,6 +12,7 @@ import {VersionedInitializable} from '../libraries/aave-upgradeability/Versioned
 import {WrappedERC721} from './WrappedERC721.sol';
 import {SafeERC721} from '../libraries/helpers/SafeERC721.sol';
 import {IERC721Receiver} from '../../dependencies/openzeppelin/contracts/IERC721Receiver.sol';
+import {IERC1155Receiver} from '../../dependencies/openzeppelin/contracts/IERC1155Receiver.sol';
 import {IERC721Stat} from '../../interfaces/IERC721Stat.sol';
 
 /**
@@ -23,7 +24,8 @@ import {IERC721Stat} from '../../interfaces/IERC721Stat.sol';
    VersionedInitializable,
    WrappedERC721, 
    IERC721Stat,
-   IERC721Receiver, 
+   IERC721Receiver,
+   IERC1155Receiver,
    INToken
 
 {
@@ -111,10 +113,10 @@ import {IERC721Stat} from '../../interfaces/IERC721Stat.sol';
        uint256 amount
    ) external override onlyLendingPool {
      require(amount != 0, Errors.CT_INVALID_BURN_AMOUNT);
-     _burn(user, tokenId, amount);
+     _burn(tokenId);
      IERC721(_underlyingNFT).safeTransferFrom(address(this), receiverOfUnderlying, tokenId, "");
 
-     emit TransferSingle(msg.sender, user, address(0), tokenId, amount);
+     emit Transfer(user, address(0), tokenId);
      emit Burn(user, receiverOfUnderlying, tokenId, amount);
    }
 
@@ -124,13 +126,20 @@ import {IERC721Stat} from '../../interfaces/IERC721Stat.sol';
        uint256[] calldata tokenIds,
        uint256[] calldata amounts
    ) external override onlyLendingPool {
-     _burnBatch(user, tokenIds, amounts);
+     require(tokenIds.length == amounts.length, Errors.CT_INVALID_BURN_AMOUNT);
+     for(uint256 i = 0; i < tokenIds.length; ++i){
+       if(amounts[i] != 0){
+        _burn(tokenIds[i]);
+       }
+     }
      for(uint256 i = 0; i < tokenIds.length; ++i){
        uint256 id = tokenIds[i];
        IERC721(_underlyingNFT).safeTransferFrom(address(this), receiverOfUnderlying, id, "");
      }
 
-     emit TransferBatch(msg.sender, user, address(0), tokenIds, amounts);
+     for(uint256 i = 0; i < tokenIds.length; ++i){
+       emit Transfer(user, address(0), tokenIds[i]);
+     }
      emit BurnBatch(user, receiverOfUnderlying, tokenIds, amounts);
    }
 
@@ -139,10 +148,10 @@ import {IERC721Stat} from '../../interfaces/IERC721Stat.sol';
        uint256 tokenId,
        uint256 amount
    ) external override onlyLendingPool returns (bool) {
-     uint256 previousNFTAmount = super._balanceOf(user);
+     uint256 previousNFTAmount = super.balanceOf(user);
      require(amount != 0, Errors.CT_INVALID_MINT_AMOUNT);
-     _mint(user, tokenId, amount, "");
-    emit TransferSingle(msg.sender, address(0), user, tokenId, amount);
+     _safeMint(user, tokenId, "");
+    emit Transfer(address(0), user, tokenId);
     emit Mint(user, tokenId, amount);
 
     return previousNFTAmount == 0;
@@ -158,7 +167,11 @@ import {IERC721Stat} from '../../interfaces/IERC721Stat.sol';
     // so no need to emit a specific event here
     _safeBatchTransferFrom(from, to, tokenIds, amounts, '', false);
 
-    emit TransferBatch(msg.sender, from, to, tokenIds, amounts);
+    for(uint256 i = 0; i < tokenIds.length; ++i){
+      if(amounts[i] > 0) {
+        emit Transfer(from, to, tokenIds[i]);
+      }
+    }
   }
 
   /**
@@ -191,24 +204,18 @@ import {IERC721Stat} from '../../interfaces/IERC721Stat.sol';
     override 
     returns(uint256, uint256[] memory)
   {
-    require(user != address(0), "ERC1155: balance query for the zero address");
-    require(tokenIds.length == amounts.length, "ERC1155: tokenIds and amounts length mismatch");
+    require(user != address(0), "ERC721: balance query for the zero address");
+    require(tokenIds.length == amounts.length, "ERC721: tokenIds and amounts length mismatch");
     uint256[] memory resultAmounts = new uint256[](tokenIds.length);
     uint256 remainTotal = maxTotal;
     uint256 i = 0;
     while(remainTotal > 0 && i < tokenIds.length) {
-      uint256 vaultAmount = _balances[tokenIds[i]][user];
-      uint256 parameterAmount = amounts[i];
-      uint256 currentAmount = vaultAmount < parameterAmount 
-        ? vaultAmount
-        : parameterAmount;
-      if(remainTotal > currentAmount) {
-        resultAmounts[i] = currentAmount;
-        remainTotal = remainTotal - currentAmount;
+      if(_owners[tokenIds[i]] == user) {
+        resultAmounts[i] = 1;
+        remainTotal = remainTotal - 1;
       }
       else{
-        resultAmounts[i] = remainTotal;
-        remainTotal = 0;
+        resultAmounts[i] = 0;
       }
       ++i;
     }
@@ -218,7 +225,7 @@ import {IERC721Stat} from '../../interfaces/IERC721Stat.sol';
     return(maxTotal - remainTotal, resultAmounts);
   }
 
-  function supportsInterface(bytes4 interfaceId) public view virtual override(IERC165, WrappedERC1155) returns (bool) {
+  function supportsInterface(bytes4 interfaceId) public view virtual override(IERC165, WrappedERC721) returns (bool) {
     return
       interfaceId == type(IERC721Receiver).interfaceId ||
       interfaceId == type(IERC1155Receiver).interfaceId ||
@@ -259,16 +266,16 @@ import {IERC721Stat} from '../../interfaces/IERC721Stat.sol';
     address underlyingNFT = _underlyingNFT;
     ILendingPool pool = _pool;
 
-    uint256 fromNFTAmountBefore = super._balanceOf(from);
-    uint256 toNFTAmountBefore = super._balanceOf(to);
-    super._safeTransferFrom(from, to, tokenId, amount, data);
+    uint256 fromNFTAmountBefore = super.balanceOf(from);
+    uint256 toNFTAmountBefore = super.balanceOf(to);
+    super._safeTransfer(from, to, tokenId, data);
     if(validate){
       pool.finalizeNFTSingleTransfer(underlyingNFT, from, to, tokenId, amount, fromNFTAmountBefore, toNFTAmountBefore);
     }
     emit BalanceTransfer(from, to, tokenId, amount);
   }
 
-  function _safeTransferFrom(address from, address to, uint256 tokenId, uint256 amount, bytes memory data) internal override {
+  function _safeTransferFrom(address from, address to, uint256 tokenId, uint256 amount, bytes memory data) internal {
     _safeTransferFrom(from, to, tokenId, amount, data, true);
   }
 
@@ -276,9 +283,13 @@ import {IERC721Stat} from '../../interfaces/IERC721Stat.sol';
     address underlyingNFT = _underlyingNFT;
     ILendingPool pool = _pool;
 
-    uint256 fromNFTAmountBefore = super._balanceOf(from);
-    uint256 toNFTAmountBefore = super._balanceOf(to);
-    super._safeBatchTransferFrom(from, to, tokenIds, amounts, data);
+    uint256 fromNFTAmountBefore = super.balanceOf(from);
+    uint256 toNFTAmountBefore = super.balanceOf(to);
+    for(uint256 i = 0; i < tokenIds.length; ++i){
+      if(amounts[i] != 0){
+        super._safeTransfer(from, to, tokenIds[i], data);
+      }
+    }
     if(validate){
       pool.finalizeNFTBatchTransfer(underlyingNFT, from, to, tokenIds, amounts, fromNFTAmountBefore, toNFTAmountBefore);
     }
@@ -286,36 +297,37 @@ import {IERC721Stat} from '../../interfaces/IERC721Stat.sol';
 
   }
 
-  function _safeBatchTransferFrom(address from, address to, uint256[] calldata tokenIds, uint256[] calldata amounts, bytes memory data) internal override {
+  function _safeBatchTransferFrom(address from, address to, uint256[] calldata tokenIds, uint256[] calldata amounts, bytes memory data) internal {
     _safeBatchTransferFrom(from, to, tokenIds, amounts, data, true);
   }
 
-  /**
-     * @dev See {IERC1155-balanceOfBatch}.
-     *
-     * Requirements:
-     *
-     * - `accounts` and `ids` must have the same length.
-     */
-    function balanceOfBatch(address[] memory accounts, uint256[] memory ids)
-        external
-        view
-        virtual
-        override
-        returns (uint256[] memory)
-    {
-        return _balanceOfBatch(accounts, ids);
-    }
+  function balanceOfBatch(address account, uint256[] memory ids)
+    external
+    view
+    virtual
+    override
+    returns (uint256[] memory)
+  {
+    
+    return _balanceOfBatch(account, ids);
+  }
 
-    function balanceOfBatch(address account, uint256[] memory ids)
-        external
-        view
-        virtual
-        override
-        returns (uint256[] memory)
-    {
-        return _balanceOfBatch(account, ids);
+
+
+  function tokensByAccount(address account) external view override returns(uint256[] memory) 
+  {
+    uint256 balance = balanceOf(account);
+    uint256[] memory tokenIds = new uint256[](balance);
+    for(uint256 i = 0; i < balance; ++i){
+      tokenIds[i] = _ownedTokens[account][i];
     }
+    return tokenIds;
+  }
+
+  function getUserBalanceAndSupply(address user) external view  override returns (uint256, uint256)
+  {
+    return (balanceOf(user), totalSupply());
+  }
 
 
 }
