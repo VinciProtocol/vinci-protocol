@@ -34,7 +34,8 @@ interface ILendingPool {
     address user,
     address indexed onBehalfOf, 
     uint256[] tokenIds, 
-    uint256[] amounts 
+    uint256[] amounts,
+    uint256 lockType
   );
 
   event WithdrawNFT(
@@ -178,7 +179,8 @@ interface ILendingPool {
     uint256[] calldata tokenIds,
     uint256[] calldata amounts,
     address onBehalfOf,
-    uint16 referralCode
+    uint16 referralCode,
+    uint16 lockType
   ) external;
 
   /**

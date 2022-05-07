@@ -198,7 +198,8 @@ contract LendingPool is VersionedInitializable, ILendingPool, LendingPoolStorage
     uint256[] calldata tokenIds,
     uint256[] calldata amounts,
     address onBehalfOf,
-    uint16 referralCode
+    uint16 referralCode,
+    uint16 lockType
   ) external override whenNotPaused {
     require(tokenIds.length == amounts.length, Errors.LP_TOKEN_AND_AMOUNT_LENGTH_NOT_MATCH);
     DataTypes.NFTVaultData storage vault = _nftVaults.data[nft];
@@ -213,13 +214,16 @@ contract LendingPool is VersionedInitializable, ILendingPool, LendingPoolStorage
     for(uint256 i = 0; i < tokenIds.length; ++i){
       IERC721(nft).safeTransferFrom(msg.sender, nToken, tokenIds[i]);
       bool isFirstDeposit = INToken(nToken).mint(onBehalfOf, tokenIds[i], 1);
+      if(lockType != 0) {
+        INToken(nToken).lock(tokenIds[i], lockType);
+      }
       if (isFirstDeposit) {
         _usersConfig[onBehalfOf].setUsingNFTVaultAsCollateral(vault.id, true);
         emit NFTVaultUsedAsCollateralEnabled(nft, onBehalfOf);
       }
     }
 
-    emit DepositNFT(nft, msg.sender, onBehalfOf, tokenIds, amounts);
+    emit DepositNFT(nft, msg.sender, onBehalfOf, tokenIds, amounts, lockType);
 
   }
 

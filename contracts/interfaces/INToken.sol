@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: agpl-3.0
 pragma solidity 0.8.11;
 
-import {ITimeLockableERC1155} from './ITimeLockableERC1155.sol';
+import {ITimeLockableERC721} from './ITimeLockableERC721.sol';
 import {IInitializableNToken} from './IInitializableNToken.sol';
 
-interface INToken is ITimeLockableERC1155, IInitializableNToken {
+interface INToken is ITimeLockableERC721, IInitializableNToken {
     /**
     * @dev Emitted after the mint action
     * @param from The address performing the mint
