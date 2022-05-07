@@ -247,7 +247,7 @@ contract LendingPool is VersionedInitializable, ILendingPool, LendingPoolStorage
 
     address nToken = vault.nTokenAddress;
 
-    uint256[] memory userBalances = IERC721Stat(nToken).balanceOfBatch(msg.sender, tokenIds);
+    uint256[] memory userBalances = INToken(nToken).unlockedBalanceOfBatch(msg.sender, tokenIds);
 
     uint256[] memory amountsToWithdraw = amounts;
 

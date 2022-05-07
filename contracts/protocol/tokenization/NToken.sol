@@ -225,7 +225,26 @@ import {IERC721Stat} from '../../interfaces/IERC721Stat.sol';
     return(maxTotal - remainTotal, resultAmounts);
   }
 
-  function supportsInterface(bytes4 interfaceId) public view virtual override(IERC165, WrappedERC721) returns (bool) {
+  function lock(address user, uint256 tokenId, uint256 amount, uint256 lockType) public virtual override onlyLendingPool
+  {
+    revert('LV_NFT_LOCK_NOT_IMPLEMENTED');
+  }
+
+  function getUnlockTime(address user, uint256 tokenId) public view virtual override returns(uint256[] memory amounts, uint256[] memory unlockTime)
+  {
+    uint256[] memory amounts = new uint256[](1);
+    uint256[] memory unlockTime = new uint256[](1);
+    amounts[0] = _balanceOf(user, tokenId);
+    unlockTime[0] = 0;
+    return (amounts, unlockTime);
+  }
+
+  function unlockedBalanceOfBatch(address user, uint256[] calldata tokenIds) public view virtual override returns(uint256[] memory amounts)
+  {
+    return _balanceOfBatch(user, tokenIds);
+  }
+
+  function supportsInterface(bytes4 interfaceId) public view virtual override(IERC165, WrappedERC1155) returns (bool) {
     return
       interfaceId == type(IERC721Receiver).interfaceId ||
       interfaceId == type(IERC1155Receiver).interfaceId ||
