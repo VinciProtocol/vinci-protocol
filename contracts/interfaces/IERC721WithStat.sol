@@ -2,9 +2,10 @@
 
 pragma solidity ^0.8.0;
 
-import "../dependencies/openzeppelin/contracts/IERC721.sol";
+import {IERC721Enumerable} from '../dependencies/openzeppelin/contracts/IERC721Enumerable.sol';
 
-interface IERC721Stat is IERC721 {
+
+interface IERC721WithStat is IERC721Enumerable{
     function balanceOfBatch(address user, uint256[] calldata ids) external view returns (uint256[] memory);
     function tokensByAccount(address account) external view returns (uint256[] memory);
     /**

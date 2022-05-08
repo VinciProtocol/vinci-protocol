@@ -16,7 +16,7 @@ import {SafeERC721} from '../libraries/helpers/SafeERC721.sol';
 import {Strings} from '../../dependencies/openzeppelin/contracts/Strings.sol';
 import {IERC721Receiver} from '../../dependencies/openzeppelin/contracts/IERC721Receiver.sol';
 import {IERC1155Receiver} from '../../dependencies/openzeppelin/contracts/IERC1155Receiver.sol';
-import {IERC721Stat} from '../../interfaces/IERC721Stat.sol';
+
 import {IERC721Wrapper} from '../../interfaces/IERC721Wrapper.sol';
 
 /**
@@ -27,7 +27,6 @@ import {IERC721Wrapper} from '../../interfaces/IERC721Wrapper.sol';
  contract NToken is
    VersionedInitializable,
    WrappedERC721, 
-   IERC721Stat,
    IERC721Wrapper,
    IERC721Receiver,
    IERC1155Receiver,
@@ -354,21 +353,20 @@ import {IERC721Wrapper} from '../../interfaces/IERC721Wrapper.sol';
     return this.onERC1155BatchReceived.selector;
   }
 
-  function _safeTransferFrom(address from, address to, uint256 tokenId, uint256 amount, bytes memory data, bool validate) internal {
-    address underlyingNFT = _underlyingNFT;
-    ILendingPool pool = _pool;
-
+  function _transfer(address from, address to, uint256 tokenId, bool validate) internal
+  {
     uint256 fromNFTAmountBefore = super.balanceOf(from);
     uint256 toNFTAmountBefore = super.balanceOf(to);
-    super._safeTransfer(from, to, tokenId, data);
-    if(validate){
-      pool.finalizeNFTSingleTransfer(underlyingNFT, from, to, tokenId, amount, fromNFTAmountBefore, toNFTAmountBefore);
+    super._transfer(from, to, tokenId);
+    if(validate) {
+      _pool.finalizeNFTSingleTransfer(_underlyingNFT, from, to, tokenId, 1, fromNFTAmountBefore, toNFTAmountBefore);
     }
-    emit BalanceTransfer(from, to, tokenId, amount);
+    emit BalanceTransfer(from, to, tokenId, 1);
   }
 
-  function _safeTransferFrom(address from, address to, uint256 tokenId, uint256 amount, bytes memory data) internal {
-    _safeTransferFrom(from, to, tokenId, amount, data, true);
+  function _transfer(address from, address to, uint256 tokenId) internal virtual override
+  {
+    _transfer(from, to, tokenId, true);
   }
 
   function _safeBatchTransferFrom(address from, address to, uint256[] calldata tokenIds, uint256[] calldata amounts, bytes memory data, bool validate) internal {
@@ -393,33 +391,7 @@ import {IERC721Wrapper} from '../../interfaces/IERC721Wrapper.sol';
     _safeBatchTransferFrom(from, to, tokenIds, amounts, data, true);
   }
 
-  function balanceOfBatch(address account, uint256[] memory ids)
-    external
-    view
-    virtual
-    override
-    returns (uint256[] memory)
-  {
-    
-    return _balanceOfBatch(account, ids);
-  }
-
-
-
-  function tokensByAccount(address account) external view override returns (uint256[] memory) 
-  {
-    uint256 balance = balanceOf(account);
-    uint256[] memory tokenIds = new uint256[](balance);
-    for(uint256 i = 0; i < balance; ++i){
-      tokenIds[i] = _ownedTokens[account][i];
-    }
-    return tokenIds;
-  }
-
-  function getUserBalanceAndSupply(address user) external view  override returns (uint256, uint256)
-  {
-    return (balanceOf(user), totalSupply());
-  }
+  
 
   function tokenURI(uint256 tokenId) public view virtual override returns (string memory)
   {

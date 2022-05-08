@@ -3,13 +3,14 @@ pragma solidity 0.8.11;
 pragma experimental ABIEncoderV2;
 
 import {IERC20Metadata} from '../dependencies/openzeppelin/contracts/IERC20Metadata.sol';
+import {IERC721} from '../dependencies/openzeppelin/contracts/IERC721.sol';
 import {IERC721Metadata} from '../dependencies/openzeppelin/contracts/IERC721Metadata.sol';
 import {ILendingPoolAddressesProvider} from '../interfaces/ILendingPoolAddressesProvider.sol';
 import {ILendingPoolAddressesProviderRegistry} from '../interfaces/ILendingPoolAddressesProviderRegistry.sol';
 import {IUiPoolDataProvider} from './interfaces/IUiPoolDataProvider.sol';
 import {ILendingPool} from '../interfaces/ILendingPool.sol';
 import {IAaveOracle} from '../interfaces/IAaveOracle.sol';
-import {IERC721Stat} from '../interfaces/IERC721Stat.sol';
+import {IERC721WithStat} from '../interfaces/IERC721WithStat.sol';
 import {IVToken} from '../interfaces/IVToken.sol';
 import {IVariableDebtToken} from '../interfaces/IVariableDebtToken.sol';
 //import {IStableDebtToken} from '../interfaces/IStableDebtToken.sol';
@@ -201,7 +202,7 @@ contract UiPoolDataProvider is IUiPoolDataProvider {
       vaultData.nTokenAddress = baseData.nTokenAddress;
       vaultData.priceInMarketReferenceCurrency = oracle.getAssetPrice(vaultData.underlyingAsset);
 
-      vaultData.totalNumberOfCollateral = IERC721Metadata(vaultData.underlyingAsset).balanceOf(
+      vaultData.totalNumberOfCollateral = IERC721(vaultData.underlyingAsset).balanceOf(
         vaultData.nTokenAddress
       );
       // we're getting this info from the vToken, because some of assets can be not compliant with ETC20Detailed
@@ -296,11 +297,11 @@ contract UiPoolDataProvider is IUiPoolDataProvider {
 
     for (uint256 i = 0; i < vaults.length; i++) {
       DataTypes.NFTVaultData memory baseData = lendingPool.getNFTVaultData(vaults[i]);
-      IERC721Stat nToken = IERC721Stat(baseData.nTokenAddress);
+      IERC721WithStat nToken = IERC721WithStat(baseData.nTokenAddress);
 
       // user reserve data
       userVaultsData[i].underlyingAsset = vaults[i];
-      userVaultsData[i].nTokenBalance = nToken.balanceOf(user);
+      userVaultsData[i].nTokenBalance = IERC721(baseData.nTokenAddress).balanceOf(user);
       userVaultsData[i].tokenIds = nToken.tokensByAccount(user);
       userVaultsData[i].amounts = nToken.balanceOfBatch(user, userVaultsData[i].tokenIds);
       userVaultsData[i].usageAsCollateralEnabledOnUser = userConfig.isUsingNFTVaultAsCollateral(i);

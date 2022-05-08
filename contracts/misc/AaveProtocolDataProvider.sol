@@ -5,7 +5,7 @@ pragma experimental ABIEncoderV2;
 import {IERC20Metadata} from '../dependencies/openzeppelin/contracts/IERC20Metadata.sol';
 import {IERC721Metadata} from '../dependencies/openzeppelin/contracts/IERC721Metadata.sol';
 import {IERC1155Metadata} from '../interfaces/IERC1155Metadata.sol';
-import {IERC721Stat} from '../interfaces/IERC721Stat.sol';
+import {IERC721WithStat} from '../interfaces/IERC721WithStat.sol';
 import {ILendingPoolAddressesProvider} from '../interfaces/ILendingPoolAddressesProvider.sol';
 import {ILendingPool} from '../interfaces/ILendingPool.sol';
 //import {IStableDebtToken} from '../interfaces/IStableDebtToken.sol';
@@ -230,9 +230,9 @@ contract AaveProtocolDataProvider {
 
     DataTypes.UserConfigurationMap memory userConfig =
       ILendingPool(ADDRESSES_PROVIDER.getLendingPool()).getUserConfiguration(user);
-    currentNTokenBalance = IERC721Stat(vault.nTokenAddress).balanceOf(user);
-    tokenIds = IERC721Stat(vault.nTokenAddress).tokensByAccount(user);
-    amounts = IERC721Stat(vault.nTokenAddress).balanceOfBatch(user, tokenIds);
+    currentNTokenBalance = IERC721WithStat(vault.nTokenAddress).balanceOf(user);
+    tokenIds = IERC721WithStat(vault.nTokenAddress).tokensByAccount(user);
+    amounts = IERC721WithStat(vault.nTokenAddress).balanceOfBatch(user, tokenIds);
     
     usageAsCollateralEnabled = userConfig.isUsingNFTVaultAsCollateral(vault.id);
   }

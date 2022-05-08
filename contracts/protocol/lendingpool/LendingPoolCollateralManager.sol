@@ -5,7 +5,7 @@ pragma abicoder v2;
 import {IERC20} from '../../dependencies/openzeppelin/contracts//IERC20.sol';
 import {IVToken} from '../../interfaces/IVToken.sol';
 import {INToken} from '../../interfaces/INToken.sol';
-import {IERC721Stat} from '../../interfaces/IERC721Stat.sol';
+import {IERC721WithStat} from '../../interfaces/IERC721WithStat.sol';
 //import {IStableDebtToken} from '../../interfaces/IStableDebtToken.sol';
 import {IVariableDebtToken} from '../../interfaces/IVariableDebtToken.sol';
 import {IPriceOracleGetter} from '../../interfaces/IPriceOracleGetter.sol';
@@ -74,7 +74,7 @@ contract LendingPoolCollateralManager is
     uint256 totalCollateralToLiquidate;
     uint256 liquidatorPreviousNTokenBalance;
     INToken collateralNtoken;
-    IERC721Stat collateralTokenData;
+    IERC721WithStat collateralTokenData;
     bool isCollateralEnabled;
     DataTypes.InterestRateMode borrowRateMode;
     uint256 errorCode;
@@ -124,7 +124,7 @@ contract LendingPoolCollateralManager is
     }
 
     vars.collateralNtoken = INToken(collateralVault.nTokenAddress);
-    vars.collateralTokenData = IERC721Stat(collateralVault.nTokenAddress);
+    vars.collateralTokenData = IERC721WithStat(collateralVault.nTokenAddress);
 
     vars.maxLiquidatableDebt = vars.userVariableDebt.percentMul(
       LIQUIDATION_CLOSE_FACTOR_PERCENT

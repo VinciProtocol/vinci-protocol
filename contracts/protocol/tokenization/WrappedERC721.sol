@@ -5,14 +5,15 @@ import {Context} from '../../dependencies/openzeppelin/contracts/Context.sol';
 import {Address} from '../../dependencies/openzeppelin/contracts/Address.sol';
 import {IERC165} from '../../dependencies/openzeppelin/contracts/IERC165.sol';
 import {ERC165} from '../../dependencies/openzeppelin/contracts/ERC165.sol';
-import {IERC721Enumerable} from '../../dependencies/openzeppelin/contracts/IERC721Enumerable.sol';
+
 import {IERC721Metadata} from '../../dependencies/openzeppelin/contracts/IERC721Metadata.sol';
 import {IERC721Receiver} from '../../dependencies/openzeppelin/contracts/IERC721Receiver.sol';
+import {IERC721WithStat} from '../../interfaces/IERC721WithStat.sol';
 import {Strings} from '../../dependencies/openzeppelin/contracts/Strings.sol';
 import {EnumerableSet} from "../../dependencies/openzeppelin/contracts/EnumerableSet.sol";
 import {EnumerableMap} from "../../dependencies/openzeppelin/contracts/EnumerableMap.sol";
 
-abstract contract WrappedERC721 is Context, ERC165, IERC721Enumerable, IERC721Metadata{
+abstract contract WrappedERC721 is Context, ERC165, IERC721WithStat, IERC721Metadata{
     using Address for address;
     using Strings for uint256;
 
@@ -150,7 +151,7 @@ abstract contract WrappedERC721 is Context, ERC165, IERC721Enumerable, IERC721Me
      */
     function supportsInterface(bytes4 interfaceId) public view virtual override(ERC165, IERC165) returns (bool) {
         return
-            interfaceId == type(IERC721Enumerable).interfaceId ||
+            interfaceId == type(IERC721WithStat).interfaceId ||
             interfaceId == type(IERC721Metadata).interfaceId ||
             super.supportsInterface(interfaceId);
     }
@@ -485,8 +486,6 @@ abstract contract WrappedERC721 is Context, ERC165, IERC721Enumerable, IERC721Me
         address to,
         uint256 tokenId
     ) internal virtual {
-        _beforeTokenTransfer(from, to, tokenId);
-
         if (from == address(0)) {
             _addTokenToAllTokensEnumeration(tokenId);
         } else if (from != to) {
@@ -582,5 +581,33 @@ abstract contract WrappedERC721 is Context, ERC165, IERC721Enumerable, IERC721Me
             }
         }
         return amounts;
+    }
+
+    function balanceOfBatch(address account, uint256[] memory ids)
+        external
+        view
+        virtual
+        override
+        returns (uint256[] memory)
+    {
+        
+        return _balanceOfBatch(account, ids);
+    }
+
+
+
+    function tokensByAccount(address account) external view virtual override returns (uint256[] memory) 
+    {
+        uint256 balance = balanceOf(account);
+        uint256[] memory tokenIds = new uint256[](balance);
+        for(uint256 i = 0; i < balance; ++i){
+        tokenIds[i] = _ownedTokens[account][i];
+        }
+        return tokenIds;
+    }
+
+    function getUserBalanceAndSupply(address user) external view virtual override returns (uint256, uint256)
+    {
+        return (balanceOf(user), totalSupply());
     }
 }

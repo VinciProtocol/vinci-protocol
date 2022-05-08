@@ -10,7 +10,7 @@ import {Address} from '../../dependencies/openzeppelin/contracts/Address.sol';
 import {ILendingPoolAddressesProvider} from '../../interfaces/ILendingPoolAddressesProvider.sol';
 import {IVToken} from '../../interfaces/IVToken.sol';
 import {INToken} from '../../interfaces/INToken.sol';
-import {IERC721Stat} from '../../interfaces/IERC721Stat.sol';
+import {IERC721WithStat} from '../../interfaces/IERC721WithStat.sol';
 import {INFTFlashLoanReceiver} from '../../flashloan/interfaces/INFTFlashLoanReceiver.sol';
 import {IVariableDebtToken} from '../../interfaces/IVariableDebtToken.sol';
 import {IPriceOracleGetter} from '../../interfaces/IPriceOracleGetter.sol';
@@ -276,7 +276,7 @@ contract LendingPool is VersionedInitializable, ILendingPool, LendingPoolStorage
       _addressesProvider.getPriceOracle()
     );
 
-    if (amountToWithdraw == IERC721Stat(nToken).balanceOf(msg.sender)) {
+    if (amountToWithdraw == IERC721(nToken).balanceOf(msg.sender)) {
       _usersConfig[msg.sender].setUsingNFTVaultAsCollateral(vault.id, false);
       emit NFTVaultUsedAsCollateralDisabled(nft, msg.sender);
     }
@@ -487,7 +487,7 @@ contract LendingPool is VersionedInitializable, ILendingPool, LendingPoolStorage
     // uint256 premium = tokenIds.length * _flashLoadPremiumTotal / 10000;
     uint256 premium = 0;
 
-    uint256[] memory userBalances = IERC721Stat(vars.nTokenAddress).balanceOfBatch(msg.sender, tokenIds);
+    uint256[] memory userBalances = IERC721WithStat(vars.nTokenAddress).balanceOfBatch(msg.sender, tokenIds);
     ValidationLogic.validateNFTFlashloan(asset, tokenIds, amounts, userBalances);
 
     vars.receiver = INFTFlashLoanReceiver(receiverAddress);
