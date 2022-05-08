@@ -22,12 +22,13 @@ interface IInitializableNToken {
     address indexed pool,
     string nTokenName,
     string nTokenSymbol,
-    bytes params
+    bytes params,
+    string baseURI
   );
 
   /**
-   * @dev Initializes the vToken
-   * @param pool The address of the lending pool where this vToken will be used
+   * @dev Initializes the nToken
+   * @param pool The address of the lending pool where this nToken will be used
    * @param underlyingAsset The address of the underlying asset of this nToken
    * @param nTokenName The name of the nToken
    * @param nTokenSymbol The symbol of the nToken
@@ -37,6 +38,7 @@ interface IInitializableNToken {
     address underlyingAsset,
     string calldata nTokenName,
     string calldata nTokenSymbol,
-    bytes calldata params
+    bytes calldata params,
+    string calldata baseURI
   ) external;
 }

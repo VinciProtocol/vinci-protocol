@@ -46,6 +46,24 @@ interface ILendingPool {
     uint256[] amounts
   );
 
+  /**
+   * @dev Emitted on nftFlashLoan()
+   * @param target The address of the flash loan receiver contract
+   * @param initiator The address initiating the flash loan
+   * @param asset The address of the asset being flash borrowed
+   * @param tokenIds The token IDs for each NFT being flash borrowed
+   * @param amounts The amounts for each NFT being flash borrowed
+   * @param premium The fee flash borrowed
+   **/
+  event NFTFlashLoan(
+    address indexed target,
+    address indexed initiator,
+    address indexed asset,
+    uint256[] tokenIds,
+    uint256[] amounts,
+    uint256 premium
+  );
+
 
   /**
    * @dev Emitted on borrow() and flashLoan() when debt needs to be opened
@@ -58,7 +76,7 @@ interface ILendingPool {
    **/
   event Borrow(
     address indexed reserve,
-    address user,
+    address indexed user,
     uint256 amount,
     uint256 borrowRateMode,
     uint256 borrowRate
@@ -234,6 +252,25 @@ interface ILendingPool {
     uint256[] memory tokenIds,
     uint256[] memory amounts,
     bool receiveNToken
+  ) external;
+
+  /**
+   * @dev Allows smartcontracts to access the nft vault of the pool within one transaction,
+   * as long as the amount taken plus a fee is returned.
+   * IMPORTANT There are security concerns for developers of flashloan receiver contracts that must be kept into consideration.
+   * For further details please visit https://developers.aave.com
+   * @param receiverAddress The address of the contract receiving the funds, implementing the INFTFlashLoanReceiver interface
+   * @param asset The addresses of the assets being flash-borrowed
+   * @param tokenIds The tokenIds of the NFTs being flash-borrowed
+   * @param amounts For ERC1155 only: The amounts of NFTs being flash-borrowed
+   * @param params Variadic packed params to pass to the receiver as extra information
+   **/
+  function nftFlashLoan(
+    address receiverAddress,
+    address asset,
+    uint256[] calldata tokenIds,
+    uint256[] calldata amounts,
+    bytes calldata params
   ) external;
 
   /**

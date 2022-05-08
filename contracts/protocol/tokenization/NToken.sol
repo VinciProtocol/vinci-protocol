@@ -2,7 +2,9 @@
 pragma solidity 0.8.11;
 
 import {IERC1155} from '../../dependencies/openzeppelin/contracts/IERC1155.sol';
+import {IERC20} from '../../dependencies/openzeppelin/contracts/IERC20.sol';
 import {IERC721} from '../../dependencies/openzeppelin/contracts/IERC721.sol';
+import {IERC721Metadata} from '../../dependencies/openzeppelin/contracts/IERC721Metadata.sol';
 import {IERC165} from '../../dependencies/openzeppelin/contracts/IERC165.sol';
 import {INToken} from '../../interfaces/INToken.sol';
 import {ILendingPool} from '../../interfaces/ILendingPool.sol';
@@ -11,9 +13,11 @@ import {Errors} from '../libraries/helpers/Errors.sol';
 import {VersionedInitializable} from '../libraries/aave-upgradeability/VersionedInitializable.sol';
 import {WrappedERC721} from './WrappedERC721.sol';
 import {SafeERC721} from '../libraries/helpers/SafeERC721.sol';
+import {Strings} from '../../dependencies/openzeppelin/contracts/Strings.sol';
 import {IERC721Receiver} from '../../dependencies/openzeppelin/contracts/IERC721Receiver.sol';
 import {IERC1155Receiver} from '../../dependencies/openzeppelin/contracts/IERC1155Receiver.sol';
 import {IERC721Stat} from '../../interfaces/IERC721Stat.sol';
+import {IERC721Wrapper} from '../../interfaces/IERC721Wrapper.sol';
 
 /**
  * @title Vinci ERC1155 NToken
@@ -24,6 +28,7 @@ import {IERC721Stat} from '../../interfaces/IERC721Stat.sol';
    VersionedInitializable,
    WrappedERC721, 
    IERC721Stat,
+   IERC721Wrapper,
    IERC721Receiver,
    IERC1155Receiver,
    INToken
@@ -31,6 +36,7 @@ import {IERC721Stat} from '../../interfaces/IERC721Stat.sol';
 {
     // TODO ERC1155 or ERC1155Burnable?
     using WadRayMath for uint256;
+    using Strings for uint256;
     using SafeERC721 for IERC721;
 
     uint256 public constant NTOKEN_REVISION = 0x1;
@@ -48,6 +54,8 @@ import {IERC721Stat} from '../../interfaces/IERC721Stat.sol';
 
     ILendingPool internal _pool;
     address internal _underlyingNFT;
+    address private _claimAdmin;
+    string internal _baseURI_;
 
     event BurnBatch(address user, address receiverOfUnderlying, uint256[] tokenIds, uint256[] amounts);
 
@@ -58,6 +66,35 @@ import {IERC721Stat} from '../../interfaces/IERC721Stat.sol';
 
     function getRevision() internal pure virtual override returns (uint256) {
         return NTOKEN_REVISION;
+    }
+
+    /**
+    * @dev Returns the address of the current claim admin.
+    */
+    function claimAdmin() public view virtual returns (address) {
+      return _claimAdmin;
+    }
+
+    /**
+    * @dev Throws if called by any account other than the claim admin.
+    */
+    modifier onlyClaimAdmin() {
+      require(claimAdmin() == _msgSender(), Errors.CT_CALLER_MUST_BE_CLAIM_ADMIN);
+      _;
+    }
+
+    /**
+    * @dev Set claim admin of the contract to a new account (`newAdmin`).
+    * Can only be called by the current owner.
+    */
+    function setClaimAdmin(address newAdmin) public virtual override onlyLendingPool {
+      _setClaimAdmin(newAdmin);
+    }
+
+    function _setClaimAdmin(address newAdmin) internal virtual {
+      address oldAdmin = _claimAdmin;
+      _claimAdmin = newAdmin;
+      emit ClaimAdminUpdated(oldAdmin, newAdmin);
     }
 
     /** TODO check the initialize, implement _setName and _setSymbol, and use _setURI to set the _uri
@@ -72,7 +109,8 @@ import {IERC721Stat} from '../../interfaces/IERC721Stat.sol';
         address underlyingNFT,
         string calldata nTokenName,
         string calldata nTokenSymbol,
-        bytes calldata params
+        bytes calldata params,
+        string calldata baseURI
     ) external override initializer {
         uint256 chainId;
 
@@ -96,13 +134,15 @@ import {IERC721Stat} from '../../interfaces/IERC721Stat.sol';
 
         _pool = pool;
         _underlyingNFT = underlyingNFT;
+        _baseURI_ = baseURI;
 
         emit Initialized(
         underlyingNFT,
         address(pool),
         nTokenName,
         nTokenSymbol,
-        params
+        params,
+        baseURI
         );
     }
 
@@ -194,7 +234,7 @@ import {IERC721Stat} from '../../interfaces/IERC721Stat.sol';
     onlyLendingPool
     returns (uint256)
   {
-    IERC721(_underlyingNFT).safeTransferFrom(_msgSender(), target, tokenId, '');
+    IERC721(_underlyingNFT).safeTransferFrom(address(this), target, tokenId, '');
     return amount;
   }
 
@@ -245,6 +285,43 @@ import {IERC721Stat} from '../../interfaces/IERC721Stat.sol';
       interfaceId == type(IERC721Receiver).interfaceId ||
       interfaceId == type(IERC1155Receiver).interfaceId ||
       super.supportsInterface(interfaceId);
+  }
+
+  function claimERC20Airdrop(
+    address token,
+    address to,
+    uint256 amount
+  ) external override onlyClaimAdmin {
+    require(token != _underlyingNFT, Errors.CT_TOKEN_CAN_NOT_BE_UNDERLYING);
+    require(token != address(this), Errors.CT_TOKEN_CAN_NOT_BE_SELF);
+    IERC20(token).transfer(to, amount);
+    emit ClaimERC20Airdrop(token, to, amount);
+  }
+
+  function claimERC721Airdrop(
+    address token,
+    address to,
+    uint256[] calldata tokenIds
+  ) external override onlyClaimAdmin {
+    require(token != _underlyingNFT, Errors.CT_TOKEN_CAN_NOT_BE_UNDERLYING);
+    require(token != address(this), Errors.CT_TOKEN_CAN_NOT_BE_SELF);
+    for (uint256 i = 0; i < tokenIds.length; i++) {
+      IERC721(token).safeTransferFrom(address(this), to, tokenIds[i]);
+    }
+    emit ClaimERC721Airdrop(token, to, tokenIds);
+  }
+
+  function claimERC1155Airdrop(
+    address token,
+    address to,
+    uint256[] calldata tokenIds,
+    uint256[] calldata amounts,
+    bytes calldata data
+  ) external override onlyClaimAdmin {
+    require(token != _underlyingNFT, Errors.CT_TOKEN_CAN_NOT_BE_UNDERLYING);
+    require(token != address(this), Errors.CT_TOKEN_CAN_NOT_BE_SELF);
+    IERC1155(token).safeBatchTransferFrom(address(this), to, tokenIds, amounts, data);
+    emit ClaimERC1155Airdrop(token, to, tokenIds, amounts, data);
   }
 
   function onERC721Received(
@@ -329,7 +406,7 @@ import {IERC721Stat} from '../../interfaces/IERC721Stat.sol';
 
 
 
-  function tokensByAccount(address account) external view override returns(uint256[] memory) 
+  function tokensByAccount(address account) external view override returns (uint256[] memory) 
   {
     uint256 balance = balanceOf(account);
     uint256[] memory tokenIds = new uint256[](balance);
@@ -344,5 +421,19 @@ import {IERC721Stat} from '../../interfaces/IERC721Stat.sol';
     return (balanceOf(user), totalSupply());
   }
 
+  function tokenURI(uint256 tokenId) public view virtual override returns (string memory)
+  {
+    return IERC721Metadata(_underlyingNFT).tokenURI(tokenId);
+  }
+
+  function _baseURI() internal view virtual override returns (string memory)
+  {
+    return _baseURI_;
+  }
+
+  function contractURI() external view override returns (string memory) {
+    string memory hexAddress = uint256(uint160(address(this))).toHexString(20);
+    return string(abi.encodePacked(_baseURI(), hexAddress));
+  }
 
 }

@@ -11,6 +11,7 @@ import {ILendingPoolAddressesProvider} from '../../interfaces/ILendingPoolAddres
 import {IVToken} from '../../interfaces/IVToken.sol';
 import {INToken} from '../../interfaces/INToken.sol';
 import {IERC721Stat} from '../../interfaces/IERC721Stat.sol';
+import {INFTFlashLoanReceiver} from '../../flashloan/interfaces/INFTFlashLoanReceiver.sol';
 import {IVariableDebtToken} from '../../interfaces/IVariableDebtToken.sol';
 import {IPriceOracleGetter} from '../../interfaces/IPriceOracleGetter.sol';
 import {INFTXEligibility} from '../../interfaces/INFTXEligibility.sol';
@@ -97,7 +98,7 @@ contract LendingPool is VersionedInitializable, ILendingPool, LendingPoolStorage
   function initialize(ILendingPoolAddressesProvider provider) public initializer {
     _addressesProvider = provider;
     _maxStableRateBorrowSizePercent = 2500;
-    _flashLoanPremiumTotal = 9;
+    _flashLoanPremiumTotal = 0;
     _maxNumberOfReserves = 128;
     _maxNumberOfNFTVaults = 256;
   }
@@ -449,6 +450,66 @@ contract LendingPool is VersionedInitializable, ILendingPool, LendingPoolStorage
     (uint256 returnCode, string memory returnMessage) = abi.decode(result, (uint256, string));
 
     require(returnCode == 0, string(abi.encodePacked(returnMessage)));
+  }
+
+  struct NFTFlashLoanLocalVars {
+    INFTFlashLoanReceiver receiver;
+    uint256 i;
+    address asset;
+    address nTokenAddress;
+    uint256 currentAmount;
+    uint256 currentPremium;
+    uint256 currentAmountPlusPremium;
+  }
+
+  /**
+   * @dev Allows smartcontracts to access the nft vault of the pool within one transaction,
+   * as long as the amount taken plus a fee is returned.
+   * IMPORTANT There are security concerns for developers of flashloan receiver contracts that must be kept into consideration.
+   * For further details please visit https://developers.aave.com
+   * @param receiverAddress The address of the contract receiving the funds, implementing the INFTFlashLoanReceiver interface
+   * @param asset The addresses of the assets being flash-borrowed
+   * @param tokenIds The tokenIds of the NFTs being flash-borrowed
+   * @param amounts For ERC1155 only: The amounts of NFTs being flash-borrowed
+   * @param params Variadic packed params to pass to the receiver as extra information
+   **/
+  function nftFlashLoan(
+    address receiverAddress,
+    address asset,
+    uint256[] calldata tokenIds,
+    uint256[] calldata amounts,
+    bytes calldata params
+  ) external override whenNotPaused 
+  {
+    NFTFlashLoanLocalVars memory vars;
+
+    vars.nTokenAddress = _nftVaults.data[asset].nTokenAddress;
+    // uint256 premium = tokenIds.length * _flashLoadPremiumTotal / 10000;
+    uint256 premium = 0;
+
+    uint256[] memory userBalances = IERC721Stat(vars.nTokenAddress).balanceOfBatch(msg.sender, tokenIds);
+    ValidationLogic.validateNFTFlashloan(asset, tokenIds, amounts, userBalances);
+
+    vars.receiver = INFTFlashLoanReceiver(receiverAddress);
+    for (vars.i = 0; vars.i < tokenIds.length; vars.i++) {
+      INToken(vars.nTokenAddress).transferUnderlyingTo(receiverAddress, tokenIds[vars.i], amounts[vars.i]);
+    }
+    require(
+      vars.receiver.executeOperation(asset, tokenIds, amounts, premium, msg.sender, params),
+      Errors.LP_INVALID_FLASH_LOAN_EXECUTOR_RETURN
+    );
+
+    for (vars.i = 0; vars.i < tokenIds.length; vars.i++) {
+      IERC721(asset).safeTransferFrom(receiverAddress, vars.nTokenAddress, tokenIds[vars.i]);
+    }
+    emit NFTFlashLoan(
+      receiverAddress,
+      msg.sender,
+      asset,
+      tokenIds,
+      amounts,
+      0
+    );
   }
 
   /**

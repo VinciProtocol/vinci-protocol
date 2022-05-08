@@ -259,6 +259,21 @@ library ValidationLogic {
     );
   }
 
+    /**
+   * @dev Validates a nft-flashloan action
+   * @param asset The asset being flashborrowed
+   * @param tokenIds The tokenIds for each NFT being borrowed
+   * @param amounts The amounts for each NFT being borrowed
+   * @param userBalances The amounts for each NFT in the vault
+   **/
+  function validateNFTFlashloan(address asset, uint256[] memory tokenIds, uint256[] memory amounts, uint256[] memory userBalances) internal pure {
+    require(tokenIds.length == amounts.length, Errors.VL_INCONSISTENT_FLASHLOAN_PARAMS);
+    for(uint256 i = 0; i < tokenIds.length; ++i) {
+      require(amounts[i] != 0, Errors.VL_INVALID_AMOUNT);
+      require(amounts[i] <= userBalances[i], Errors.VL_NOT_ENOUGH_AVAILABLE_USER_BALANCE);
+    }
+  }
+
   /**
    * @dev Validates the liquidation action
    * @param collateralVault The vault data of the collateral
