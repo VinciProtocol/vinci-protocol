@@ -30,6 +30,7 @@ interface ILendingPoolConfigurator {
     string nTokenName;
     string nTokenSymbol;
     bytes params;
+    string baseURI;
   }
 
   struct UpdateVTokenInput {

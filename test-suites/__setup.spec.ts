@@ -271,9 +271,10 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
     nftVaultsParams,
     allReservesAddresses,
     allEligibilityAddresses,
+    'https://meta.vinci.com/',
     VTokenNamePrefix,
     SymbolPrefix,
-    false
+    false,
   );
 
   await configureNFTVaultByHelper(nftVaultsParams, allReservesAddresses, testHelpers, admin);

@@ -24,9 +24,9 @@ makeSuite('NToken: Transfer', (testEnv: TestEnv) => {
 
     await pool
       .connect(users[0].signer)
-      .depositNFT(nft.address, ['1'], ['1'], users[0].address, '0');
+      .depositNFT(nft.address, ['1'], ['1'], users[0].address, '0',0);
 
-    await nNFT.connect(users[0].signer).safeTransferFrom(users[0].address, users[1].address, '1', '1', []);
+    await nNFT.connect(users[0].signer)['safeTransferFrom(address,address,uint256)'](users[0].address, users[1].address, '1');
 
     const name = await nNFT.name();
 
@@ -74,7 +74,7 @@ makeSuite('NToken: Transfer', (testEnv: TestEnv) => {
   it('User 1 tries to transfer all the CRYPTOPANDA used as collateral back to user 0 (revert expected)', async () => {
     const { users, nNFT } = testEnv;
     await expect(
-      nNFT.connect(users[1].signer).safeTransferFrom(users[1].address, users[0].address, '1', '1', []),
+      nNFT.connect(users[1].signer)['safeTransferFrom(address,address,uint256)'](users[1].address, users[0].address, '1'),
       VL_TRANSFER_NOT_ALLOWED
     ).to.be.revertedWith(VL_TRANSFER_NOT_ALLOWED);
   });
@@ -88,9 +88,9 @@ makeSuite('NToken: Transfer', (testEnv: TestEnv) => {
 
     await pool
       .connect(users[1].signer)
-      .depositNFT(nft.address, ['2'], ['1'], users[1].address, '0');
+      .depositNFT(nft.address, ['2'], ['1'], users[1].address, '0', 0);
 
-    await nNFT.connect(users[1].signer).safeTransferFrom(users[1].address, users[0].address, '1', '1', []);
+    await nNFT.connect(users[1].signer)['safeTransferFrom(address,address,uint256)'](users[1].address, users[0].address, '1');
 
     const user0Balance = await nNFT['balanceOf(address)'](users[0].address);
 
