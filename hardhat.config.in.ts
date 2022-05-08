@@ -13,13 +13,16 @@ import "@tenderly/hardhat-tenderly";
 const SKIP_LOAD = process.env.SKIP_LOAD === "true";
 
 if (!SKIP_LOAD) {
-  ["misc"].forEach((folder) => {
+  ['misc', 'migrations', 'dev', 'full', 'deployments', 'single'].forEach((folder) => {
     const tasksPath = path.join(__dirname, "tasks", folder);
-    fs.readdirSync(tasksPath)
-      .filter((pth) => pth.includes(".ts"))
-      .forEach((task) => {
-        require(`${tasksPath}/${task}`);
-      });
+    if(fs.existsSync(tasksPath)){
+      fs.readdirSync(tasksPath)
+        .filter((pth) => pth.includes(".ts"))
+        .forEach((task) => {
+          require(`${tasksPath}/${task}`);
+        }
+      );
+    }
   });
 }
 

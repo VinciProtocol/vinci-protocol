@@ -163,8 +163,8 @@ contract LendingPoolConfigurator is VersionedInitializable, ILendingPoolConfigur
           input.underlyingAsset,
           input.nTokenName,
           input.nTokenSymbol,
-          input.params,
-          input.baseURI
+          input.baseURI,
+          input.params
         )
       );
 

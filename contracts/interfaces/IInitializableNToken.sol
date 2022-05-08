@@ -22,8 +22,8 @@ interface IInitializableNToken {
     address indexed pool,
     string nTokenName,
     string nTokenSymbol,
-    bytes params,
-    string baseURI
+    string baseURI,
+    bytes params
   );
 
   /**
@@ -38,7 +38,7 @@ interface IInitializableNToken {
     address underlyingAsset,
     string calldata nTokenName,
     string calldata nTokenSymbol,
-    bytes calldata params,
-    string calldata baseURI
+    string calldata baseURI,
+    bytes calldata params
   ) external;
 }

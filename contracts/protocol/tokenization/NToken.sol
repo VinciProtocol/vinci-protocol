@@ -108,8 +108,8 @@ import {IERC721Wrapper} from '../../interfaces/IERC721Wrapper.sol';
         address underlyingNFT,
         string calldata nTokenName,
         string calldata nTokenSymbol,
-        bytes calldata params,
-        string calldata baseURI
+        string calldata baseURI,
+        bytes calldata params
     ) external override initializer {
         uint256 chainId;
 
@@ -140,8 +140,8 @@ import {IERC721Wrapper} from '../../interfaces/IERC721Wrapper.sol';
         address(pool),
         nTokenName,
         nTokenSymbol,
-        params,
-        baseURI
+        baseURI,
+        params
         );
     }
 

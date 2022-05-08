@@ -9,3 +9,5 @@ networks/deployment
 tasks/dev
 tasks/migrations
 tasks/single
+tasks/deployments
+*.orig

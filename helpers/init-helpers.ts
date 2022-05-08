@@ -61,8 +61,8 @@ export const initNFTVaultByHelper = async (
     underlyingAssetName: string;
     nTokenName: string;
     nTokenSymbol: string;
-    params: BytesLike;
     baseURI: string;
+    params: BytesLike;
   }[] = [];
 
   const NFTVault = Object.entries(NFTVaultInputParams);
@@ -82,8 +82,8 @@ export const initNFTVaultByHelper = async (
       underlyingAssetName: symbol,
       nTokenName: `${nTokenNamePrefix} ${symbol}`,
       nTokenSymbol: `n${symbolPrefix}${symbol}`,
-      params: await getNTokenExtraParams(tokenAddresses[symbol], ntoken.address),
       baseURI: baseURI,
+      params: await getNTokenExtraParams(tokenAddresses[symbol], ntoken.address),
     });
   }
 
