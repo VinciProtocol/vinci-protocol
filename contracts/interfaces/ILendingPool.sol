@@ -197,8 +197,24 @@ interface ILendingPool {
     uint256[] calldata tokenIds,
     uint256[] calldata amounts,
     address onBehalfOf,
-    uint16 referralCode,
-    uint16 lockType
+    uint16 referralCode
+  ) external;
+
+  /**
+   * @dev Deposits an `amounts[i]` of underlying `tokenIds[i]` into the NFT reserve, receiving in return overlying nTokens.
+   * @param tokenIds The tokenIds of the NFTs to be deposited
+   * @param amounts For ERC1155 only: The amounts of NFTs to be deposited
+   * @param onBehalfOf The address that will receive the nTokens, same as msg.sender if the user
+   *   wants to receive them on his own wallet, or a different address if the beneficiary of nTokens
+   *   is a different wallet
+   **/
+  function depositAndLockNFT(
+    address nft,
+    uint256[] calldata tokenIds,
+    uint256[] calldata amounts,
+    address onBehalfOf,
+    uint16 lockType,
+    uint16 referralCode
   ) external;
 
   /**

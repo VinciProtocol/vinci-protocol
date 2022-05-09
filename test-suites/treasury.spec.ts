@@ -22,7 +22,7 @@ makeSuite("Treasury - Receiving the fees on VToken", (testEnv: TestEnv) => {
 
         await pool
         .connect(users[1].signer)
-        .depositNFT(nft.address, ['1'], ['1'], users[1].address, '0',0);
+        .depositNFT(nft.address, ['1'], ['1'], users[1].address, '0');
 
         await dai.connect(users[0].signer).mint(await convertToCurrencyDecimals(dai.address, '1'));
 

@@ -24,7 +24,7 @@ makeSuite('NToken: Transfer', (testEnv: TestEnv) => {
 
     await pool
       .connect(users[0].signer)
-      .depositNFT(nft.address, ['1'], ['1'], users[0].address, '0',0);
+      .depositNFT(nft.address, ['1'], ['1'], users[0].address, '0');
 
     await nNFT.connect(users[0].signer)['safeTransferFrom(address,address,uint256)'](users[0].address, users[1].address, '1');
 
@@ -88,7 +88,7 @@ makeSuite('NToken: Transfer', (testEnv: TestEnv) => {
 
     await pool
       .connect(users[1].signer)
-      .depositNFT(nft.address, ['2'], ['1'], users[1].address, '0', 0);
+      .depositNFT(nft.address, ['2'], ['1'], users[1].address, '0');
 
     await nNFT.connect(users[1].signer)['safeTransferFrom(address,address,uint256)'](users[1].address, users[0].address, '1');
 

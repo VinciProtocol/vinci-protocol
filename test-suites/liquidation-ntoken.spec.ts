@@ -46,7 +46,7 @@ makeSuite('LendingPool liquidation - liquidator receiving nToken', (testEnv) => 
     //user 2 deposits 1 WETH
     await pool
       .connect(borrower.signer)
-      .depositNFT(nft.address, ['1'], ['1'], borrower.address, '0', 0);
+      .depositNFT(nft.address, ['1'], ['1'], borrower.address, '0');
 
     //user 2 borrows
     const userGlobalData = await pool.getUserAccountData(borrower.address);
