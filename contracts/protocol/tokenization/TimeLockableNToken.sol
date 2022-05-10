@@ -12,7 +12,7 @@ contract TimeLockableNToken is NToken {
     _unlockTime[tokenId] = block.timestamp + uint256(lock_days[lockType]) * 24 * 3600;
   }
 
-  function getUnlockTime(address user, uint256 tokenId) public view virtual override returns(uint256 unlockTime)
+  function getUnlockTime(uint256 tokenId) public view virtual override returns(uint256 unlockTime)
   {
     require(_exists(tokenId), "NToken: query unlock time for nonexistent token");
     return _unlockTime[tokenId];

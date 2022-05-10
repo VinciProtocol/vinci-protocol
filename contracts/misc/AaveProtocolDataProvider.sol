@@ -4,7 +4,6 @@ pragma experimental ABIEncoderV2;
 
 import {IERC20Metadata} from '../dependencies/openzeppelin/contracts/IERC20Metadata.sol';
 import {IERC721Metadata} from '../dependencies/openzeppelin/contracts/IERC721Metadata.sol';
-import {IERC1155Metadata} from '../interfaces/IERC1155Metadata.sol';
 import {IERC721WithStat} from '../interfaces/IERC721WithStat.sol';
 import {ILendingPoolAddressesProvider} from '../interfaces/ILendingPoolAddressesProvider.sol';
 import {ILendingPool} from '../interfaces/ILendingPool.sol';
@@ -89,7 +88,7 @@ contract AaveProtocolDataProvider {
     for (uint256 i = 0; i < vaults.length; i++) {
       DataTypes.NFTVaultData memory vaultData = pool.getNFTVaultData(vaults[i]);
       nTokens[i] = TokenData({
-        symbol: IERC1155Metadata(vaultData.nTokenAddress).symbol(),
+        symbol: IERC721Metadata(vaultData.nTokenAddress).symbol(),
         tokenAddress: vaultData.nTokenAddress
       });
     }

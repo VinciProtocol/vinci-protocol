@@ -269,7 +269,7 @@ import {IERC721Wrapper} from '../../interfaces/IERC721Wrapper.sol';
     revert('LV_NFT_LOCK_NOT_IMPLEMENTED');
   }
 
-  function getUnlockTime(address user, uint256 tokenId) public view virtual override returns(uint256 unlockTime)
+  function getUnlockTime(uint256 tokenId) public view virtual override returns(uint256 unlockTime)
   {
     return 0;
   }
@@ -277,6 +277,19 @@ import {IERC721Wrapper} from '../../interfaces/IERC721Wrapper.sol';
   function unlockedBalanceOfBatch(address user, uint256[] calldata tokenIds) public view virtual override returns(uint256[] memory amounts)
   {
     return _balanceOfBatch(user, tokenIds);
+  }
+
+  function tokensAndLockExpirationsByAccount(address user) public view virtual override returns(uint256[] memory tokenIds, uint256[] memory lockExpirations)
+  {
+    uint256 balance = balanceOf(user);
+    uint256[] memory tokens = new uint256[](balance);
+    uint256[] memory expirations = new uint256[](balance);
+    for(uint256 i = 0; i < balance; ++i){
+      uint256 tokenId = _ownedTokens[user][i];
+      tokens[i] = tokenId;
+      expirations[i] = getUnlockTime(tokenId);
+    }
+    return (tokens, expirations);
   }
 
   function supportsInterface(bytes4 interfaceId) public view virtual override(IERC165, WrappedERC721) returns (bool) {

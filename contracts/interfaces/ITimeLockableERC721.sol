@@ -11,7 +11,9 @@ interface ITimeLockableERC721 is IERC721 {
 
   function lock(uint256 tokenid, uint16 lockType) external;
 
-  function getUnlockTime(address user, uint256 tokenId) external returns(uint256 unlockTime);
+  function getUnlockTime(uint256 tokenId) external returns(uint256 unlockTime);
 
   function unlockedBalanceOfBatch(address user, uint256[] memory tokenIds) external returns(uint256[] memory amounts);
+
+  function tokensAndLockExpirationsByAccount(address user) external returns(uint256[] memory tokenIds, uint256[] memory lockExpirations);
 }
