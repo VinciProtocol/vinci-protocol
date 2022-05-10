@@ -75,6 +75,7 @@ interface IUiPoolDataProvider {
     uint256 nTokenBalance;
     uint256[] tokenIds;
     uint256[] amounts;
+    uint256[] lockExpirations;
     bool usageAsCollateralEnabledOnUser;
   }
 

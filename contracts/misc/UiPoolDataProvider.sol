@@ -11,6 +11,7 @@ import {IUiPoolDataProvider} from './interfaces/IUiPoolDataProvider.sol';
 import {ILendingPool} from '../interfaces/ILendingPool.sol';
 import {IAaveOracle} from '../interfaces/IAaveOracle.sol';
 import {IERC721WithStat} from '../interfaces/IERC721WithStat.sol';
+import {ITimeLockableERC721} from '../interfaces/ITimeLockableERC721.sol';
 import {IVToken} from '../interfaces/IVToken.sol';
 import {IVariableDebtToken} from '../interfaces/IVariableDebtToken.sol';
 //import {IStableDebtToken} from '../interfaces/IStableDebtToken.sol';
@@ -297,13 +298,14 @@ contract UiPoolDataProvider is IUiPoolDataProvider {
 
     for (uint256 i = 0; i < vaults.length; i++) {
       DataTypes.NFTVaultData memory baseData = lendingPool.getNFTVaultData(vaults[i]);
-      IERC721WithStat nToken = IERC721WithStat(baseData.nTokenAddress);
+      address nTokenAddress = baseData.nTokenAddress;
 
       // user reserve data
       userVaultsData[i].underlyingAsset = vaults[i];
-      userVaultsData[i].nTokenBalance = IERC721(baseData.nTokenAddress).balanceOf(user);
-      userVaultsData[i].tokenIds = nToken.tokensByAccount(user);
-      userVaultsData[i].amounts = nToken.balanceOfBatch(user, userVaultsData[i].tokenIds);
+      userVaultsData[i].nTokenBalance = IERC721(nTokenAddress).balanceOf(user);
+      (userVaultsData[i].tokenIds, userVaultsData[i].lockExpirations)
+          = ITimeLockableERC721(nTokenAddress).tokensAndLockExpirationsByAccount(user);
+      userVaultsData[i].amounts = IERC721WithStat(nTokenAddress).balanceOfBatch(user, userVaultsData[i].tokenIds);
       userVaultsData[i].usageAsCollateralEnabledOnUser = userConfig.isUsingNFTVaultAsCollateral(i);
     }
     return (userVaultsData);
