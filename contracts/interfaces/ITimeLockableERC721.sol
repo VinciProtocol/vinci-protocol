@@ -4,9 +4,9 @@ import {IERC721} from '../dependencies/openzeppelin/contracts/IERC721.sol';
 
 interface ITimeLockableERC721 is IERC721 {
   event TimeLocked(
-    address indexed user,
     uint256 indexed tokenid,
-    uint256 lockType
+    uint256 indexed lockType,
+    uint256 indexed expirationTime
   );
 
   function lock(uint256 tokenid, uint16 lockType) external;

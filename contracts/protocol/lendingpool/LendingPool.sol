@@ -220,7 +220,7 @@ contract LendingPool is VersionedInitializable, ILendingPool, LendingPoolStorage
       }
     }
 
-    emit DepositNFT(nft, msg.sender, onBehalfOf, tokenIds, amounts, 0);
+    emit DepositNFT(nft, msg.sender, onBehalfOf, tokenIds, amounts);
 
   }
 
@@ -254,7 +254,7 @@ contract LendingPool is VersionedInitializable, ILendingPool, LendingPoolStorage
       }
     }
 
-    emit DepositNFT(nft, msg.sender, onBehalfOf, tokenIds, amounts, lockType);
+    emit DepositNFT(nft, msg.sender, onBehalfOf, tokenIds, amounts);
 
   }
 

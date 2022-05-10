@@ -9,7 +9,9 @@ contract TimeLockableNToken is NToken {
   {
     uint16[6] memory lock_days = [0, 60, 90, 120, 240, 360];
     require(lockType < lock_days.length, "NToken: Unknown lockType.");
-    _unlockTime[tokenId] = block.timestamp + uint256(lock_days[lockType]) * 24 * 3600;
+    uint256 expirationTime = block.timestamp + uint256(lock_days[lockType]) * 24 * 3600;
+    _unlockTime[tokenId] = expirationTime;
+    emit TimeLocked(tokenId, lockType, expirationTime);
   }
 
   function getUnlockTime(uint256 tokenId) public view virtual override returns(uint256 unlockTime)
