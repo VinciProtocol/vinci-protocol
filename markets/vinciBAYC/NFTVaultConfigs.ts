@@ -1,11 +1,7 @@
 import { eContractid, INFTVaultParams } from '../../helpers/types';
 
-import {
-    rateStrategyBAYC,
-  } from './rateStrategies';
-
 export const strategyBAYC: INFTVaultParams = {
-  name: 'BAYC',
+  name: 'BoredApeYachtClub',
   symbol: 'BAYC',
   baseLTVAsCollateral: '8000',
   liquidationThreshold: '8250',

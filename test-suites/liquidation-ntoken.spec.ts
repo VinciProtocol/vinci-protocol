@@ -20,37 +20,36 @@ makeSuite('LendingPool liquidation - liquidator receiving nToken', (testEnv) => 
     LP_IS_PAUSED,
   } = ProtocolErrors;
 
-  it('Deposits CRYPTOPANDA, borrows DAI/Check liquidation fails because health factor is above 1', async () => {
+  it('Deposits BAYC, borrows DAI/Check liquidation fails because health factor is above 1', async () => {
     const { dai, nft, users, pool, oracle } = testEnv;
     const depositor = users[0];
     const borrower = users[1];
 
     //mints DAI to depositor
-    await dai.connect(depositor.signer).mint(await convertToCurrencyDecimals(dai.address, '1000'));
+    await dai.connect(depositor.signer).mint(await convertToCurrencyDecimals(dai.address, '10000'));
 
     //approve protocol to access depositor wallet
     await dai.connect(depositor.signer).approve(pool.address, APPROVAL_AMOUNT_LENDING_POOL);
 
     //user 1 deposits 1000 DAI
-    const amountDAItoDeposit = await convertToCurrencyDecimals(dai.address, '1000');
+    const amountDAItoDeposit = await convertToCurrencyDecimals(dai.address, '10000');
     await pool
       .connect(depositor.signer)
       .deposit(dai.address, amountDAItoDeposit, depositor.address, '0');
 
-    //mints CRYPTOPANDA to borrower
+    //mints BAYC to borrower
     await nft.connect(borrower.signer).publicMint(borrower.address, '1');
 
     //approve protocol to access borrower wallet
     await nft.connect(borrower.signer).approve(pool.address, '1');
 
-    //user 2 deposits 1 WETH
+    //user 2 deposits 1 BAYC
     await pool
       .connect(borrower.signer)
       .depositNFT(nft.address, ['1'], ['1'], borrower.address, '0');
 
     //user 2 borrows
     const userGlobalData = await pool.getUserAccountData(borrower.address);
-    console.log(JSON.stringify(userGlobalData.map(function (v, _) {return v.toString();}), null, 4));
     const daiPrice = await oracle.getAssetPrice(dai.address);
     const amountDAIToBorrow = await convertToCurrencyDecimals(
       dai.address,
@@ -59,7 +58,6 @@ makeSuite('LendingPool liquidation - liquidator receiving nToken', (testEnv) => 
         .multipliedBy(0.95)
         .toFixed(2)
     );
-    console.log(amountDAIToBorrow.toString());
 
     await pool
       .connect(borrower.signer)
@@ -84,19 +82,12 @@ makeSuite('LendingPool liquidation - liquidator receiving nToken', (testEnv) => 
 
     const daiPrice = await oracle.getAssetPrice(dai.address);
 
-    console.log(daiPrice.toString());
-
-    const userGlobalDataBefore = await pool.getUserAccountData(borrower.address);
-    console.log(JSON.stringify(userGlobalDataBefore.map(function (v, _) {return v.toString();}), null, 4));
-
     await oracle.setAssetPrice(
       dai.address,
       new BigNumber(daiPrice.toString()).multipliedBy(1.15).toFixed(0)
     );
 
-
     const userGlobalData = await pool.getUserAccountData(borrower.address);
-    console.log(JSON.stringify(userGlobalData.map(function (v, _) {return v.toString();}), null, 4));
 
     expect(userGlobalData.healthFactor.toString()).to.be.bignumber.lt(
       oneEther.toString(),
@@ -128,7 +119,7 @@ makeSuite('LendingPool liquidation - liquidator receiving nToken', (testEnv) => 
 
     //mints dai to the caller
 
-    await dai.mint(await convertToCurrencyDecimals(dai.address, '1000'));
+    await dai.mint(await convertToCurrencyDecimals(dai.address, '10000'));
 
     //approve protocol to access depositor wallet
     await dai.approve(pool.address, APPROVAL_AMOUNT_LENDING_POOL);
@@ -197,28 +188,6 @@ makeSuite('LendingPool liquidation - liquidator receiving nToken', (testEnv) => 
       oneEther.toFixed(0),
       'Invalid health factor'
     );
-    const nftAsCollateral = (await helpersContract.getUserNFTVaultData(nft.address, deployer.address)).usageAsCollateralEnabled;
-    console.log(
-      JSON.stringify(
-        {
-          expected_collateral_liquidated: expectedCollateralLiquidated.toString(),
-          amountToLiquidate: amountToLiquidate.toString(),
-          debt_before: userReserveDataBefore.currentVariableDebt.toString(),
-          debt_after: userReserveDataAfter.currentVariableDebt.toString(),
-          balance_before: userReserveDataBefore.currentVTokenBalance.toString(),
-          balance_after: userReserveDataAfter.currentVTokenBalance.toString(),
-          liquidity_before: daiReserveDataBefore.availableLiquidity.toString(),
-          liquidity_after: daiReserveDataAfter.availableLiquidity.toString(),
-          liquidity_index_before: daiReserveDataBefore.liquidityIndex.toString(),
-          liquidity_index_after: daiReserveDataAfter.liquidityIndex.toString(),
-          liquidity_rate_before: daiReserveDataBefore.liquidityRate.toString(),
-          liquidity_rate_after: daiReserveDataAfter.liquidityRate.toString(),
-          nftAsCollateral: nftAsCollateral,
-        }, 
-        null, 
-        4
-      )
-    )
     /*expect(userReserveDataAfter.currentVariableDebt.toString()).to.be.equal(
       new BigNumber(0),
       'Invalid user borrow balance after liquidation'

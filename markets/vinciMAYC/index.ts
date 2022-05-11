@@ -1,40 +1,43 @@
-import { IVinciConfiguration, eEthereumNetwork } from '../../helpers/types';
+import { IVinciConfigurationMAYC, eEthereumNetwork } from '../../helpers/types';
 
 import { CommonsConfig } from './commons';
 import {
   strategyDAI,
-  strategyETH,
+  strategyWETH,
 } from './reservesConfigs';
 
 import {
-  strategyBAYC,
+  strategyMAYC,
 } from './NFTVaultConfigs';
 
 // ----------------
 // POOL--SPECIFIC PARAMS
 // ----------------
 
-export const VinciConfig: IVinciConfiguration = {
+export const MAYCConfig: IVinciConfigurationMAYC = {
     ...CommonsConfig,
-    MarketId: 'Vinci test market',
-    ProviderId: 1,
+    MarketId: 'VinciMAYC',
+    ProviderId: 2,
     ReservesConfig: {
       DAI: strategyDAI,
-      WETH: strategyETH,
+      WETH: strategyWETH,
     },
     NFTVaultConfig:{
-      BAYC: strategyBAYC,
+      MAYC: strategyMAYC,
     },
     ReserveAssets: {
       [eEthereumNetwork.localhost]: {},
-      [eEthereumNetwork.vinci]: {},
+      [eEthereumNetwork.vinci]: {
+        DAI: '0x8Feeec88D4de57FCd7EFd588ea2eE093C95275f7',
+        WETH: '0x4601c3b62d25eBD50942244CCF8759CeEB682F08',
+      },
       [eEthereumNetwork.hardhat]: {},
       [eEthereumNetwork.buidlerevm]: {},
       [eEthereumNetwork.kovan]: {
         //AAVE: '0xB597cd8D3217ea6477232F9217fa70837ff667Af',
         //BAT: '0x2d12186Fbb9f9a8C28B3FfdD4c42920f8539D738',
         //BUSD: '0x4c6E1EFC12FDfD568186b7BAEc0A43fFfb4bCcCf',
-        DAI: '0xFf795577d9AC8bD7D90Ee22b6C1703490b6512FD',
+        //DAI: '0xFf795577d9AC8bD7D90Ee22b6C1703490b6512FD',
         //ENJ: '0xC64f90Cd7B564D3ab580eb20a102A8238E218be2',
         //KNC: '0x3F80c39c0b96A0945f9F0E9f55d8A8891c5671A8',
         //LINK: '0xAD5ce863aE3E4E9394Ab43d4ba0D80f419F61789',
@@ -53,6 +56,17 @@ export const VinciConfig: IVinciConfiguration = {
         //ZRX: '0xD0d76886cF8D952ca26177EB7CfDf83bad08C00C',
       },
     },
+    NFTVaultAssets: {
+      [eEthereumNetwork.localhost]: {},
+      [eEthereumNetwork.vinci]: {
+        MAYC: '0x9C1662728bf05f73fC55cf9dc0bb6ed75221CC4b',
+      },
+      [eEthereumNetwork.kovan]: {
+        MAYC: '0x5c8b3055B9F7FBEFb3F71ca6a8754DE6973646E0',
+      },
+      [eEthereumNetwork.hardhat]: {},
+      [eEthereumNetwork.buidlerevm]: {},
+    }
   };
   
-  export default VinciConfig;
+  export default MAYCConfig;

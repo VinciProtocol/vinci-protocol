@@ -13,7 +13,7 @@ import { tEthereumAddress } from '../../../helpers/types';
 import BigNumber from 'bignumber.js';
 import { getDb, DRE } from '../../../helpers/misc-utils';
 import { AaveProtocolDataProvider } from '../../../types/AaveProtocolDataProvider';
-
+import {VinciConfig} from '../../../markets/vinci';
 export const getReserveData = async (
   helper: AaveProtocolDataProvider,
   reserve: tEthereumAddress
@@ -24,9 +24,10 @@ export const getReserveData = async (
     getLendingRateOracle(),
     getIErc20Detailed(reserve),
   ]);
+  const marketId = VinciConfig.MarketId
 
-  const stableDebtToken = await getStableDebtToken(tokenAddresses.stableDebtTokenAddress);
-  const variableDebtToken = await getVariableDebtToken(tokenAddresses.variableDebtTokenAddress);
+  const stableDebtToken = await getStableDebtToken(marketId, tokenAddresses.stableDebtTokenAddress);
+  const variableDebtToken = await getVariableDebtToken(marketId, tokenAddresses.variableDebtTokenAddress);
 
   const { 0: principalStableDebt } = await stableDebtToken.getSupplyData();
   const totalStableDebtLastUpdated = await stableDebtToken.getTotalSupplyLastUpdated();
@@ -143,7 +144,7 @@ const getVTokenUserData = async (
   const vTokenAddress: string = (await helpersContract.getReserveTokensAddresses(reserve))
     .vTokenAddress;
 
-  const vToken = await getVToken(vTokenAddress);
+  const vToken = await getVToken(VinciConfig.MarketId, vTokenAddress);
 
   const scaledBalance = await vToken.scaledBalanceOf(user);
   return scaledBalance.toString();

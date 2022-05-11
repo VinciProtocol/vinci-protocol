@@ -62,6 +62,7 @@ export interface TestEnv {
   addressesProvider: LendingPoolAddressesProvider;
   registry: LendingPoolAddressesProviderRegistry;
   treasury: AaveCollector;
+  marketId: string;
 }
 
 let buidlerevmSnapshotId: string = '0x1';
@@ -84,6 +85,7 @@ const testEnv: TestEnv = {
   registry: {} as LendingPoolAddressesProviderRegistry,
   wethGateway: {} as WETHGateway,
   treasury: {} as AaveCollector,
+  marketId: '',
 } as TestEnv;
 
 export async function initializeMakeSuite() {
@@ -100,13 +102,16 @@ export async function initializeMakeSuite() {
       address: await signer.getAddress(),
     });
   }
+
   testEnv.deployer = deployer;
-  testEnv.pool = await getLendingPool();
+
+  testEnv.marketId = VinciConfig.MarketId;
+  testEnv.pool = await getLendingPool(testEnv.marketId);
   testEnv.treasury = await getTreasury();
 
-  testEnv.configurator = await getLendingPoolConfiguratorProxy();
+  testEnv.configurator = await getLendingPoolConfiguratorProxy(testEnv.marketId);
 
-  testEnv.addressesProvider = await getLendingPoolAddressesProvider();
+  testEnv.addressesProvider = await getLendingPoolAddressesProvider(testEnv.marketId);
 
   if (process.env.FORK) {
     testEnv.registry = await getLendingPoolAddressesProviderRegistry(
@@ -117,7 +122,7 @@ export async function initializeMakeSuite() {
     testEnv.oracle = await getPriceOracle();
   }
 
-  testEnv.helpersContract = await getAaveProtocolDataProvider();
+  testEnv.helpersContract = await getAaveProtocolDataProvider(testEnv.marketId);
 
   const allTokens = await testEnv.helpersContract.getAllVTokens();
   const aDaiAddress = allTokens.find((vToken) => vToken.symbol === 'aDAI')?.tokenAddress;
@@ -127,25 +132,25 @@ export async function initializeMakeSuite() {
   const daiAddress = reservesTokens.find((token) => token.symbol === 'DAI')?.tokenAddress;
 
   const allNTokens = await testEnv.helpersContract.getAllNTokens();
-  const nNFTAddress = allNTokens.find((nToken) => nToken.symbol === 'nCRYPTOPANDA')?.tokenAddress;
+  const nNFTAddress = allNTokens.find((nToken) => nToken.symbol === 'nBAYC')?.tokenAddress;
 
   const vaultsTokens = await testEnv.helpersContract.getAlNFTVaultsTokens();
-  const nftAddress = vaultsTokens.find((token) => token.symbol == 'CRYPTOPANDA')?.tokenAddress;
+  const nftAddress = vaultsTokens.find((token) => token.symbol == 'BAYC')?.tokenAddress;
 
   if (!aDaiAddress || !nNFTAddress) {
-    console.log('can not get adai or nCRYPTOPANDA address');
+    console.log('can not get adai or nBAYC address');
     process.exit(1);
   }
   if (!daiAddress || !nftAddress) {
-    console.log('can not get dai or CRYPTOPANDA address');
+    console.log('can not get dai or BAYC address');
     process.exit(1);
   }
 
-  testEnv.aDai = await getVToken(aDaiAddress);
+  testEnv.aDai = await getVToken(testEnv.marketId, aDaiAddress);
 
   testEnv.dai = await getMintableERC20(daiAddress);
 
-  testEnv.nNFT = await getNToken(nNFTAddress);
+  testEnv.nNFT = await getNToken(testEnv.marketId, nNFTAddress);
   testEnv.nft = await getMockERC721Token(nftAddress);
   //testEnv.wethGateway = await getWETHGateway();
 }

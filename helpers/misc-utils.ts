@@ -9,6 +9,7 @@ import { isAddress } from 'ethers/lib/utils';
 import { isZeroAddress } from 'ethereumjs-util';
 
 export const getDb = () => low(new FileSync('./deployed-contracts.json'));
+export const getMarketDb = () => low(new FileSync('./deployed-market-contracts.json'));
 
 export let DRE: HardhatRuntimeEnvironment | BuidlerRuntimeEnvironment;
 
@@ -30,20 +31,37 @@ interface DbEntry {
   };
 }
 
-export const printContracts = () => {
+interface mDbEntry {
+  [network: string]: {
+    [MarketId: string]: {
+      deployer: string;
+      address: string;
+    }
+  };
+}
+
+export const printContracts = (MarketId: string) => {
   const network = DRE.network.name;
   const db = getDb();
-  console.log('Contracts deployed at', network);
+  const mdb = getMarketDb();
+  console.log('Contracts deployed at', network, MarketId);
   console.log('---------------------------------');
 
   const entries = Object.entries<DbEntry>(db.getState()).filter(([_k, value]) => !!value[network]);
+  const mEntries = Object.entries<mDbEntry>(mdb.getState()).filter(([_k, value]) => !!value[network][MarketId]);
 
   const contractsPrint = entries.map(
     ([key, value]: [string, DbEntry]) => `${key}: \'${value[network].address}\',`
   );
 
-  console.log('N# Contracts:', entries.length);
+  const mContractsPrint = mEntries.map(
+    ([key, value]: [string, mDbEntry]) => `${key}: \'${value[network].address}\',`
+  );
+
+  console.log('N# Contracts:', entries.length + mEntries.length);
   console.log(contractsPrint.join('\n'), '\n');
+  console.log(mContractsPrint.join('\n'), '\n');
+
 };
 
 export const notFalsyOrZeroAddress = (address: tEthereumAddress | null | undefined): boolean => {

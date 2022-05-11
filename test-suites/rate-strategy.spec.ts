@@ -21,7 +21,7 @@ makeSuite('Interest rate strategy tests', (testEnv: TestEnv) => {
     dai = testEnv.dai;
     aDai = testEnv.aDai;
 
-    const { addressesProvider } = testEnv;
+    const { addressesProvider, marketId } = testEnv;
 
     strategyInstance = await deployDefaultReserveInterestRateStrategy(
       [
@@ -33,6 +33,7 @@ makeSuite('Interest rate strategy tests', (testEnv: TestEnv) => {
         rateStrategyStableOne.stableRateSlope1,
         rateStrategyStableOne.stableRateSlope2,
       ],
+      marketId,
       false
     );
   });

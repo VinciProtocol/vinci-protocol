@@ -44,6 +44,9 @@ export const CommonsConfig: ICommonConfiguration = {
     DAI: {
       borrowRate: oneRay.multipliedBy(0.039).toFixed(),
     },
+    WETH: {
+      borrowRate: oneRay.multipliedBy(0.03).toFixed(),
+    },
   },
   // ----------------
   // COMMON PROTOCOL ADDRESSES ACROSS POOLS
@@ -65,7 +68,7 @@ export const CommonsConfig: ICommonConfiguration = {
     [eEthereumNetwork.hardhat]: undefined,
     [eEthereumNetwork.buidlerevm]: undefined,
   },
-  EmergencyAdminIndex: 1,
+  EmergencyAdminIndex: 0,
   ReserveAssets: {
     [eEthereumNetwork.localhost]: {},
     [eEthereumNetwork.vinci]: {},
@@ -106,21 +109,21 @@ export const CommonsConfig: ICommonConfiguration = {
   ProviderRegistry: {
     [eEthereumNetwork.localhost]: '',
     [eEthereumNetwork.vinci]: '',
-    [eEthereumNetwork.kovan]: '0x1E40B561EC587036f9789aF83236f057D1ed2A90',
+    [eEthereumNetwork.kovan]: '0xDD2d9D8b7Fc64c94d3c33a23DFe6B41a1212c915',
     [eEthereumNetwork.hardhat]: '',
     [eEthereumNetwork.buidlerevm]: '',
   },
   ProviderRegistryOwner: {
     [eEthereumNetwork.localhost]: '',
     [eEthereumNetwork.vinci]: '',
-    [eEthereumNetwork.kovan]: '0x85e4A467343c0dc4aDAB74Af84448D9c45D8ae6F',
+    [eEthereumNetwork.kovan]: '0x84c6e324e989bdb46bb3bb9da84ea902b7a2ef82',
     [eEthereumNetwork.hardhat]: '',
     [eEthereumNetwork.buidlerevm]: '',
   },
   LendingRateOracle: {
     [eEthereumNetwork.localhost]: '',
     [eEthereumNetwork.vinci]: '',
-    [eEthereumNetwork.kovan]: '', //'0xdCde9Bb6a49e37fA433990832AB541AE2d4FEB4a',
+    [eEthereumNetwork.kovan]: '0xB8aC13dB510442319500786c17c6582352d741F4',
     [eEthereumNetwork.hardhat]: '',
     [eEthereumNetwork.buidlerevm]: '',
   },
@@ -148,7 +151,7 @@ export const CommonsConfig: ICommonConfiguration = {
   WethGateway: {
     [eEthereumNetwork.localhost]: '',
     [eEthereumNetwork.vinci]: '',
-    [eEthereumNetwork.kovan]: '',
+    [eEthereumNetwork.kovan]: '0x4B8D36Ee514b691e23643fdAd43fbFf59F2CB99C',
     [eEthereumNetwork.hardhat]: '',
     [eEthereumNetwork.buidlerevm]: '',
   },
@@ -162,7 +165,7 @@ export const CommonsConfig: ICommonConfiguration = {
   AaveOracle: {
     [eEthereumNetwork.localhost]: '',
     [eEthereumNetwork.vinci]: '',
-    [eEthereumNetwork.kovan]: '', //'0xB8bE51E6563BB312Cbb2aa26e352516c25c26ac1',
+    [eEthereumNetwork.kovan]: '0x0e820f8648A27323aCd8f62402aD47A95545A8Ad',
     [eEthereumNetwork.hardhat]: '',
     [eEthereumNetwork.buidlerevm]: '',
   },
@@ -197,6 +200,8 @@ export const CommonsConfig: ICommonConfiguration = {
       YFI: '0xC5d1B1DEb2992738C0273408ac43e1e906086B6C',
       ZRX: '0xBc3f28Ccc21E9b5856E81E6372aFf57307E2E883',
       USD: '0x9326BFA02ADD2366b30bacB125260Af641031331',
+      BAYC: '0x2f7871FFAc7f8Af95aeCDcC01AFAFd7850f87AA4',
+      MAYC: '0x5a38bD38069F62d66a91cB9E7eAD6a5bb50eb56b',
     },
     [eEthereumNetwork.hardhat]: {},
     [eEthereumNetwork.buidlerevm]: {},

@@ -52,6 +52,8 @@ import {
     AaveCollector__factory,
     AaveCollector,
     NFTXRangeEligibility__factory,
+    WETHGateway__factory,
+    NFTXAllowAllEligibility__factory,
 } from '../types';
 import {
     withSaveAndVerify,
@@ -68,13 +70,15 @@ import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { LendingPoolLibraryAddresses } from '../types/factories/LendingPool__factory';
 import { eNetwork } from './types';
 import internal from 'stream';
+import { NFTXRangeEligibility } from '../types/NFTXRangeEligibility';
 
 export const deployLendingPoolAddressesProvider = async (marketId: string, verify?: boolean) =>
   withSaveAndVerify(
     await new LendingPoolAddressesProvider__factory(await getFirstSigner()).deploy(marketId),
     eContractid.LendingPoolAddressesProvider,
     [marketId],
-    verify
+    verify,
+    marketId
   );
 
 export const deployLendingPoolAddressesProviderRegistry = async (verify?: boolean) =>
@@ -109,14 +113,9 @@ export const deployERC721Mocked = async (
 
 export const deployAllMockERC721Tokens = async (verify?: boolean) => {
   const tokens: { [symbol: string]: MockContract | ERC721Mocked } = {};
-
-  const protoConfigData = getReservesConfigByPool(VinciPools.proto);
-
   for (const tokenSymbol of Object.keys(ERC721TokenContractId)) {
-    let configData = (<any>protoConfigData)[tokenSymbol];
-
     tokens[tokenSymbol] = await deployERC721Mocked(
-      [configData.name, configData.symbol],
+      [tokenSymbol, tokenSymbol],
       verify
     );
   }
@@ -136,6 +135,22 @@ export const deployMockERC721Tokens = async (tokenSymbol: string, verify?: boole
   );
   return tokens;
 };
+
+export const deployWETHGateway = async (args: [tEthereumAddress], verify?: boolean) =>
+  withSaveAndVerify(
+    await new WETHGateway__factory(await getFirstSigner()).deploy(...args),
+    eContractid.WETHGateway,
+    args,
+    verify
+  );
+
+export const authorizeWETHGateway = async (
+  wethGateWay: tEthereumAddress,
+  lendingPool: tEthereumAddress
+) =>
+  await new WETHGateway__factory(await getFirstSigner())
+    .attach(wethGateWay)
+    .authorizeLendingPool(lendingPool);
 
 export const deployWETHMocked = async (verify?: boolean) =>
   withSaveAndVerify(
@@ -279,41 +294,46 @@ export const deployVinciLibraries = async (
   };
 };
 
-export const deployLendingPool = async (verify?: boolean) => {
+export const deployLendingPool = async (marketId: string, verify?: boolean) => {
   const libraries = await deployVinciLibraries(verify);
   const lendingPoolImpl = await new LendingPool__factory(libraries, await getFirstSigner()).deploy();
-  await insertContractAddressInDb(eContractid.LendingPoolImpl, lendingPoolImpl.address);
-  return withSaveAndVerify(lendingPoolImpl, eContractid.LendingPool, [], verify);
+  await insertContractAddressInDb(eContractid.LendingPoolImpl, lendingPoolImpl.address, marketId);
+  return withSaveAndVerify(lendingPoolImpl, eContractid.LendingPool, [], verify, marketId);
 };
 
-export const deployLendingPoolConfigurator = async (verify?: boolean) => {
+export const deployLendingPoolConfigurator = async (marketId: string, verify?: boolean) => {
   const lendingPoolConfiguratorImpl = await new LendingPoolConfigurator__factory(
     await getFirstSigner()
   ).deploy();
   await insertContractAddressInDb(
     eContractid.LendingPoolConfiguratorImpl,
-    lendingPoolConfiguratorImpl.address
+    lendingPoolConfiguratorImpl.address,
+    marketId
   );
   return withSaveAndVerify(
     lendingPoolConfiguratorImpl,
     eContractid.LendingPoolConfigurator,
     [],
-    verify
+    verify,
+    marketId
   );
 };
 
 export const deployStableAndVariableTokensHelper = async (
   args: [tEthereumAddress, tEthereumAddress],
+  marketId: string,
   verify?: boolean
 ) =>
   withSaveAndVerify(
     await new StableAndVariableTokensHelper__factory(await getFirstSigner()).deploy(...args),
     eContractid.StableAndVariableTokensHelper,
     args,
-    verify
+    verify,
+    marketId
   );
 
 export const deployVTokensAndRatesHelper = async (
+  marketId: string,
   args: [tEthereumAddress, tEthereumAddress, tEthereumAddress],
   verify?: boolean
 ) =>
@@ -321,23 +341,26 @@ export const deployVTokensAndRatesHelper = async (
     await new VTokensAndRatesHelper__factory(await getFirstSigner()).deploy(...args),
     eContractid.VTokensAndRatesHelper,
     args,
-    verify
+    verify,
+    marketId
   );
 
-export const deployGenericVTokenImpl = async (verify: boolean) =>
+export const deployGenericVTokenImpl = async (marketId: string, verify: boolean) =>
   withSaveAndVerify(
     await new VToken__factory(await getFirstSigner()).deploy(),
     eContractid.VToken,
     [],
-    verify
+    verify,
+    marketId
   );
 
-export const deployDelegationAwareVTokenImpl = async (verify: boolean) =>
+export const deployDelegationAwareVTokenImpl = async (marketId: string, verify: boolean) =>
   withSaveAndVerify(
     await new DelegationAwareVToken__factory(await getFirstSigner()).deploy(),
     eContractid.DelegationAwareVToken,
     [],
-    verify
+    verify,
+    marketId
   );
 
 export const chooseVTokenDeployment = (id: eContractid) => {
@@ -347,24 +370,26 @@ export const chooseVTokenDeployment = (id: eContractid) => {
     case eContractid.DelegationAwareVToken:
       return deployDelegationAwareVTokenImpl;
     default:
-      throw Error(`Missing vToken implementation deployment script for: ${id}`);
+      throw Error(`Missing VToken implementation deployment script for: ${id}`);
   }
 };
 
-export const deployGenericStableDebtToken = async (verify?: boolean) =>
+export const deployGenericStableDebtToken = async (marketId: string, verify?: boolean) =>
   withSaveAndVerify(
     await new StableDebtToken__factory(await getFirstSigner()).deploy(),
     eContractid.StableDebtToken,
     [],
-    verify
+    verify,
+    marketId
   );
 
-export const deployGenericVariableDebtToken = async (verify?: boolean) =>
+export const deployGenericVariableDebtToken = async (marketId: string, verify?: boolean) =>
   withSaveAndVerify(
     await new VariableDebtToken__factory(await getFirstSigner()).deploy(),
     eContractid.VariableDebtToken,
     [],
-    verify
+    verify,
+    marketId
   );
 
 export const deployVTokenImplementations = async (
@@ -376,22 +401,22 @@ export const deployVTokenImplementations = async (
   const network = <eNetwork>DRE.network.name;
 
   // Obtain the different VToken implementations of all reserves inside the Market config
-  const vTokenImplementations = [
+  const VTokenImplementations = [
     ...Object.entries(reservesConfig).reduce<Set<eContractid>>((acc, [, entry]) => {
       acc.add(entry.vTokenImpl);
       return acc;
     }, new Set<eContractid>()),
   ];
 
-  for (let x = 0; x < vTokenImplementations.length; x++) {
-    const vTokenAddress = getOptionalParamAddressPerNetwork(
-      poolConfig[vTokenImplementations[x].toString()],
+  for (let x = 0; x < VTokenImplementations.length; x++) {
+    const VTokenAddress = getOptionalParamAddressPerNetwork(
+      poolConfig[VTokenImplementations[x].toString()],
       network
     );
-    if (!notFalsyOrZeroAddress(vTokenAddress)) {
-      const deployImplementationMethod = chooseVTokenDeployment(vTokenImplementations[x]);
-      console.log(`Deploying implementation`, vTokenImplementations[x]);
-      await deployImplementationMethod(verify);
+    if (!notFalsyOrZeroAddress(VTokenAddress)) {
+      const deployImplementationMethod = chooseVTokenDeployment(VTokenImplementations[x]);
+      console.log(`Deploying implementation`, VTokenImplementations[x]);
+      await deployImplementationMethod(poolConfig.MarketId, verify);
     }
   }
 
@@ -407,19 +432,20 @@ export const deployVTokenImplementations = async (
   );
 
   if (!notFalsyOrZeroAddress(genericStableDebtTokenAddress)) {
-    await deployGenericStableDebtToken(verify);
+    await deployGenericStableDebtToken(poolConfig.MarketId, verify);
   }
   if (!notFalsyOrZeroAddress(geneticVariableDebtTokenAddress)) {
-    await deployGenericVariableDebtToken(verify);
+    await deployGenericVariableDebtToken(poolConfig.MarketId, verify);
   }
 };
 
-export const deployNToken = async (verify?: boolean) =>
+export const deployNToken = async (marketId: string, verify?: boolean) =>
   withSaveAndVerify(
     await new NToken__factory(await getFirstSigner()).deploy(),
     eContractid.NToken,
     [],
-    verify
+    verify,
+    marketId
   );
 
 export const deployPriceOracle = async (verify?: boolean) =>
@@ -474,35 +500,40 @@ export const deployAaveOracle = async (
     verify
   );
 
-export const deployLendingPoolCollateralManager = async (verify?: boolean) => {
+export const deployLendingPoolCollateralManager = async (marketId: string, verify?: boolean) => {
     const collateralManagerImpl = await new LendingPoolCollateralManager__factory(
       await getFirstSigner()
     ).deploy();
     await insertContractAddressInDb(
       eContractid.LendingPoolCollateralManagerImpl,
-      collateralManagerImpl.address
+      collateralManagerImpl.address,
+      marketId
     );
     return withSaveAndVerify(
       collateralManagerImpl,
       eContractid.LendingPoolCollateralManager,
       [],
-      verify
+      verify,
+      marketId
     );
   };
 
 export const deployAaveProtocolDataProvider = async (
     addressesProvider: tEthereumAddress,
+    marketId: string,
     verify?: boolean
   ) =>
     withSaveAndVerify(
       await new AaveProtocolDataProvider__factory(await getFirstSigner()).deploy(addressesProvider),
       eContractid.AaveProtocolDataProvider,
       [addressesProvider],
-      verify
+      verify,
+      marketId
     );
 
 export const deployDefaultReserveInterestRateStrategy = async (
   args: [tEthereumAddress, string, string, string, string, string, string],
+  marketId: string,
   verify: boolean,
   name?: string
 ) =>
@@ -510,7 +541,8 @@ export const deployDefaultReserveInterestRateStrategy = async (
     await new DefaultReserveInterestRateStrategy__factory(await getFirstSigner()).deploy(...args),
     name ? name : eContractid.DefaultReserveInterestRateStrategy,
     args,
-    verify
+    verify,
+    marketId
   );
 
 export const deployWalletBalancerProvider = async (verify?: boolean) =>
@@ -537,57 +569,61 @@ export const deployUiPoolDataProvider = async (
 export const deployRateStrategy = async (
   strategyName: string,
   args: [tEthereumAddress, string, string, string, string, string, string],
+  marketId: string,
   verify: boolean
 ): Promise<tEthereumAddress> => {
   switch (strategyName) {
     default:
       return await (
-        await deployDefaultReserveInterestRateStrategy(args, verify, strategyName)
+        await deployDefaultReserveInterestRateStrategy(args, marketId, verify, strategyName)
       ).address;
   }
 };
 
 export const deployTreasury = async (
-  verify?: boolean
+    verify?: boolean
 ) => {
-  const implementation = await withSaveAndVerify(
-    await new AaveCollector__factory(await getFirstSigner()).deploy(),
-    'AaveTreasuryImpl',
-    [],
-    verify
-  );
-  const contract = await withSaveAndVerify(
-    await new InitializableAdminUpgradeabilityProxy__factory(await getFirstSigner()).deploy(),
-    'AaveTreasury',
-    [],
-    verify
-  );
-  const tx = await contract['initialize(address,address,bytes)'](
-    implementation.address, 
-    await (await getFirstSigner()).getAddress(),
-    implementation.interface.encodeFunctionData("initialize")
-  );
-  await tx.wait();
-  return AaveCollector__factory.connect(contract.address, await getFirstSigner());
+    const implementation = await withSaveAndVerify(
+        await new AaveCollector__factory(await getFirstSigner()).deploy(),
+        'AaveTreasuryImpl',
+        [],
+        verify
+    );
+    const contract = await withSaveAndVerify(
+        await new InitializableAdminUpgradeabilityProxy__factory(await getFirstSigner()).deploy(),
+        'AaveTreasury',
+        [],
+        verify
+    );
+    const tx = await contract['initialize(address,address,bytes)'](
+        implementation.address,
+        await (await getFirstSigner()).getAddress(),
+        implementation.interface.encodeFunctionData("initialize")
+    );
+    await tx.wait();
+    return AaveCollector__factory.connect(contract.address, await getFirstSigner());
 };
 
 export const deployRangeEligibility = async (
   rangeStart: number,
   rangeEnd: number,
   tokenSymbol: string,
+  marketId: string,
   verify?: boolean
 ) => {
   const implementation = await withSaveAndVerify(
     await new NFTXRangeEligibility__factory(await getFirstSigner()).deploy(),
     `${tokenSymbol}EligibilityImpl`,
     [],
-    verify
+    verify,
+    marketId
   );
   const contract = await withSaveAndVerify(
     await new InitializableAdminUpgradeabilityProxy__factory(await getFirstSigner()).deploy(),
     `${tokenSymbol}Eligibility`,
     [],
-    verify
+    verify,
+    marketId
   );
   const tx = await contract['initialize(address,address,bytes)'](
     implementation.address,
@@ -596,4 +632,40 @@ export const deployRangeEligibility = async (
   );
   await tx.wait()
   return NFTXRangeEligibility__factory.connect(contract.address, await getFirstSigner());
+}
+
+export const deployNFTXAllowAllEligibility = async (
+    tokenSymbol: string,
+    marketId: string,
+    verify?: boolean
+) => {
+    const implementation = await withSaveAndVerify(
+        await new NFTXAllowAllEligibility__factory(await getFirstSigner()).deploy(),
+        `${tokenSymbol}EligibilityImpl`,
+        [],
+        verify,
+        marketId
+    );
+    const contract = await withSaveAndVerify(
+        await new InitializableAdminUpgradeabilityProxy__factory(await getFirstSigner()).deploy(),
+        `${tokenSymbol}Eligibility`,
+        [],
+        verify,
+        marketId
+    );
+    const tx = await contract['initialize(address,address,bytes)'](
+        implementation.address,
+        await (await getFirstSigner()).getAddress(),
+        implementation.interface.encodeFunctionData("__NFTXEligibility_init")
+    );
+    await tx.wait()
+    return NFTXRangeEligibility__factory.connect(contract.address, await getFirstSigner());
+}
+
+export const deployAllMockEligibilities = async (marketId: string, verify?: boolean) => {
+  const eligibilities: { [symbol: string]: NFTXRangeEligibility} = {};
+  for (const tokenSymbol of Object.keys(ERC721TokenContractId)) {
+    eligibilities[tokenSymbol] = await deployNFTXAllowAllEligibility(tokenSymbol.toLocaleUpperCase(), marketId, verify);
+  }
+  return eligibilities;
 }

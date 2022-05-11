@@ -293,7 +293,6 @@ makeSuite('LendingPoolConfigurator', (testEnv: TestEnv) => {
       stableBorrowRateEnabled: strategyDAI.stableBorrowRateEnabled,
       reserveFactor: 1000,
     };
-    console.log(`expected ${JSON.stringify(expected, null, 4)}`);
     const result = {
       borrowingEnabled: borrowingEnabled,
       isActive: isActive,
@@ -305,8 +304,6 @@ makeSuite('LendingPoolConfigurator', (testEnv: TestEnv) => {
       stableBorrowRateEnabled: stableBorrowRateEnabled,
       reserveFactor: reserveFactor,
     };
-    console.log(`result: ${JSON.stringify(result, null, 4)}`);
-
     expect(borrowingEnabled).to.be.equal(true);
     expect(isActive).to.be.equal(true);
     expect(isFrozen).to.be.equal(false);
@@ -327,7 +324,7 @@ makeSuite('LendingPoolConfigurator', (testEnv: TestEnv) => {
   });
 
   it('Reverts when trying to disable the DAI reserve with liquidity on it', async () => {
-    const { dai, pool, configurator } = testEnv;
+    const { dai, pool, configurator, helpersContract } = testEnv;
     const userAddress = await pool.signer.getAddress();
     await dai.mint(await convertToCurrencyDecimals(dai.address, '1000'));
 

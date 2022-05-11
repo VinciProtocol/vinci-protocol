@@ -11,3 +11,5 @@ tasks/migrations
 tasks/single
 tasks/deployments
 *.orig
+deployed-contracts.json
+deployed-market-contracts.json

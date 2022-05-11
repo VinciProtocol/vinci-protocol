@@ -15,7 +15,7 @@ makeSuite('NToken: Transfer', (testEnv: TestEnv) => {
     VL_TRANSFER_NOT_ALLOWED,
   } = ProtocolErrors;
 
-  it('User 0 deposits 1 CRYPTOPANDA, transfers to user 1', async () => {
+  it('User 0 deposits 1 BAYC, transfers to user 1', async () => {
     const { users, pool, nft, nNFT, helpersContract } = testEnv;
 
     await nft.connect(users[0].signer).publicMint(users[0].address, '1');
@@ -30,7 +30,7 @@ makeSuite('NToken: Transfer', (testEnv: TestEnv) => {
 
     const name = await nNFT.name();
 
-    expect(name).to.be.equal('Vinci interest bearing CRYPTOPANDA');
+    expect(name).to.be.equal('Vinci interest bearing BAYC');
 
     const fromBalance = await nNFT['balanceOf(address)'](users[0].address);
     const toBalance = await nNFT['balanceOf(address)'](users[1].address);
@@ -42,7 +42,7 @@ makeSuite('NToken: Transfer', (testEnv: TestEnv) => {
     );
   });
 
-  it('User 0 deposits 1 DAI and user 1 tries to borrow the DAI with the received CRYPTOPANDA as collateral', async () => {
+  it('User 0 deposits 1 DAI and user 1 tries to borrow the DAI with the received BAYC as collateral', async () => {
     const { users, pool, dai, helpersContract } = testEnv;
     const userAddress = await pool.signer.getAddress();
 
@@ -71,7 +71,7 @@ makeSuite('NToken: Transfer', (testEnv: TestEnv) => {
     expect(userReserveData.currentVariableDebt.toString()).to.be.eq(ethers.utils.parseEther('0.1'));
   });
 
-  it('User 1 tries to transfer all the CRYPTOPANDA used as collateral back to user 0 (revert expected)', async () => {
+  it('User 1 tries to transfer all the BAYC used as collateral back to user 0 (revert expected)', async () => {
     const { users, nNFT } = testEnv;
     await expect(
       nNFT.connect(users[1].signer)['safeTransferFrom(address,address,uint256)'](users[1].address, users[0].address, '1'),
@@ -79,7 +79,7 @@ makeSuite('NToken: Transfer', (testEnv: TestEnv) => {
     ).to.be.revertedWith(VL_TRANSFER_NOT_ALLOWED);
   });
 
-  it('User 1 deposite another CRYPTOPANDA and tries to transfer the first CRYPTOPANDA used as collateral back to user 0', async () => {
+  it('User 1 deposite another BAYC and tries to transfer the first BAYC used as collateral back to user 0', async () => {
     const { users, pool, nNFT, nft } = testEnv;
 
     await nft.connect(users[1].signer).publicMint(users[1].address, '2');

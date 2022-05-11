@@ -29,6 +29,7 @@ export enum eContractid {
   LendingPool = 'LendingPool',
   PriceOracle = 'PriceOracle',
   VToken = 'VToken',
+  WETHGateway = 'WETHGateway',
   WETHMocked = 'WETH',
   ETH = 'ETH',
   ERC721Mocked = 'ERC721Mocked',
@@ -52,6 +53,7 @@ export enum eContractid {
   MockFlashLoanReceiver = 'MockFlashLoanReceiver',
   LendingPoolCollateralManagerImpl = 'LendingPoolCollateralManagerImpl',
   NFTXRangeEligibility = 'NFTXRangeEligibility',
+  NFTXEligibility = 'NFTXEligibility',
 }
 
 /*
@@ -104,7 +106,7 @@ export enum ProtocolErrors {
   CT_TRANSFER_AMOUNT_NOT_GT_0 = '31', // 'Transferred amount needs to be greater than zero'
   RL_RESERVE_ALREADY_INITIALIZED = '32', // 'Reserve has already been initialized'
   LPC_RESERVE_LIQUIDITY_NOT_0 = '34', // 'The liquidity of the reserve needs to be 0'
-  LPC_INVALID_VTOKEN_POOL_ADDRESS = '35', // 'The liquidity of the reserve needs to be 0'
+    LPC_INVALID_VTOKEN_POOL_ADDRESS = '35', // 'The liquidity of the reserve needs to be 0'
   LPC_INVALID_STABLE_DEBT_TOKEN_POOL_ADDRESS = '36', // 'The liquidity of the reserve needs to be 0'
   LPC_INVALID_VARIABLE_DEBT_TOKEN_POOL_ADDRESS = '37', // 'The liquidity of the reserve needs to be 0'
   LPC_INVALID_STABLE_DEBT_TOKEN_UNDERLYING_ADDRESS = '38', // 'The liquidity of the reserve needs to be 0'
@@ -133,7 +135,7 @@ export enum ProtocolErrors {
   LP_FAILED_COLLATERAL_SWAP = '60',
   LP_INVALID_EQUAL_ASSETS_TO_SWAP = '61',
   LP_REENTRANCY_NOT_ALLOWED = '62',
-  LP_CALLER_MUST_BE_AN_VTOKEN = '63',
+    LP_CALLER_MUST_BE_AN_VTOKEN = '63',
   LP_IS_PAUSED = '64', // 'Pool is paused'
   LP_NO_MORE_RESERVES_ALLOWED = '65',
   LP_INVALID_FLASH_LOAN_EXECUTOR_RETURN = '66',
@@ -162,19 +164,22 @@ export type iAssetsWithoutETH<T> = Omit<iAssetBase<T>, 'ETH'>;
 export type iAssetAggregatorBase<T> = iAssetsWithoutETH<T>;
 
 export enum TokenContractId {
-    DAI = 'DAI',
     WETH = 'WETH',
+    DAI = 'DAI',
   }
 
 export enum ERC721TokenContractId {
-  CRYPTOPANDA = 'CRYPTOPANDA',
+  BAYC = 'BAYC',
+  MAYC = 'MAYC',
 }
 
 export interface iAssetBase<T> {
   DAI: T;
   USD: T;
   WETH: T;
-  CRYPTOPANDA: T;
+  BAYC: T;
+  //CRYPTOPANDA: T;
+  MAYC: T;
 }
 
 export type iAssetsWithoutUSD<T> = Omit<iAssetBase<T>, 'USD'>;
@@ -187,10 +192,21 @@ export type iVinciPoolAssets<T> = Pick<
 
 export type iVinciPoolNFTAssets<T> = Pick<
   iAssetsWithoutUSD<T>,
-  | 'CRYPTOPANDA'
+  //| 'CRYPTOPANDA'
+  | 'BAYC'
 >;
 
-export type iMultiPoolsAssets<T> = iAssetCommon<T> | iVinciPoolAssets<T> | iVinciPoolNFTAssets<T>;
+export type iVinciPoolBAYCAssets<T> = Pick<
+  iAssetsWithoutUSD<T>,
+  | 'BAYC'
+>;
+
+export type iVinciPoolMAYCAssets<T> = Pick<
+  iAssetsWithoutUSD<T>,
+  | 'MAYC'
+>;
+
+export type iMultiPoolsAssets<T> = iAssetCommon<T> | iVinciPoolAssets<T> | iVinciPoolBAYCAssets<T> | iVinciPoolMAYCAssets<T>;
 
 export interface iAssetCommon<T> {
   [key: string]: T;
@@ -251,6 +267,7 @@ export interface IMarketRates {
 
 export interface IBaseConfiguration {
   MarketId: string;
+  BaseURI: string;
   VTokenNamePrefix: string;
   StableDebtTokenNamePrefix: string;
   VariableDebtTokenNamePrefix: string;
@@ -281,8 +298,10 @@ export interface IBaseConfiguration {
   StableDebtTokenImplementation?: iParamsPerNetwork<tEthereumAddress>;
   VariableDebtTokenImplementation?: iParamsPerNetwork<tEthereumAddress>;
   ReserveAssets: iParamsPerNetwork<SymbolMap<tEthereumAddress>>;
+  NFTVaultAssets: iParamsPerNetwork<SymbolMap<tEthereumAddress>>;
   OracleQuoteCurrency: string;
   OracleQuoteUnit: string;
+  LendingPoolLibraryAddresses: iParamsPerNetwork<ILendingPoolLibraryAddresses>;
 }
 
 export interface IMocksConfig {
@@ -300,6 +319,16 @@ export interface IVinciConfiguration extends ICommonConfiguration {
   NFTVaultConfig: iVinciPoolNFTAssets<INFTVaultParams>;
 }
 
+export interface IVinciConfigurationBAYC extends ICommonConfiguration {
+  ReservesConfig: iVinciPoolAssets<IReserveParams>;
+  NFTVaultConfig: iVinciPoolBAYCAssets<INFTVaultParams>;
+}
+
+export interface IVinciConfigurationMAYC extends ICommonConfiguration {
+  ReservesConfig: iVinciPoolAssets<IReserveParams>;
+  NFTVaultConfig: iVinciPoolMAYCAssets<INFTVaultParams>;
+}
+
 export type iParamsPerNetwork<T> =
   | iEthereumParamsPerNetwork<T>;
 
@@ -315,7 +344,13 @@ export interface ITokenAddress {
   [token: string]: tEthereumAddress;
 }
 
-export type PoolConfiguration = ICommonConfiguration | IVinciConfiguration;
+export interface ILendingPoolLibraryAddresses {
+  ["contracts/protocol/libraries/logic/NFTVaultLogic.sol:NFTVaultLogic"]: string;
+  ["contracts/protocol/libraries/logic/ValidationLogic.sol:ValidationLogic"]: string;
+  ["contracts/protocol/libraries/logic/ReserveLogic.sol:ReserveLogic"]: string;
+}
+
+export type PoolConfiguration = ICommonConfiguration | IVinciConfiguration | IVinciConfigurationMAYC;
 
 export enum RateMode {
   None = '0',

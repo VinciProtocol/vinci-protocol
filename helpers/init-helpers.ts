@@ -17,10 +17,9 @@ import {
 } from './contracts-getters';
 import {
   getContractAddressWithJsonFallback,
-  rawInsertContractAddressInDb,
 } from './contracts-helpers';
 import { BigNumberish, BytesLike } from 'ethers';
-import { ConfigNames } from './configuration';
+import { ConfigNames, loadPoolConfig } from './configuration';
 import { deployRateStrategy } from './contracts-deployments';
 
 export const getVTokenExtraParams = async (vTokenName: string, tokenAddress: tEthereumAddress) => {
@@ -41,12 +40,13 @@ export const initNFTVaultByHelper = async (
   NFTVaultInputParams: iMultiPoolsAssets<INFTVaultParams>,
   tokenAddresses: { [symbol: string]: tEthereumAddress },
   eligibilityAddresses: { [symbol: string]: tEthereumAddress },
-  baseURI: string,
+  baseURI,
   nTokenNamePrefix: string,
   symbolPrefix: string,
+  marketId: string,
   verify: boolean
 ) => {
-  const addressProvider = await getLendingPoolAddressesProvider();
+  const addressProvider = await getLendingPoolAddressesProvider(marketId);
   
   // CHUNK CONFIGURATION
   const initChunks = 1;
@@ -73,7 +73,7 @@ export const initNFTVaultByHelper = async (
       continue;
     }
     // Prepare input parameters
-    const ntoken = await getNToken();
+    const ntoken = await getNToken(marketId);
     reserveSymbols.push(symbol);
     initNFTVaultInputParams.push({
       nTokenImpl: ntoken.address,
@@ -91,7 +91,7 @@ export const initNFTVaultByHelper = async (
   const chunkedSymbols = chunk(reserveSymbols, initChunks);
   const chunkedInitInputParams = chunk(initNFTVaultInputParams, initChunks);
 
-  const configurator = await getLendingPoolConfiguratorProxy();
+  const configurator = await getLendingPoolConfiguratorProxy(marketId);
 
   console.log(`- Reserves initialization in ${chunkedInitInputParams.length} txs`);
   for (let chunkIndex = 0; chunkIndex < chunkedInitInputParams.length; chunkIndex++) {
@@ -119,7 +119,8 @@ export const initReservesByHelper = async (
   poolName: ConfigNames,
   verify: boolean
 ) => {
-  const addressProvider = await getLendingPoolAddressesProvider();
+  const poolConfig = loadPoolConfig(poolName);  
+  const addressProvider = await getLendingPoolAddressesProvider(poolConfig.MarketId);
 
   // CHUNK CONFIGURATION
   const initChunks = 1;
@@ -190,6 +191,7 @@ export const initReservesByHelper = async (
       strategyAddresses[strategy.name] = await deployRateStrategy(
         strategy.name,
         rateStrategies[strategy.name],
+        poolConfig.MarketId,
         verify
       );
 
@@ -229,7 +231,7 @@ export const initReservesByHelper = async (
   const chunkedSymbols = chunk(reserveSymbols, initChunks);
   const chunkedInitInputParams = chunk(initInputParams, initChunks);
 
-  const configurator = await getLendingPoolConfiguratorProxy();
+  const configurator = await getLendingPoolConfiguratorProxy(poolConfig.MarketId);
 
   console.log(`- Reserves initialization in ${chunkedInitInputParams.length} txs`);
   for (let chunkIndex = 0; chunkIndex < chunkedInitInputParams.length; chunkIndex++) {
@@ -275,10 +277,11 @@ export const configureNFTVaultByHelper = async (
   reservesParams: iMultiPoolsAssets<INFTVaultParams>,
   tokenAddresses: { [symbol: string]: tEthereumAddress },
   helpers: AaveProtocolDataProvider,
-  admin: tEthereumAddress
+  admin: tEthereumAddress,
+  marketId: string
 ) => {
-  const addressProvider = await getLendingPoolAddressesProvider();
-  const vtokenAndRatesDeployer = await getVTokensAndRatesHelper();
+  const addressProvider = await getLendingPoolAddressesProvider(marketId);
+    const vtokenAndRatesDeployer = await getVTokensAndRatesHelper(marketId);
   const tokens: string[] = [];
   const symbols: string[] = [];
 
@@ -331,7 +334,7 @@ export const configureNFTVaultByHelper = async (
     tokens.push(tokenAddress);
     symbols.push(assetSymbol);
   }
-  const configurator = await getLendingPoolConfiguratorProxy();
+  const configurator = await getLendingPoolConfiguratorProxy(marketId);
 
   if (tokens.length) {
     // Deploy init per chunks
@@ -349,10 +352,11 @@ export const configureReservesByHelper = async (
   reservesParams: iMultiPoolsAssets<IReserveParams>,
   tokenAddresses: { [symbol: string]: tEthereumAddress },
   helpers: AaveProtocolDataProvider,
-  admin: tEthereumAddress
+  admin: tEthereumAddress,
+  marketId: string
 ) => {
-  const addressProvider = await getLendingPoolAddressesProvider();
-  const vtokenAndRatesDeployer = await getVTokensAndRatesHelper();
+  const addressProvider = await getLendingPoolAddressesProvider(marketId);
+  const vtokenAndRatesDeployer = await getVTokensAndRatesHelper(marketId);
   const tokens: string[] = [];
   const symbols: string[] = [];
 

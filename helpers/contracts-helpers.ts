@@ -2,7 +2,7 @@ import { Contract, Signer, ethers } from 'ethers';
 import * as ethsigutils from 'eth-sig-util';
 import { fromRpcSig, ECDSASignature } from 'ethereumjs-util';
 import BigNumber from 'bignumber.js';
-import { getDb, DRE, waitForTx, notFalsyOrZeroAddress } from './misc-utils';
+import { getDb, getMarketDb, DRE, waitForTx, notFalsyOrZeroAddress } from './misc-utils';
 import {
     eContractid,
     tStringTokenSmallUnits,
@@ -25,7 +25,7 @@ import { getFirstSigner, getIErc20Detailed } from './contracts-getters';
 import { ConfigNames, loadPoolConfig } from './configuration';
 import { BUIDLEREVM_NETWORK_NAME } from '@nomiclabs/buidler/plugins';
 
-export const registerContractInJsonDb = async (contractId: string, contractInstance: Contract) => {
+export const registerContractInJsonDb = async (contractId: string, contractInstance: Contract, marketId?: string) => {
   const currentNetwork = DRE.network.name;
   const FORK = process.env.FORK;
   if (FORK || (currentNetwork !== 'hardhat' && !currentNetwork.includes('coverage'))) {
@@ -40,27 +40,40 @@ export const registerContractInJsonDb = async (contractId: string, contractInsta
     console.log();
   }
 
-  await getDb()
-    .set(`${contractId}.${currentNetwork}`, {
-      address: contractInstance.address,
-      deployer: contractInstance.deployTransaction.from,
-    })
-    .write();
+  if (marketId) {
+    await getMarketDb()
+      .set(`${contractId}.${currentNetwork}.${marketId}`, {
+        address: contractInstance.address,
+        deployer: contractInstance.deployTransaction.from,
+      })
+      .write();
+  }
+  else {
+    await getDb()
+      .set(`${contractId}.${currentNetwork}`, {
+        address: contractInstance.address,
+        deployer: contractInstance.deployTransaction.from,
+      })
+      .write();
+  }
 };
 
-export const insertContractAddressInDb = async (id: eContractid, address: tEthereumAddress) =>
-  await getDb()
-    .set(`${id}.${DRE.network.name}`, {
-      address,
-    })
-    .write();
-
-export const rawInsertContractAddressInDb = async (id: string, address: tEthereumAddress) =>
-  await getDb()
-    .set(`${id}.${DRE.network.name}`, {
-      address,
-    })
-    .write();
+export const insertContractAddressInDb = async (id: eContractid, address: tEthereumAddress, marketId?: string) => {
+  if (marketId) {
+    await getMarketDb()
+      .set(`${id}.${DRE.network.name}.${marketId}`, {
+        address,
+      })
+      .write();
+  }
+  else {
+    await getDb()
+      .set(`${id}.${DRE.network.name}`, {
+        address,
+      })
+      .write();
+  }
+};
 
 export const getEthersSigners = async (): Promise<Signer[]> => {
     const ethersSigners = await Promise.all(await DRE.ethers.getSigners());
@@ -79,10 +92,11 @@ export const withSaveAndVerify = async <ContractType extends Contract>(
     instance: ContractType,
     id: string,
     args: (string | string[])[],
-    verify?: boolean
+    verify?: boolean,
+    MarketId?: string
   ): Promise<ContractType> => {
     await waitForTx(instance.deployTransaction);
-    await registerContractInJsonDb(id, instance);
+    await registerContractInJsonDb(id, instance, MarketId);
     if (verify) {
       await verifyContract(id, instance, args);
     }
@@ -169,13 +183,14 @@ export const getOptionalParamAddressPerNetwork = (
 
 export const deployContract = async <ContractType extends Contract>(
   contractName: string,
-  args: any[]
+  args: any[],
+  MarketId?: string
 ): Promise<ContractType> => {
   const contract = (await (await DRE.ethers.getContractFactory(contractName))
     .connect(await getFirstSigner())
     .deploy(...args)) as ContractType;
   await waitForTx(contract.deployTransaction);
-  await registerContractInJsonDb(<eContractid>contractName, contract);
+  await registerContractInJsonDb(<eContractid>contractName, contract, MarketId);
   return contract;
 };
 
@@ -185,14 +200,13 @@ export const getContractAddressWithJsonFallback = async (
 ): Promise<tEthereumAddress> => {
   const poolConfig = loadPoolConfig(pool);
   const network = <eNetwork>DRE.network.name;
-  const db = getDb();
 
   const contractAtMarketConfig = getOptionalParamAddressPerNetwork(poolConfig[id], network);
   if (notFalsyOrZeroAddress(contractAtMarketConfig)) {
     return contractAtMarketConfig;
   }
 
-  const contractAtDb = await getDb().get(`${id}.${DRE.network.name}`).value();
+  const contractAtDb = await getMarketDb().get(`${id}.${DRE.network.name}.${poolConfig.MarketId}`).value();
   if (contractAtDb?.address) {
     return contractAtDb.address as tEthereumAddress;
   }

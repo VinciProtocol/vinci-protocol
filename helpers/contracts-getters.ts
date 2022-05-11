@@ -23,22 +23,26 @@ import {
     AaveCollector__factory,
     NFTXRangeEligibility__factory,
     NFTXRangeEligibility,
+    WETHGateway__factory,
+    NFTXEligibility__factory,
+    AaveCollector
  } from "../types";
 import { MintableERC20 } from '../types/MintableERC20';
 import { ERC721Mocked } from '../types/ERC721Mocked';
 import { getEthersSigners } from './contracts-helpers';
-import { DRE, getDb, notFalsyOrZeroAddress, omit } from './misc-utils';
+import { DRE, getDb, getMarketDb,notFalsyOrZeroAddress, omit } from './misc-utils';
 import { eContractid, tEthereumAddress, TokenContractId, ERC721TokenContractId } from "./types";
 export const getFirstSigner = async () => (await getEthersSigners())[0];
 export type MockTokenMap = { [symbol: string]: MintableERC20 };
 export type MockERC721TokenMap = { [symbol: string]: ERC721Mocked };
 export type MockEligibilityMap = { [symbol: string]: NFTXRangeEligibility};
+export type EligibilityAddressMap = { [symbol: string]: tEthereumAddress};
 
-export const getLendingPoolAddressesProvider = async (address?: tEthereumAddress) => {
+export const getLendingPoolAddressesProvider = async (marketId: string, address?: tEthereumAddress) => {
     return await LendingPoolAddressesProvider__factory.connect(
       address ||
         (
-          await getDb().get(`${eContractid.LendingPoolAddressesProvider}.${DRE.network.name}`).value()
+          await getMarketDb().get(`${eContractid.LendingPoolAddressesProvider}.${DRE.network.name}.${marketId}`).value()
         ).address,
       await getFirstSigner()
     );
@@ -83,11 +87,11 @@ export const getNFTVaultLogic = async (address?: tEthereumAddress) =>
     await getFirstSigner()
   );
 
-export const getLendingPool = async (address?: tEthereumAddress) =>
+export const getLendingPool = async (marketId: string, address?: tEthereumAddress) =>
   await LendingPool__factory.connect(
     address ||
       (
-        await getDb().get(`${eContractid.LendingPool}.${DRE.network.name}`).value()
+        await getMarketDb().get(`${eContractid.LendingPool}.${DRE.network.name}.${marketId}`).value()
       ).address,
     await getFirstSigner()
   );
@@ -101,41 +105,41 @@ export const getPriceOracle = async (address?: tEthereumAddress) =>
     await getFirstSigner()
   );
 
-export const getLendingPoolConfiguratorProxy = async (address?: tEthereumAddress) => {
+export const getLendingPoolConfiguratorProxy = async (marketId: string, address?: tEthereumAddress) => {
   return await LendingPoolConfigurator__factory.connect(
     address ||
       (
-        await getDb().get(`${eContractid.LendingPoolConfigurator}.${DRE.network.name}`).value()
+        await getMarketDb().get(`${eContractid.LendingPoolConfigurator}.${DRE.network.name}.${marketId}`).value()
       ).address,
     await getFirstSigner()
   );
 };
 
-export const getStableAndVariableTokensHelper = async (address?: tEthereumAddress) =>
+export const getStableAndVariableTokensHelper = async (marketId: string, address?: tEthereumAddress) =>
   await StableAndVariableTokensHelper__factory.connect(
     address ||
       (
-        await getDb()
-          .get(`${eContractid.StableAndVariableTokensHelper}.${DRE.network.name}`)
+        await getMarketDb()
+          .get(`${eContractid.StableAndVariableTokensHelper}.${DRE.network.name}.${marketId}`)
           .value()
       ).address,
     await getFirstSigner()
   );
 
-export const getStableDebtToken = async (address?: tEthereumAddress) =>
+export const getStableDebtToken = async (marketId: string, address?: tEthereumAddress) =>
   await StableDebtToken__factory.connect(
     address ||
       (
-        await getDb().get(`${eContractid.StableDebtToken}.${DRE.network.name}`).value()
+        await getMarketDb().get(`${eContractid.StableDebtToken}.${DRE.network.name}.${marketId}`).value()
       ).address,
     await getFirstSigner()
   );
 
-export const getVariableDebtToken = async (address?: tEthereumAddress) =>
+export const getVariableDebtToken = async (marketId: string, address?: tEthereumAddress) =>
   await VariableDebtToken__factory.connect(
     address ||
       (
-        await getDb().get(`${eContractid.VariableDebtToken}.${DRE.network.name}`).value()
+        await getMarketDb().get(`${eContractid.VariableDebtToken}.${DRE.network.name}.${marketId}`).value()
       ).address,
     await getFirstSigner()
   );
@@ -153,7 +157,7 @@ export const getIErc20Detailed = async (address: tEthereumAddress) =>
   await IERC20Metadata__factory.connect(
     address ||
       (
-        await getDb().get(`${eContractid.IERC20Metadata}.${DRE.network.name}`).value()
+            await getDb().get(`${eContractid.IERC20Metadata}.${DRE.network.name}`).value()
       ).address,
     await getFirstSigner()
   );
@@ -168,20 +172,30 @@ export const getMockERC721Token = async (address: tEthereumAddress) =>
   );
 
 export const getMockEligibility = async (address: tEthereumAddress) =>
-  await NFTXRangeEligibility__factory.connect(
-    address ||
-      (
-        await getDb().get(`${eContractid.NFTXRangeEligibility}.${DRE.network.name}`).value()
-      ).address,
-    await getFirstSigner()
-  );
+    await NFTXRangeEligibility__factory.connect(
+        address ||
+        (
+            await getDb().get(`${eContractid.NFTXRangeEligibility}.${DRE.network.name}`).value()
+        ).address,
+        await getFirstSigner()
+    );
+
+export const getEligibilityAddress = async (marketId: string, tokenSymbol: string, address?: tEthereumAddress) => {
+    await NFTXRangeEligibility__factory.connect(
+        address ||
+        (
+            await getMarketDb().get(`${tokenSymbol}Eligibility.${DRE.network.name}.${marketId}`).value()
+        ).address,
+        await getFirstSigner()
+    );
+}
 
 export const getAllMockedTokens = async () => {
   const db = getDb();
   const tokens: MockTokenMap = await Object.keys(TokenContractId).reduce<Promise<MockTokenMap>>(
     async (acc, tokenSymbol) => {
       const accumulator = await acc;
-      const address = db.get(`${tokenSymbol.toUpperCase()}.${DRE.network.name}`).value().address;
+      const address = (await db.get(`${tokenSymbol.toUpperCase()}.${DRE.network.name}`).value()).address;
       accumulator[tokenSymbol] = await getMintableERC20(address);
       return Promise.resolve(acc);
     },
@@ -195,7 +209,7 @@ export const getAllMockedERC721Tokens = async () => {
   const tokens: MockERC721TokenMap = await Object.keys(ERC721TokenContractId).reduce<Promise<MockERC721TokenMap>>(
     async (acc, tokenSymbol) => {
       const accumulator = await acc;
-      const address = db.get(`${tokenSymbol.toUpperCase()}.${DRE.network.name}`).value().address;
+            const address = (await db.get(`${tokenSymbol.toUpperCase()}.${DRE.network.name}`).value()).address;
       accumulator[tokenSymbol] = await getMockERC721Token(address);
       return Promise.resolve(acc);
     },
@@ -204,18 +218,32 @@ export const getAllMockedERC721Tokens = async () => {
   return tokens;
 };
 
-export const getAllMockedEligibility = async () => {
-  const db = getDb();
-  const eligibilities: MockEligibilityMap = await Object.keys(ERC721TokenContractId).reduce<Promise<MockEligibilityMap>>(
-    async (acc, tokenSymbol) => {
-      const accumulator = await acc;
-      const address = db.get(`${tokenSymbol.toUpperCase()}.${DRE.network.name}`).value().address;
-      accumulator[tokenSymbol] = await getMockEligibility(address);
-      return Promise.resolve(acc);
-    },
-    Promise.resolve({})
-  );
-  return eligibilities;
+export const getAllMockedEligibility = async (marketId: string) => {
+    const db = getDb();
+    const eligibilities: MockEligibilityMap = await Object.keys(ERC721TokenContractId).reduce<Promise<MockEligibilityMap>>(
+        async (acc, tokenSymbol) => {
+            const accumulator = await acc;
+            const address = (await db.get(`${tokenSymbol.toUpperCase()}Eligibility.${DRE.network.name}`).value()).address;
+            accumulator[tokenSymbol] = await getMockEligibility(address);
+            return Promise.resolve(acc);
+        },
+        Promise.resolve({})
+    );
+    return eligibilities;
+};
+
+export const getAllEligibilityAddresses = async (marketId: string, tokenSymbols: string[]) => {
+    const db = getDb();
+    const eligibilities: EligibilityAddressMap = await tokenSymbols.reduce<Promise<EligibilityAddressMap>>(
+        async (acc, tokenSymbol) => {
+            const accumulator = await acc;
+            const address = (await db.get(`${tokenSymbol.toUpperCase()}Eligibility.${DRE.network.name}`).value()).address;
+            accumulator[tokenSymbol] = address;
+            return Promise.resolve(acc);
+        },
+        Promise.resolve({})
+    );
+    return eligibilities;
 };
 
 export const getQuoteCurrencies = (oracleQuoteCurrency: string): string[] => {
@@ -259,36 +287,45 @@ export const getPairsTokenAggregator = (
     return [mappedPairs, mappedAggregators];
   };
 
-export const getETHMockAggregator = async (address?: tEthereumAddress) => {
+export const getMockAggregator = async (id: string, address?: tEthereumAddress) => {
     return await MockAggregator__factory.connect(
       address ||
         (
-          await getDb().get(`${eContractid.ETH}${eContractid.MockAggregator}.${DRE.network.name}`).value()
+          await getDb().get(`${id}${eContractid.MockAggregator}.${DRE.network.name}`).value()
         ).address,
       await getFirstSigner()
     );
   };
 
-export const getLendingPoolConfiguratorImpl = async (address?: tEthereumAddress) =>
+export const getLendingPoolConfiguratorImpl = async (marketId: string, address?: tEthereumAddress) =>
   await LendingPoolConfigurator__factory.connect(
     address ||
       (
-        await getDb().get(`${eContractid.LendingPoolConfiguratorImpl}.${DRE.network.name}`).value()
+        await getMarketDb().get(`${eContractid.LendingPoolConfiguratorImpl}.${DRE.network.name}.${marketId}`).value()
       ).address,
     await getFirstSigner()
   );
 
-export const getVToken = async (address?: tEthereumAddress) =>
+export const getVToken = async (marketId: string, address?: tEthereumAddress) =>
   await VToken__factory.connect(
-    address || (await getDb().get(`${eContractid.VToken}.${DRE.network.name}`).value()).address,
+    address || (await getMarketDb().get(`${eContractid.VToken}.${DRE.network.name}.${marketId}`).value()).address,
     await getFirstSigner()
   );
 
-export const getVTokensAndRatesHelper = async (address?: tEthereumAddress) =>
+export const getVTokensAndRatesHelper = async (marketId: string, address?: tEthereumAddress) =>
   await VTokensAndRatesHelper__factory.connect(
     address ||
       (
-        await getDb().get(`${eContractid.VTokensAndRatesHelper}.${DRE.network.name}`).value()
+        await getMarketDb().get(`${eContractid.VTokensAndRatesHelper}.${DRE.network.name}.${marketId}`).value()
+      ).address,
+    await getFirstSigner()
+  );
+
+export const getWETHGateway = async (address?: tEthereumAddress) =>
+  await WETHGateway__factory.connect(
+    address ||
+      (
+        await getDb().get(`${eContractid.WETHGateway}.${DRE.network.name}`).value()
       ).address,
     await getFirstSigner()
   );
@@ -299,17 +336,17 @@ export const getWETHMocked = async (address?: tEthereumAddress) =>
     await getFirstSigner()
   );
 
-export const getNToken = async (address?: tEthereumAddress) =>
+export const getNToken = async (marketId: string, address?: tEthereumAddress) =>
   await NToken__factory.connect(
-    address || (await getDb().get(`${eContractid.NToken}.${DRE.network.name}`).value()).address,
+    address || (await getMarketDb().get(`${eContractid.NToken}.${DRE.network.name}.${marketId}`).value()).address,
     await getFirstSigner()
   );
   
-export const getAaveProtocolDataProvider = async (address?: tEthereumAddress) =>
+export const getAaveProtocolDataProvider = async (marketId: string, address?: tEthereumAddress) =>
   await AaveProtocolDataProvider__factory.connect(
     address ||
       (
-        await getDb().get(`${eContractid.AaveProtocolDataProvider}.${DRE.network.name}`).value()
+        await getMarketDb().get(`${eContractid.AaveProtocolDataProvider}.${DRE.network.name}.${marketId}`).value()
       ).address,
     await getFirstSigner()
   );
@@ -323,11 +360,14 @@ export const getLendingRateOracle = async (address?: tEthereumAddress) =>
     await getFirstSigner()
   );
 
+export const getAaveOracle = async (address?: tEthereumAddress) =>
+  await AaveOracle__factory.connect(
+    address || (await getDb().get(`${eContractid.AaveOracle}.${DRE.network.name}`).value()).address,
+    await getFirstSigner()
+  );
+
 export const getTreasury = async (address?: tEthereumAddress) =>
   await AaveCollector__factory.connect(
-    address ||
-    (
-      await getDb().get(`AaveTreasury.${DRE.network.name}`).value()
-    ).address,
+    address || (await getDb().get(`AaveTreasury.${DRE.network.name}`).value()).address,
     await getFirstSigner()
   );

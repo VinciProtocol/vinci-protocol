@@ -26,6 +26,7 @@ import {
   deployAaveOracle,
   deployTreasury,
   deployRangeEligibility,
+  deployAllMockEligibilities
 } from '../helpers/contracts-deployments';
 import { Signer } from 'ethers';
 import { TokenContractId, ERC721TokenContractId, eContractid, tEthereumAddress, VinciPools } from '../helpers/types';
@@ -94,19 +95,11 @@ const deployAllMockTokens = async (deployer: Signer) => {
   return tokens;
 };
 
-const deployAllMockEligibilities = async (deployer: Signer) => {
-  const eligibilities: { [symbol: string]: NFTXRangeEligibility} = {};
-  for (const tokenSymbol of Object.keys(ERC721TokenContractId)) {
-    eligibilities[tokenSymbol] = await deployRangeEligibility(0, 1000, tokenSymbol.toLocaleUpperCase());
-  }
-  return eligibilities;
-}
-
 const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
   console.time('setup');
   const aaveAdmin = await deployer.getAddress();
   const config = loadPoolConfig(ConfigNames.Vinci);
-
+  const marketId = config.MarketId;
   const treasury = await deployTreasury();
 
   const mockTokens: {
@@ -117,9 +110,9 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
   const eligibilities: {
     [symbol: string]: NFTXRangeEligibility
   } = { 
-    ... (await deployAllMockEligibilities(deployer)), 
+    ... (await deployAllMockEligibilities(marketId)), 
   };
-  const addressesProvider = await deployLendingPoolAddressesProvider(VinciConfig.MarketId);
+  const addressesProvider = await deployLendingPoolAddressesProvider(marketId);
   await waitForTx(await addressesProvider.setPoolAdmin(aaveAdmin));
 
   //setting users[1] as emergency admin, which is in position 2 in the DRE addresses list
@@ -132,30 +125,32 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
     await addressesProviderRegistry.registerAddressesProvider(addressesProvider.address, 1)
   );
 
-  const lendingPoolImpl = await deployLendingPool();
+  const lendingPoolImpl = await deployLendingPool(marketId);
 
   await waitForTx(await addressesProvider.setLendingPoolImpl(lendingPoolImpl.address));
 
   const lendingPoolAddress = await addressesProvider.getLendingPool();
-  const lendingPoolProxy = await getLendingPool(lendingPoolAddress);
+  const lendingPoolProxy = await getLendingPool(marketId, lendingPoolAddress);
 
-  await insertContractAddressInDb(eContractid.LendingPool, lendingPoolProxy.address);
+  await insertContractAddressInDb(eContractid.LendingPool, lendingPoolProxy.address, marketId);
 
-  const lendingPoolConfiguratorImpl = await deployLendingPoolConfigurator();
+  const lendingPoolConfiguratorImpl = await deployLendingPoolConfigurator(marketId);
   await waitForTx(
     await addressesProvider.setLendingPoolConfiguratorImpl(lendingPoolConfiguratorImpl.address)
   );
   const lendingPoolConfiguratorProxy = await getLendingPoolConfiguratorProxy(
+    marketId,
     await addressesProvider.getLendingPoolConfigurator()
   );
   await insertContractAddressInDb(
     eContractid.LendingPoolConfigurator,
-    lendingPoolConfiguratorProxy.address
+    lendingPoolConfiguratorProxy.address,
+    marketId
   );
 
   // Deploy deployment helpers
-  await deployStableAndVariableTokensHelper([lendingPoolProxy.address, addressesProvider.address]);
-  await deployVTokensAndRatesHelper([
+  await deployStableAndVariableTokensHelper([lendingPoolProxy.address, addressesProvider.address], marketId);
+  await deployVTokensAndRatesHelper(marketId, [
     lendingPoolProxy.address,
     addressesProvider.address,
     lendingPoolConfiguratorProxy.address,
@@ -168,7 +163,8 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
     {
       WETH: mockTokens.WETH.address,
       DAI: mockTokens.DAI.address,
-      CRYPTOPANDA: mockTokens.CRYPTOPANDA.address,
+      BAYC: mockTokens.BAYC.address,
+      MAYC: mockTokens.MAYC.address,
       USD: USD_ADDRESS,
     },
     fallbackOracle
@@ -224,7 +220,8 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
     LENDING_RATE_ORACLE_RATES_COMMON,
     allReservesAddresses,
     lendingRateOracle,
-    aaveAdmin
+    aaveAdmin,
+    marketId
   );
 
   console.log(
@@ -240,10 +237,10 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
     ...config.NFTVaultConfig,
   }
 
-  const testHelpers = await deployAaveProtocolDataProvider(addressesProvider.address);
+  const testHelpers = await deployAaveProtocolDataProvider(addressesProvider.address, marketId);
 
   await deployVTokenImplementations(ConfigNames.Vinci, reservesParams, false);
-  await deployNToken(false);
+  await deployNToken(marketId, false);
 
   const admin = await deployer.getAddress();
 
@@ -265,7 +262,7 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
     false
   );
 
-  await configureReservesByHelper(reservesParams, allReservesAddresses, testHelpers, admin);
+  await configureReservesByHelper(reservesParams, allReservesAddresses, testHelpers, admin, marketId);
 
   await initNFTVaultByHelper(
     nftVaultsParams,
@@ -274,12 +271,13 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
     'https://meta.vinci.com/',
     VTokenNamePrefix,
     SymbolPrefix,
+    marketId,
     false,
   );
 
-  await configureNFTVaultByHelper(nftVaultsParams, allReservesAddresses, testHelpers, admin);
+  await configureNFTVaultByHelper(nftVaultsParams, allReservesAddresses, testHelpers, admin, marketId);
 
-  const collateralManager = await deployLendingPoolCollateralManager();
+  const collateralManager = await deployLendingPoolCollateralManager(marketId);
   await waitForTx(
     await addressesProvider.setLendingPoolCollateralManager(collateralManager.address)
   );

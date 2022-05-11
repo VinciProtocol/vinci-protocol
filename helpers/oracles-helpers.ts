@@ -18,9 +18,10 @@ export const setInitialMarketRatesInRatesOracleByHelper = async (
   marketRates: iMultiPoolsAssets<IMarketRates>,
   assetsAddresses: { [x: string]: tEthereumAddress },
   lendingRateOracleInstance: LendingRateOracle,
-  admin: tEthereumAddress
+  admin: tEthereumAddress,
+  marketId: string
 ) => {
-  const stableAndVariableTokenHelper = await getStableAndVariableTokensHelper();
+  const stableAndVariableTokenHelper = await getStableAndVariableTokensHelper(marketId);
   const assetAddresses: string[] = [];
   const borrowRates: string[] = [];
   const symbols: string[] = [];
@@ -31,6 +32,7 @@ export const setInitialMarketRatesInRatesOracleByHelper = async (
     const assetAddressIndex = Object.keys(assetsAddresses).findIndex(
       (value) => value === assetSymbol
     );
+    if (assetAddressIndex < 0) continue;
     const [, assetAddress] = (Object.entries(assetsAddresses) as [string, string][])[
       assetAddressIndex
     ];
@@ -75,6 +77,7 @@ export const setInitialAssetPricesInOracle = async (
     const assetAddressIndex = Object.keys(assetsAddresses).findIndex(
       (value) => value === assetSymbol
     );
+    if (assetAddressIndex < 0) continue;
     const [, assetAddress] = (Object.entries(assetsAddresses) as [string, string][])[
       assetAddressIndex
     ];

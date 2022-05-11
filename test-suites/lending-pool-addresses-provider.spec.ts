@@ -42,12 +42,12 @@ makeSuite('LendingPoolAddressesProvider', (testEnv: TestEnv) => {
   });
 
   it('Tests adding  a proxied address with `setAddressAsProxy()`', async () => {
-    const { addressesProvider, users } = testEnv;
+    const { addressesProvider, users, marketId } = testEnv;
     const { INVALID_OWNER_REVERT_MSG } = ProtocolErrors;
 
     const currentAddressesProviderOwner = users[1];
 
-    const mockLendingPool = await deployLendingPool();
+    const mockLendingPool = await deployLendingPool(marketId);
     const proxiedAddressId = utils.keccak256(utils.toUtf8Bytes('RANDOM_PROXIED'));
 
     const proxiedAddressSetReceipt = await waitForTx(
