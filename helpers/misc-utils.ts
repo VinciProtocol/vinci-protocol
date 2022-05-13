@@ -48,14 +48,14 @@ export const printContracts = (MarketId: string) => {
   console.log('---------------------------------');
 
   const entries = Object.entries<DbEntry>(db.getState()).filter(([_k, value]) => !!value[network]);
-  const mEntries = Object.entries<mDbEntry>(mdb.getState()).filter(([_k, value]) => !!value[network][MarketId]);
+  const mEntries = Object.entries<mDbEntry>(mdb.getState()).filter(([_k, value]) => (!!value[network]) && (!!value[network][MarketId]));
 
   const contractsPrint = entries.map(
     ([key, value]: [string, DbEntry]) => `${key}: \'${value[network].address}\',`
   );
 
   const mContractsPrint = mEntries.map(
-    ([key, value]: [string, mDbEntry]) => `${key}: \'${value[network].address}\',`
+    ([key, value]: [string, mDbEntry]) => `${key}: \'${value[network][MarketId].address}\',`
   );
 
   console.log('N# Contracts:', entries.length + mEntries.length);

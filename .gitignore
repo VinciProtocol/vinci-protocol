@@ -10,6 +10,8 @@ tasks/dev
 tasks/migrations
 tasks/single
 tasks/deployments
+tasks/full
+markets/vinci-*
 *.orig
 deployed-contracts.json
 deployed-market-contracts.json
