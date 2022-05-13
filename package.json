@@ -14,15 +14,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/BestMinr-defi/vinci-protocol.git"
+    "url": "git+https://github.com/VinciProtocol/vinci-protocol.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/BestMinr-defi/vinci-protocol/issues"
+    "url": "https://github.com/VinciProtocol/vinci-protocol/issues"
   },
-  "homepage": "https://github.com/BestMinr-defi/vinci-protocol#readme",
+  "homepage": "https://github.com/VinciProtocol/vinci-protocol#readme",
   "devDependencies": {
     "@nomiclabs/buidler": "^1.4.8",
     "@nomiclabs/buidler-ethers": "^2.0.2",
