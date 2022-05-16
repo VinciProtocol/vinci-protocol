@@ -561,6 +561,11 @@ contract LendingPoolConfigurator is VersionedInitializable, ILendingPoolConfigur
     emit NFTVaultFrozen(asset);
   }
 
+  function updateNFTVaultActionExpiration(address asset, uint40 expiration) external onlyPoolAdmin {
+    pool.setNFTVaultActionExpiration(asset, expiration);
+    emit NFTVaultActionExpirationUpdated(asset, expiration);
+  }
+
   /**
    * @dev pauses or unpauses all the actions of the protocol, including vToken transfers
    * @param val true if protocol needs to be paused, false otherwise

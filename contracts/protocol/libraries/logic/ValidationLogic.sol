@@ -62,6 +62,10 @@ library ValidationLogic {
     require(eligibility.checkAllEligible(ids), Errors.VL_NFT_INELIGIBLE_TOKEN_ID);
   }
 
+  function validateLockNFT(DataTypes.NFTVaultData storage vault, uint40 now) external view {
+    require(vault.expiration >= now, Errors.VL_NFT_LOCK_ACTION_IS_EXPIRED);
+  }
+
   /**
    * @dev Validates a withdraw action
    * @param reserveAddress The address of the reserve

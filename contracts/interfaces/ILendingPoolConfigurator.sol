@@ -173,6 +173,8 @@ interface ILendingPoolConfigurator {
    **/
   event NFTVaultUnfrozen(address indexed asset);
 
+  event NFTVaultActionExpirationUpdated(address indexed asset, uint40 expiration);
+
   /**
    * @dev Emitted when a reserve factor is updated
    * @param asset The address of the underlying asset of the reserve

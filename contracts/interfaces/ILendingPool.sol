@@ -329,7 +329,7 @@ interface ILendingPool {
 
   function setConfiguration(address reserve, uint256 configuration) external;
   function setNFTVaultConfiguration(address reserve, uint256 configuration) external;
-
+  function setNFTVaultActionExpiration(address nftValue, uint40 expiration) external;
 
   /**
    * @dev Returns the configuration of the reserve
@@ -350,7 +350,6 @@ interface ILendingPool {
     external
     view
     returns (DataTypes.NFTVaultConfigurationMap memory);
-
 
   /**
    * @dev Returns the configuration of the user across all the reserves

@@ -32,6 +32,7 @@ library DataTypes {
     address nTokenAddress;
     address nftEligibility;
     uint32 id;
+    uint40 expiration;
   }
 
   struct ReserveConfigurationMap {

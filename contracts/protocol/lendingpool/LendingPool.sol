@@ -241,6 +241,11 @@ contract LendingPool is VersionedInitializable, ILendingPool, LendingPoolStorage
       amounts
     );
 
+    ValidationLogic.validateLockNFT(
+      vault,
+      uint40(block.timestamp)
+    );    
+
     address nToken = vault.nTokenAddress;
     for(uint256 i = 0; i < tokenIds.length; ++i){
       IERC721(nft).safeTransferFrom(msg.sender, nToken, tokenIds[i]);
@@ -961,6 +966,14 @@ contract LendingPool is VersionedInitializable, ILendingPool, LendingPoolStorage
    onlyLendingPoolConfigurator
   {
     _nftVaults.data[vault].configuration.data = configuration;
+  }
+
+  function setNFTVaultActionExpiration(address vault, uint40 expiration)
+   external
+   override
+   onlyLendingPoolConfigurator
+  {
+    _nftVaults.data[vault].expiration = expiration;
   }
 
   /**

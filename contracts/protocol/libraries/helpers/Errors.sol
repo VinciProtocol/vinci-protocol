@@ -107,6 +107,7 @@ library Errors {
   string public constant CT_CALLER_MUST_BE_CLAIM_ADMIN = '81';
   string public constant CT_TOKEN_CAN_NOT_BE_UNDERLYING = '82';
   string public constant CT_TOKEN_CAN_NOT_BE_SELF = '83';
+  string public constant VL_NFT_LOCK_ACTION_IS_EXPIRED = '84';
   string public constant NL_VAULT_ALREADY_INITIALIZED = '100'; // 'NFT vault has already been initialized'
   string public constant VL_NFT_INELIGIBLE_TOKEN_ID = '130';
   string public constant LP_TOKEN_AND_AMOUNT_LENGTH_NOT_MATCH = "148";

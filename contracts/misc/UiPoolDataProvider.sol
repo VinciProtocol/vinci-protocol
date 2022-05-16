@@ -201,6 +201,7 @@ contract UiPoolDataProvider is IUiPoolDataProvider {
       DataTypes.NFTVaultData memory baseData =
         lendingPool.getNFTVaultData(vaultData.underlyingAsset);
       vaultData.nTokenAddress = baseData.nTokenAddress;
+      vaultData.lockActionExpiration = baseData.expiration;
       vaultData.priceInMarketReferenceCurrency = oracle.getAssetPrice(vaultData.underlyingAsset);
 
       vaultData.totalNumberOfCollateral = IERC721(vaultData.underlyingAsset).balanceOf(

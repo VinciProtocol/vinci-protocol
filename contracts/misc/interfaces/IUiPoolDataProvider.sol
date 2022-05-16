@@ -54,6 +54,7 @@ interface IUiPoolDataProvider {
     bool usageAsCollateralEnabled;
     bool isActive;
     bool isFrozen;
+    uint40 lockActionExpiration;
     // base data
     address nTokenAddress;
     uint256 totalNumberOfCollateral;
@@ -75,7 +76,7 @@ interface IUiPoolDataProvider {
     uint256 nTokenBalance;
     uint256[] tokenIds;
     uint256[] amounts;
-    uint256[] lockExpirations;
+    uint40[] lockExpirations;
     bool usageAsCollateralEnabledOnUser;
   }
 
