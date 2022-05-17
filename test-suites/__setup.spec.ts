@@ -23,6 +23,7 @@ import {
   deployWETHMocked,
   deployVTokenImplementations,
   deployNToken,
+  deployTimeLockableNToken,
   deployAaveOracle,
   deployTreasury,
   deployRangeEligibility,
@@ -53,6 +54,7 @@ import {
   getLendingPool,
   getLendingPoolConfiguratorProxy,
   getPairsTokenAggregator,
+  getTimeLockableNToken,
 } from '../helpers/contracts-getters';
 import { WETH9Mocked } from '../types/WETH9Mocked';
 
@@ -240,7 +242,7 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
   const testHelpers = await deployAaveProtocolDataProvider(addressesProvider.address, marketId);
 
   await deployVTokenImplementations(ConfigNames.Vinci, reservesParams, false);
-  await deployNToken(marketId, false);
+  await deployTimeLockableNToken(marketId, false);
 
   const admin = await deployer.getAddress();
 
@@ -272,6 +274,7 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
     VTokenNamePrefix,
     SymbolPrefix,
     marketId,
+    getTimeLockableNToken,
     false,
   );
 

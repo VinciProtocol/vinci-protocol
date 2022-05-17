@@ -13,6 +13,7 @@ import {
   getLendingPoolAddressesProviderRegistry,
   getWETHMocked,
   getTreasury,
+  getTimeLockableNToken,
 } from '../../helpers/contracts-getters';
 import { eEthereumNetwork, eNetwork, tEthereumAddress } from '../../helpers/types';
 import { LendingPool } from '../../types/LendingPool';
@@ -150,7 +151,7 @@ export async function initializeMakeSuite() {
 
   testEnv.dai = await getMintableERC20(daiAddress);
 
-  testEnv.nNFT = await getNToken(testEnv.marketId, nNFTAddress);
+  testEnv.nNFT = await getTimeLockableNToken(testEnv.marketId, nNFTAddress);
   testEnv.nft = await getMockERC721Token(nftAddress);
   //testEnv.wethGateway = await getWETHGateway();
 }

@@ -7,4 +7,5 @@ export const strategyMAYC: INFTVaultParams = {
   liquidationThreshold: '8250',
   liquidationBonus: '10500',
   nTokenImpl: eContractid.NToken,
+  lockdropExpiration: '0',
 };

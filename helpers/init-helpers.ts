@@ -14,6 +14,8 @@ import {
   getLendingPoolAddressesProvider,
   getLendingPoolConfiguratorProxy,
   getNToken,
+  getTimeLockableNToken,
+  getTimeLockableNTokenForTest,
 } from './contracts-getters';
 import {
   getContractAddressWithJsonFallback,
@@ -44,6 +46,7 @@ export const initNFTVaultByHelper = async (
   nTokenNamePrefix: string,
   symbolPrefix: string,
   marketId: string,
+  ntokenGetter: (string, tEthereumAddress?)=> Promise<any>,
   verify: boolean
 ) => {
   const addressProvider = await getLendingPoolAddressesProvider(marketId);
@@ -73,7 +76,7 @@ export const initNFTVaultByHelper = async (
       continue;
     }
     // Prepare input parameters
-    const ntoken = await getNToken(marketId);
+    const ntoken = await ntokenGetter(marketId);
     reserveSymbols.push(symbol);
     initNFTVaultInputParams.push({
       nTokenImpl: ntoken.address,
@@ -290,6 +293,7 @@ export const configureNFTVaultByHelper = async (
     baseLTV: BigNumberish;
     liquidationThreshold: BigNumberish;
     liquidationBonus: BigNumberish;
+    lockdropExpiration: BigNumberish;
   }[] = [];
 
   for (const [
@@ -298,6 +302,7 @@ export const configureNFTVaultByHelper = async (
       baseLTVAsCollateral,
       liquidationBonus,
       liquidationThreshold,
+      lockdropExpiration,
     },
   ] of Object.entries(reservesParams) as [string, INFTVaultParams][]) {
     if (!tokenAddresses[assetSymbol]) {
@@ -329,6 +334,7 @@ export const configureNFTVaultByHelper = async (
       baseLTV: baseLTVAsCollateral,
       liquidationThreshold: liquidationThreshold,
       liquidationBonus: liquidationBonus,
+      lockdropExpiration: lockdropExpiration,
     });
 
     tokens.push(tokenAddress);
@@ -342,6 +348,9 @@ export const configureNFTVaultByHelper = async (
       const inputParam = inputParams[index];
       await waitForTx(
         await configurator.configureNFTVaultAsCollateral(inputParam.asset, inputParam.baseLTV, inputParam.liquidationThreshold, inputParam.liquidationBonus)
+      );
+      await waitForTx(
+        await configurator.updateNFTVaultActionExpiration(inputParam.asset, inputParam.lockdropExpiration)
       );
       console.log(`  - Init for: ${symbols[index]}`);
     }

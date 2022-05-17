@@ -42,6 +42,8 @@ export enum eContractid {
   StableDebtToken = 'StableDebtToken',
   VariableDebtToken = 'VariableDebtToken',
   NToken = 'NToken',
+  TimeLockableNToken = 'TimeLockableNToken',
+  TimeLockableNTokenForTest = 'TimeLockableNTokenForTest',
   MockAggregator = 'MockAggregator',
   AaveOracle = 'AaveOracle',
   LendingRateOracle = 'LendingRateOracle',
@@ -234,6 +236,7 @@ export interface INFTVaultParams extends IReserveCollateralParams {
   name: string;
   symbol: string;
   nTokenImpl: eContractid;
+  lockdropExpiration: string;
 }
 
 export interface IReserveBorrowParams {

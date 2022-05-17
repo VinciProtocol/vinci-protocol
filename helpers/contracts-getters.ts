@@ -25,7 +25,9 @@ import {
     NFTXRangeEligibility,
     WETHGateway__factory,
     NFTXEligibility__factory,
-    AaveCollector
+    AaveCollector,
+    TimeLockableNToken__factory,
+    TimeLockableNTokenForTest__factory
  } from "../types";
 import { MintableERC20 } from '../types/MintableERC20';
 import { ERC721Mocked } from '../types/ERC721Mocked';
@@ -339,6 +341,18 @@ export const getWETHMocked = async (address?: tEthereumAddress) =>
 export const getNToken = async (marketId: string, address?: tEthereumAddress) =>
   await NToken__factory.connect(
     address || (await getMarketDb().get(`${eContractid.NToken}.${DRE.network.name}.${marketId}`).value()).address,
+    await getFirstSigner()
+  );
+
+export const getTimeLockableNToken = async (marketId: string, address?: tEthereumAddress) =>
+  await TimeLockableNToken__factory.connect(
+    address || (await getMarketDb().get(`${eContractid.TimeLockableNToken}.${DRE.network.name}.${marketId}`).value()).address,
+    await getFirstSigner()
+  );
+
+export const getTimeLockableNTokenForTest = async (marketId: string, address?: tEthereumAddress) =>
+  await TimeLockableNTokenForTest__factory.connect(
+    address || (await getMarketDb().get(`${eContractid.TimeLockableNTokenForTest}.${DRE.network.name}.${marketId}`).value()).address,
     await getFirstSigner()
   );
   

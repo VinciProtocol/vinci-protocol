@@ -54,6 +54,8 @@ import {
     NFTXRangeEligibility__factory,
     WETHGateway__factory,
     NFTXAllowAllEligibility__factory,
+    TimeLockableNToken__factory,
+    TimeLockableNTokenForTest__factory,
 } from '../types';
 import {
     withSaveAndVerify,
@@ -443,6 +445,24 @@ export const deployNToken = async (marketId: string, verify?: boolean) =>
   withSaveAndVerify(
     await new NToken__factory(await getFirstSigner()).deploy(),
     eContractid.NToken,
+    [],
+    verify,
+    marketId
+  );
+
+export const deployTimeLockableNToken = async (marketId: string, verify?: boolean) =>
+  withSaveAndVerify(
+    await new TimeLockableNToken__factory(await getFirstSigner()).deploy(),
+    eContractid.TimeLockableNToken,
+    [],
+    verify,
+    marketId
+  );
+
+  export const deployTimeLockableNTokenForTest = async (marketId: string, verify?: boolean) =>
+  withSaveAndVerify(
+    await new TimeLockableNTokenForTest__factory(await getFirstSigner()).deploy(),
+    eContractid.TimeLockableNTokenForTest,
     [],
     verify,
     marketId
