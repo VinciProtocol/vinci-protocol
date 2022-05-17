@@ -3,13 +3,12 @@ pragma solidity 0.8.11;
 import {NToken} from './NToken.sol';
 
 contract TimeLockableNToken is NToken {
-  mapping(uint256 => uint40) private _unlockTime;
+  mapping(uint256 => uint40) internal _unlockTime;
 
   function lock(uint256 tokenId, uint16 lockType) public virtual override onlyLendingPool
   {
-    uint16[6] memory lock_days = [0, 60, 90, 120, 240, 360];
+    uint40[6] memory lock_days = [uint40(0), 60, 90, 120, 240, 360];
     require(lockType < lock_days.length, "NToken: Unknown lockType.");
-    // solidium-disable-next-line
     uint40 expirationTime = uint40(block.timestamp) + uint40(lock_days[lockType]) * 24 * 3600;
     _unlockTime[tokenId] = expirationTime;
     emit TimeLocked(tokenId, lockType, expirationTime);
