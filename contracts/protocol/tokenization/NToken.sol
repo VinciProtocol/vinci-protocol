@@ -18,6 +18,7 @@ import {IERC721Receiver} from '../../dependencies/openzeppelin/contracts/IERC721
 import {IERC1155Receiver} from '../../dependencies/openzeppelin/contracts/IERC1155Receiver.sol';
 
 import {IERC721Wrapper} from '../../interfaces/IERC721Wrapper.sol';
+import {DataTypes} from '../libraries/types/DataTypes.sol';
 
 /**
  * @title Vinci ERC1155 NToken
@@ -271,25 +272,44 @@ import {IERC721Wrapper} from '../../interfaces/IERC721Wrapper.sol';
 
   function getUnlockTime(uint256 tokenId) public view virtual override returns(uint40)
   {
+    require(_exists(tokenId), "NToken: query for nonexistent token");
+    return _getUnlockTime(tokenId);
+  }
+
+  function _getUnlockTime(uint256 tokenId) internal view virtual returns(uint40)
+  {
     return 0;
+  }
+
+  function getLockData(uint256 tokenId) public view virtual override returns(DataTypes.TimeLock memory)
+  {
+    require(_exists(tokenId), "NToken: query for nonexistent token");
+    return _getLockData(tokenId);
+  }
+
+  function _getLockData(uint256 tokenId) internal view virtual returns(DataTypes.TimeLock memory lockData)
+  {
+    lockData.lockType = 0;
+    lockData.expiration = 0;
   }
 
   function unlockedBalanceOfBatch(address user, uint256[] calldata tokenIds) public view virtual override returns(uint256[] memory amounts)
   {
+    require(user != address(0), "NToken: balance query for the zero address");
     return _balanceOfBatch(user, tokenIds);
   }
 
-  function tokensAndLockExpirationsByAccount(address user) public view virtual override returns(uint256[] memory tokenIds, uint40[] memory lockExpirations)
+  function tokensAndLocksByAccount(address user) public view virtual override returns(uint256[] memory tokenIds, DataTypes.TimeLock[] memory locks)
   {
     uint256 balance = balanceOf(user);
     uint256[] memory tokens = new uint256[](balance);
-    uint40[] memory expirations = new uint40[](balance);
+    DataTypes.TimeLock[] memory locks = new DataTypes.TimeLock[](balance);
     for(uint256 i = 0; i < balance; ++i){
       uint256 tokenId = _ownedTokens[user][i];
       tokens[i] = tokenId;
-      expirations[i] = getUnlockTime(tokenId);
+      locks[i] = _getLockData(tokenId);
     }
-    return (tokens, expirations);
+    return (tokens, locks);
   }
 
   function supportsInterface(bytes4 interfaceId) public view virtual override(IERC165, WrappedERC721) returns (bool) {

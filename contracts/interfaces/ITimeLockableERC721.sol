@@ -1,6 +1,7 @@
 pragma solidity 0.8.11;
 
 import {IERC721} from '../dependencies/openzeppelin/contracts/IERC721.sol';
+import {DataTypes} from '../protocol/libraries/types/DataTypes.sol';
 
 interface ITimeLockableERC721 is IERC721 {
   event TimeLocked(
@@ -13,7 +14,9 @@ interface ITimeLockableERC721 is IERC721 {
 
   function getUnlockTime(uint256 tokenId) external view returns(uint40 unlockTime);
 
+  function getLockData(uint256 tokenId) external view returns(DataTypes.TimeLock memory lock);
+
   function unlockedBalanceOfBatch(address user, uint256[] memory tokenIds) external view returns(uint256[] memory amounts);
 
-  function tokensAndLockExpirationsByAccount(address user) external view returns(uint256[] memory tokenIds, uint40[] memory lockExpirations);
+  function tokensAndLocksByAccount(address user) external view returns(uint256[] memory tokenIds, DataTypes.TimeLock[] memory locks);
 }

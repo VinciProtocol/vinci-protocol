@@ -76,5 +76,10 @@ library DataTypes {
     mapping(uint256 => address) list;
   }
 
+  struct TimeLock {
+    uint40 expiration;
+    uint16 lockType;
+  }
+
   enum InterestRateMode {NONE, STABLE, VARIABLE}
 }

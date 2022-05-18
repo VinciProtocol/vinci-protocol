@@ -4,6 +4,7 @@ pragma experimental ABIEncoderV2;
 
 import {ILendingPoolAddressesProvider} from '../../interfaces/ILendingPoolAddressesProvider.sol';
 import {ILendingPoolAddressesProviderRegistry} from '../../interfaces/ILendingPoolAddressesProviderRegistry.sol';
+import {DataTypes} from '../../protocol/libraries/types/DataTypes.sol';
 
 interface IUiPoolDataProvider {
   struct AggregatedReserveData {
@@ -76,7 +77,7 @@ interface IUiPoolDataProvider {
     uint256 nTokenBalance;
     uint256[] tokenIds;
     uint256[] amounts;
-    uint40[] lockExpirations;
+    DataTypes.TimeLock[] locks;
     bool usageAsCollateralEnabledOnUser;
   }
 

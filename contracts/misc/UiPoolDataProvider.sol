@@ -304,8 +304,8 @@ contract UiPoolDataProvider is IUiPoolDataProvider {
       // user reserve data
       userVaultsData[i].underlyingAsset = vaults[i];
       userVaultsData[i].nTokenBalance = IERC721(nTokenAddress).balanceOf(user);
-      (userVaultsData[i].tokenIds, userVaultsData[i].lockExpirations)
-          = ITimeLockableERC721(nTokenAddress).tokensAndLockExpirationsByAccount(user);
+      (userVaultsData[i].tokenIds, userVaultsData[i].locks)
+          = ITimeLockableERC721(nTokenAddress).tokensAndLocksByAccount(user);
       userVaultsData[i].amounts = IERC721WithStat(nTokenAddress).balanceOfBatch(user, userVaultsData[i].tokenIds);
       userVaultsData[i].usageAsCollateralEnabledOnUser = userConfig.isUsingNFTVaultAsCollateral(i);
     }
