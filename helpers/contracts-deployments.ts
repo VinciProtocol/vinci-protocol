@@ -10,6 +10,7 @@ import {
   ERC721TokenContractId,
   iMultiPoolsAssets,
   IReserveParams,
+  INFTVaultParams,
   PoolConfiguration,
   eEthereumNetwork,
 } from './types';
@@ -441,32 +442,56 @@ export const deployVTokenImplementations = async (
   }
 };
 
-export const deployNToken = async (marketId: string, verify?: boolean) =>
+
+export const deployNToken = async (marketId: string, nftSymbol: string, verify?: boolean) =>
   withSaveAndVerify(
     await new NToken__factory(await getFirstSigner()).deploy(),
     eContractid.NToken,
     [],
     verify,
-    marketId
+    `${marketId}.vn${nftSymbol}`
   );
 
-export const deployTimeLockableNToken = async (marketId: string, verify?: boolean) =>
+export const deployTimeLockableNToken = async (marketId: string, nftSymbol: string, verify?: boolean) =>
   withSaveAndVerify(
     await new TimeLockableNToken__factory(await getFirstSigner()).deploy(),
     eContractid.TimeLockableNToken,
     [],
     verify,
-    marketId
+    `${marketId}.vn${nftSymbol}`
   );
 
-  export const deployTimeLockableNTokenForTest = async (marketId: string, verify?: boolean) =>
+export const deployTimeLockableNTokenForTest = async (marketId: string, nftSymbol: string, verify?: boolean) =>
   withSaveAndVerify(
     await new TimeLockableNTokenForTest__factory(await getFirstSigner()).deploy(),
     eContractid.TimeLockableNTokenForTest,
     [],
     verify,
-    marketId
+    `${marketId}.vn${nftSymbol}`
   );
+
+
+export const deployNTokenImplementations = async (
+  marketId: string,
+  NFTVaultInputParams: iMultiPoolsAssets<INFTVaultParams>,
+  verify?: boolean
+) => {
+  const NFTVault = Object.entries(NFTVaultInputParams);
+  for (let [symbol, params] of NFTVault) {
+    await deployTimeLockableNToken(marketId, symbol, verify);
+  };
+};
+
+export const deployNTokenImplementationsForTest = async (
+  marketId: string,
+  NFTVaultInputParams: iMultiPoolsAssets<INFTVaultParams>,
+  verify?: boolean
+) => {
+  const NFTVault = Object.entries(NFTVaultInputParams);
+  for (let [symbol, params] of NFTVault) {
+    await deployTimeLockableNTokenForTest(marketId, symbol, verify);
+  };
+};
 
 export const deployPriceOracle = async (verify?: boolean) =>
   withSaveAndVerify(

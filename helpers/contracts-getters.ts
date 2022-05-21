@@ -338,21 +338,29 @@ export const getWETHMocked = async (address?: tEthereumAddress) =>
     await getFirstSigner()
   );
 
-export const getNToken = async (marketId: string, address?: tEthereumAddress) =>
+export const getNTokenAddressFromDb = async (
+  marketId: string,
+  contractId: string,
+  nftSymbol: string
+): Promise<tEthereumAddress> => {
+  return (await getMarketDb().get(`${contractId}.${DRE.network.name}.${marketId}.vn${nftSymbol}`).value()).address;
+}
+
+export const getNToken = async (marketId: string, nftSymbol: string, address?: tEthereumAddress) =>
   await NToken__factory.connect(
-    address || (await getMarketDb().get(`${eContractid.NToken}.${DRE.network.name}.${marketId}`).value()).address,
+    address || (await getNTokenAddressFromDb(marketId, eContractid.NToken, nftSymbol)),
     await getFirstSigner()
   );
 
-export const getTimeLockableNToken = async (marketId: string, address?: tEthereumAddress) =>
+export const getTimeLockableNToken = async (marketId: string, nftSymbol: string, address?: tEthereumAddress) =>
   await TimeLockableNToken__factory.connect(
-    address || (await getMarketDb().get(`${eContractid.TimeLockableNToken}.${DRE.network.name}.${marketId}`).value()).address,
+    address || (await getNTokenAddressFromDb(marketId, eContractid.TimeLockableNToken, nftSymbol)),
     await getFirstSigner()
   );
 
-export const getTimeLockableNTokenForTest = async (marketId: string, address?: tEthereumAddress) =>
+export const getTimeLockableNTokenForTest = async (marketId: string, nftSymbol: string, address?: tEthereumAddress) =>
   await TimeLockableNTokenForTest__factory.connect(
-    address || (await getMarketDb().get(`${eContractid.TimeLockableNTokenForTest}.${DRE.network.name}.${marketId}`).value()).address,
+    address || (await getNTokenAddressFromDb(marketId, eContractid.TimeLockableNTokenForTest, nftSymbol)),
     await getFirstSigner()
   );
   

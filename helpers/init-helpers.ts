@@ -46,7 +46,7 @@ export const initNFTVaultByHelper = async (
   nTokenNamePrefix: string,
   symbolPrefix: string,
   marketId: string,
-  ntokenGetter: (string, tEthereumAddress?)=> Promise<any>,
+  ntokenGetter: (marketId: string, nftSymbol: string, address?: tEthereumAddress)=> Promise<any>,
   verify: boolean
 ) => {
   const addressProvider = await getLendingPoolAddressesProvider(marketId);
@@ -76,7 +76,7 @@ export const initNFTVaultByHelper = async (
       continue;
     }
     // Prepare input parameters
-    const ntoken = await ntokenGetter(marketId);
+    const ntoken = await ntokenGetter(marketId, symbol);
     reserveSymbols.push(symbol);
     initNFTVaultInputParams.push({
       nTokenImpl: ntoken.address,

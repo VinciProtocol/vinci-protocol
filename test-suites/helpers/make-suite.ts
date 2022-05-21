@@ -5,7 +5,6 @@ import {
   getLendingPoolAddressesProvider,
   getAaveProtocolDataProvider,
   getVToken,
-  getNToken,
   getMintableERC20,
   getMockERC721Token,
   getLendingPoolConfiguratorProxy,
@@ -151,7 +150,7 @@ export async function initializeMakeSuite() {
 
   testEnv.dai = await getMintableERC20(daiAddress);
 
-  testEnv.nNFT = await getTimeLockableNToken(testEnv.marketId, nNFTAddress);
+  testEnv.nNFT = await getTimeLockableNToken(testEnv.marketId, 'BAYC', nNFTAddress);
   testEnv.nft = await getMockERC721Token(nftAddress);
   //testEnv.wethGateway = await getWETHGateway();
 }

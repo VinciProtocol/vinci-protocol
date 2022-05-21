@@ -22,8 +22,7 @@ import {
   deployVTokensAndRatesHelper,
   deployWETHMocked,
   deployVTokenImplementations,
-  deployNToken,
-  deployTimeLockableNToken,
+  deployNTokenImplementations,
   deployAaveOracle,
   deployTreasury,
   deployRangeEligibility,
@@ -242,7 +241,7 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
   const testHelpers = await deployAaveProtocolDataProvider(addressesProvider.address, marketId);
 
   await deployVTokenImplementations(ConfigNames.Vinci, reservesParams, false);
-  await deployTimeLockableNToken(marketId, false);
+  await deployNTokenImplementations(marketId, nftVaultsParams, false);
 
   const admin = await deployer.getAddress();
 

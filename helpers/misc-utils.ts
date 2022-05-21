@@ -48,19 +48,30 @@ export const printContracts = (MarketId: string) => {
   console.log('---------------------------------');
 
   const entries = Object.entries<DbEntry>(db.getState()).filter(([_k, value]) => !!value[network]);
-  const mEntries = Object.entries<mDbEntry>(mdb.getState()).filter(([_k, value]) => (!!value[network]) && (!!value[network][MarketId]));
+
+  let mContractsPrint: string[] = [];
+  let mSymbolContractsPrint: string[] = [];
+  for (let [key, value] of Object.entries(mdb.getState())) {
+    if ((!!value[network]) && (!!value[network][MarketId])) {
+      let market = value[network][MarketId];
+      if (!!market.address) {
+        mContractsPrint.push(`${key}: \'${market.address}\',`);
+      } else {
+        for (let [symbol, val] of Object.entries(market)) {
+          mSymbolContractsPrint.push(`${key}.${symbol}: \'${market[symbol].address}\',`);
+        };
+      };
+    };
+  };
 
   const contractsPrint = entries.map(
     ([key, value]: [string, DbEntry]) => `${key}: \'${value[network].address}\',`
   );
 
-  const mContractsPrint = mEntries.map(
-    ([key, value]: [string, mDbEntry]) => `${key}: \'${value[network][MarketId].address}\',`
-  );
-
-  console.log('N# Contracts:', entries.length + mEntries.length);
+  console.log('N# Contracts:', entries.length + mContractsPrint.length + mSymbolContractsPrint.length);
   console.log(contractsPrint.join('\n'), '\n');
   console.log(mContractsPrint.join('\n'), '\n');
+  console.log(mSymbolContractsPrint.join('\n'), '\n');
 
 };
 
