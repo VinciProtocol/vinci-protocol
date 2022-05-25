@@ -340,7 +340,7 @@ export const getWETHMocked = async (address?: tEthereumAddress) =>
 
 export const getNTokenAddressFromDb = async (
   marketId: string,
-  contractId: string,
+  contractId: eContractid,
   nftSymbol: string
 ): Promise<tEthereumAddress> => {
   return (await getMarketDb().get(`${contractId}.${DRE.network.name}.${marketId}.vn${nftSymbol}`).value()).address;
