@@ -1,4 +1,7 @@
 import { IVinciConfiguration, eEthereumNetwork } from '../../helpers/types';
+import {
+  buildAssets,
+} from '../../helpers/markets-helpers';
 
 import { CommonsConfig } from './commons';
 import {
@@ -25,11 +28,7 @@ export const VinciConfig: IVinciConfiguration = {
     NFTVaultConfig:{
       BAYC: strategyBAYC,
     },
-    ReserveAssets: {
-      [eEthereumNetwork.localhost]: {},
-      [eEthereumNetwork.vinci]: {},
-      [eEthereumNetwork.hardhat]: {},
-      [eEthereumNetwork.buidlerevm]: {},
+    ReserveAssets: buildAssets({
       [eEthereumNetwork.kovan]: {
         //AAVE: '0xB597cd8D3217ea6477232F9217fa70837ff667Af',
         //BAT: '0x2d12186Fbb9f9a8C28B3FfdD4c42920f8539D738',
@@ -52,7 +51,7 @@ export const VinciConfig: IVinciConfiguration = {
         //YFI: '0xb7c325266ec274fEb1354021D27FA3E3379D840d',
         //ZRX: '0xD0d76886cF8D952ca26177EB7CfDf83bad08C00C',
       },
-    },
+    }),
   };
   
   export default VinciConfig;

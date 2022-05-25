@@ -5,6 +5,14 @@ import {
   ZERO_ADDRESS,
 } from '../../helpers/constants';
 import { ICommonConfiguration, eEthereumNetwork } from '../../helpers/types';
+import {
+  buildAdmin,
+  buildAssets,
+  buildAddress,
+  buildWithZeroAddress,
+  buildSameAddress,
+  buildLibrary,
+} from '../../helpers/markets-helpers';
 
 // ----------------
 // PROTOCOL GLOBAL PARAMS
@@ -50,132 +58,46 @@ export const CommonsConfig: ICommonConfiguration = {
   // ----------------
 
   // If PoolAdmin/emergencyAdmin is set, will take priority over PoolAdminIndex/emergencyAdminIndex
-  PoolAdmin: {
-    [eEthereumNetwork.localhost]: undefined,
-    [eEthereumNetwork.vinci]: undefined,
-    [eEthereumNetwork.kovan]: undefined,
-    [eEthereumNetwork.hardhat]: undefined,
-    [eEthereumNetwork.buidlerevm]: undefined,
-  },
+  PoolAdmin: buildAdmin(),
   PoolAdminIndex: 0,
-  EmergencyAdmin: {
-    [eEthereumNetwork.localhost]: undefined,
-    [eEthereumNetwork.vinci]: undefined,
-    [eEthereumNetwork.kovan]: undefined,
-    [eEthereumNetwork.hardhat]: undefined,
-    [eEthereumNetwork.buidlerevm]: undefined,
-  },
+  EmergencyAdmin: buildAdmin(),
   EmergencyAdminIndex: 1,
-  ReserveAssets: {
-    [eEthereumNetwork.localhost]: {},
-    [eEthereumNetwork.vinci]: {},
-    [eEthereumNetwork.kovan]: {},
-    [eEthereumNetwork.hardhat]: {},
-    [eEthereumNetwork.buidlerevm]: {},
-  },
-  NFTVaultAssets: {
-    [eEthereumNetwork.localhost]: {},
-    [eEthereumNetwork.vinci]: {},
-    [eEthereumNetwork.kovan]: {},
-    [eEthereumNetwork.hardhat]: {},
-    [eEthereumNetwork.buidlerevm]: {},
-  },
+  ReserveAssets: buildAssets(),
+  NFTVaultAssets: buildAssets(),
   ReservesConfig: {},
   NFTVaultConfig: {},
-  VTokenDomainSeparator: {
-    [eEthereumNetwork.localhost]: '',
-    [eEthereumNetwork.vinci]:'',
-    [eEthereumNetwork.kovan]: '',
-    [eEthereumNetwork.hardhat]: '',
-    [eEthereumNetwork.buidlerevm]: '',
-  },
-  WETH: {
-    [eEthereumNetwork.localhost]: '',
-    [eEthereumNetwork.vinci]: '', 
+  VTokenDomainSeparator: buildAddress(),
+  WETH: buildAddress({
     [eEthereumNetwork.kovan]: '0xd0a1e359811322d97991e03f863a0c30c2cf029c',
-    [eEthereumNetwork.hardhat]: '',
-    [eEthereumNetwork.buidlerevm]: '',
-  },
-  WrappedNativeToken: {
-    [eEthereumNetwork.localhost]: '',
-    [eEthereumNetwork.vinci]: '', 
+  }),
+  WrappedNativeToken: buildAddress({
     [eEthereumNetwork.kovan]: '0xd0a1e359811322d97991e03f863a0c30c2cf029c',
-    [eEthereumNetwork.hardhat]: '',
-    [eEthereumNetwork.buidlerevm]: '',
-  },
-  ProviderRegistry: {
-    [eEthereumNetwork.localhost]: '',
-    [eEthereumNetwork.vinci]: '',
+  }),
+  ProviderRegistry: buildAddress({
     [eEthereumNetwork.kovan]: '0x1E40B561EC587036f9789aF83236f057D1ed2A90',
-    [eEthereumNetwork.hardhat]: '',
-    [eEthereumNetwork.buidlerevm]: '',
-  },
-  ProviderRegistryOwner: {
-    [eEthereumNetwork.localhost]: '',
-    [eEthereumNetwork.vinci]: '',
+  }),
+  ProviderRegistryOwner: buildAddress({
     [eEthereumNetwork.kovan]: '0x85e4A467343c0dc4aDAB74Af84448D9c45D8ae6F',
-    [eEthereumNetwork.hardhat]: '',
-    [eEthereumNetwork.buidlerevm]: '',
-  },
-  LendingRateOracle: {
-    [eEthereumNetwork.localhost]: '',
-    [eEthereumNetwork.vinci]: '',
+  }),
+  LendingRateOracle: buildAddress({
     [eEthereumNetwork.kovan]: '', //'0xdCde9Bb6a49e37fA433990832AB541AE2d4FEB4a',
-    [eEthereumNetwork.hardhat]: '',
-    [eEthereumNetwork.buidlerevm]: '',
-  },
-  LendingPoolCollateralManager: {
-    [eEthereumNetwork.localhost]: '',
-    [eEthereumNetwork.vinci]: '',
+  }),
+  LendingPoolCollateralManager: buildAddress({
     [eEthereumNetwork.kovan]: '', //'0x9269b6453d0d75370c4c85e5a42977a53efdb72a',
-    [eEthereumNetwork.hardhat]: '',
-    [eEthereumNetwork.buidlerevm]: '',
-  },
-  LendingPoolConfigurator: {
-    [eEthereumNetwork.localhost]: '',
-    [eEthereumNetwork.vinci]: '',
-    [eEthereumNetwork.kovan]: '',
-    [eEthereumNetwork.hardhat]: '',
-    [eEthereumNetwork.buidlerevm]: '',
-  },
-  LendingPool: {
-    [eEthereumNetwork.localhost]: '',
-    [eEthereumNetwork.vinci]: '',
-    [eEthereumNetwork.kovan]: '',
-    [eEthereumNetwork.hardhat]: '',
-    [eEthereumNetwork.buidlerevm]: '',
-  },
-  WethGateway: {
-    [eEthereumNetwork.localhost]: '',
-    [eEthereumNetwork.vinci]: '',
-    [eEthereumNetwork.kovan]: '',
-    [eEthereumNetwork.hardhat]: '',
-    [eEthereumNetwork.buidlerevm]: '',
-  },
-  TokenDistributor: {
-    [eEthereumNetwork.localhost]: '',
-    [eEthereumNetwork.vinci]: '',
+  }),
+  LendingPoolConfigurator: buildAddress(),
+  LendingPool: buildAddress(),
+  WethGateway: buildAddress(),
+  TokenDistributor: buildAddress({
     [eEthereumNetwork.kovan]: '0x971efe90088f21dc6a36f610ffed77fc19710708',
-    [eEthereumNetwork.hardhat]: '',
-    [eEthereumNetwork.buidlerevm]: '',
-  },
-  AaveOracle: {
-    [eEthereumNetwork.localhost]: '',
-    [eEthereumNetwork.vinci]: '',
+  }),
+  AaveOracle: buildAddress({
     [eEthereumNetwork.kovan]: '', //'0xB8bE51E6563BB312Cbb2aa26e352516c25c26ac1',
-    [eEthereumNetwork.hardhat]: '',
-    [eEthereumNetwork.buidlerevm]: '',
-  },
-  FallbackOracle: {
-    [eEthereumNetwork.localhost]: '',
-    [eEthereumNetwork.vinci]: '',
+  }),
+  FallbackOracle: buildAddress({
     [eEthereumNetwork.kovan]: '0x50913E8E1c650E790F8a1E741FF9B1B1bB251dfe',
-    [eEthereumNetwork.hardhat]: '',
-    [eEthereumNetwork.buidlerevm]: '',
-  },
-  ChainlinkAggregator: {
-    [eEthereumNetwork.localhost]: {},
-    [eEthereumNetwork.vinci]: {},
+  }),
+  ChainlinkAggregator: buildAssets({
     [eEthereumNetwork.kovan]: {
       AAVE: '0xd04647B7CB523bb9f26730E9B6dE1174db7591Ad',
       BAT: '0x0e4fcEC26c9f85c3D714370c98f43C4E02Fc35Ae',
@@ -198,49 +120,16 @@ export const CommonsConfig: ICommonConfiguration = {
       ZRX: '0xBc3f28Ccc21E9b5856E81E6372aFf57307E2E883',
       USD: '0x9326BFA02ADD2366b30bacB125260Af641031331',
     },
-    [eEthereumNetwork.hardhat]: {},
-    [eEthereumNetwork.buidlerevm]: {},
-  
-  },
-  ReserveFactorTreasuryAddress: {
-    [eEthereumNetwork.localhost]: '0x464c71f6c2f760dda6093dcb91c24c39e5d6e18c',
-    [eEthereumNetwork.vinci]: '0x464c71f6c2f760dda6093dcb91c24c39e5d6e18c',
-    [eEthereumNetwork.kovan]: '0x464c71f6c2f760dda6093dcb91c24c39e5d6e18c',
-    [eEthereumNetwork.hardhat]: '0x464c71f6c2f760dda6093dcb91c24c39e5d6e18c',
-    [eEthereumNetwork.buidlerevm]: '0x464c71f6c2f760dda6093dcb91c24c39e5d6e18c',
-  },
-  IncentivesController: {
-    [eEthereumNetwork.localhost]: ZERO_ADDRESS,
-    [eEthereumNetwork.vinci]: ZERO_ADDRESS,
-    [eEthereumNetwork.kovan]: ZERO_ADDRESS,
-    [eEthereumNetwork.hardhat]: ZERO_ADDRESS,
-    [eEthereumNetwork.buidlerevm]: ZERO_ADDRESS,
-  },
-  LendingPoolLibraryAddresses: {
-    [eEthereumNetwork.localhost]: {
-      ["contracts/protocol/libraries/logic/ReserveLogic.sol:ReserveLogic"]: '',
-      ["contracts/protocol/libraries/logic/NFTVaultLogic.sol:NFTVaultLogic"]: '',
-      ["contracts/protocol/libraries/logic/ValidationLogic.sol:ValidationLogic"]: '',
-    },
-    [eEthereumNetwork.vinci]: {
-      ["contracts/protocol/libraries/logic/ReserveLogic.sol:ReserveLogic"]: '',
-      ["contracts/protocol/libraries/logic/NFTVaultLogic.sol:NFTVaultLogic"]: '',
-      ["contracts/protocol/libraries/logic/ValidationLogic.sol:ValidationLogic"]: '',
-    },
+  }),
+  ReserveFactorTreasuryAddress: buildSameAddress(
+    '0x464c71f6c2f760dda6093dcb91c24c39e5d6e18c'
+  ),
+  IncentivesController: buildWithZeroAddress(),
+  LendingPoolLibraryAddresses: buildLibrary({
     [eEthereumNetwork.kovan]: {
       ["contracts/protocol/libraries/logic/ReserveLogic.sol:ReserveLogic"]: '0x49cF5C1AA0619EA6F328A9C6dab36d9Ed409dEFE',
       ["contracts/protocol/libraries/logic/NFTVaultLogic.sol:NFTVaultLogic"]: '0x24Ef12dD3E85d9395b82b020dac1dBdE6Dbb02F2',
       ["contracts/protocol/libraries/logic/ValidationLogic.sol:ValidationLogic"]: '0x206DB225E49Bb2D4DB3FE0e2C537734ab8ee4423',
     },
-    [eEthereumNetwork.hardhat]: {
-      ["contracts/protocol/libraries/logic/ReserveLogic.sol:ReserveLogic"]: '',
-      ["contracts/protocol/libraries/logic/NFTVaultLogic.sol:NFTVaultLogic"]: '',
-      ["contracts/protocol/libraries/logic/ValidationLogic.sol:ValidationLogic"]: '',
-    },
-    [eEthereumNetwork.buidlerevm]: {
-      ["contracts/protocol/libraries/logic/ReserveLogic.sol:ReserveLogic"]: '',
-      ["contracts/protocol/libraries/logic/NFTVaultLogic.sol:NFTVaultLogic"]: '',
-      ["contracts/protocol/libraries/logic/ValidationLogic.sol:ValidationLogic"]: '',
-    },
-  },
+  }),
 };

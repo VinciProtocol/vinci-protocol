@@ -14,7 +14,7 @@ const okErrors = [`Contract source code already verified`];
 
 const unableVerifyError = 'Fail - Unable to verify';
 
-export const SUPPORTED_ETHERSCAN_NETWORKS = ['localhost', 'vinci', 'kovan', 'matic', 'mumbai'];
+export const SUPPORTED_ETHERSCAN_NETWORKS = ['localhost', 'vinci', 'kovan', 'matic', 'mumbai', 'rinkeby'];
 
 function delay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
