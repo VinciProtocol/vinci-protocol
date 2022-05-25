@@ -175,16 +175,24 @@ export enum ERC721TokenContractId {
   MAYC = 'MAYC',
 }
 
-export interface iAssetBase<T> {
+export interface iERC20AssetBase<T> {
   DAI: T;
   USD: T;
   WETH: T;
+}
+
+export interface iERC721AssetBase<T> {
   BAYC: T;
-  //CRYPTOPANDA: T;
   MAYC: T;
 }
 
+export interface iAssetBase<T> extends iERC20AssetBase<T>, iERC721AssetBase<T> {}
+
+export type iERC20AssetsWithoutUSD<T>=Omit<iERC20AssetBase<T>, 'USD'>;
 export type iAssetsWithoutUSD<T> = Omit<iAssetBase<T>, 'USD'>;
+
+export type ERC721Assets = keyof iERC721AssetBase<null>;
+export type ERC20Assets = keyof iERC20AssetsWithoutUSD<null>;
 
 export type iVinciPoolAssets<T> = Pick<
   iAssetsWithoutUSD<T>,
