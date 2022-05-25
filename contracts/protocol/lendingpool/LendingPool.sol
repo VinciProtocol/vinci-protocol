@@ -131,7 +131,7 @@ contract LendingPool is VersionedInitializable, ILendingPool, LendingPoolStorage
 
     IVToken(vToken).mint(onBehalfOf, amount, reserve.liquidityIndex);
 
-    emit Deposit(asset, msg.sender, onBehalfOf, amount);
+    emit Deposit(asset, msg.sender, onBehalfOf, amount, referralCode);
   }
 
   /**
@@ -220,7 +220,7 @@ contract LendingPool is VersionedInitializable, ILendingPool, LendingPoolStorage
       }
     }
 
-    emit DepositNFT(nft, msg.sender, onBehalfOf, tokenIds, amounts);
+    emit DepositNFT(nft, msg.sender, onBehalfOf, tokenIds, amounts, referralCode);
 
   }
 
@@ -259,7 +259,7 @@ contract LendingPool is VersionedInitializable, ILendingPool, LendingPoolStorage
       }
     }
 
-    emit DepositNFT(nft, msg.sender, onBehalfOf, tokenIds, amounts);
+    emit DepositNFT(nft, msg.sender, onBehalfOf, tokenIds, amounts, referralCode);
 
   }
 
@@ -424,7 +424,7 @@ contract LendingPool is VersionedInitializable, ILendingPool, LendingPoolStorage
 
     IVToken(vToken).handleRepayment(msg.sender, paybackAmount);
 
-    emit Repay(asset, msg.sender, paybackAmount);
+    emit Repay(asset, onBehalfOf, msg.sender, paybackAmount);
 
     return paybackAmount;
   }
@@ -513,7 +513,8 @@ contract LendingPool is VersionedInitializable, ILendingPool, LendingPoolStorage
     address asset,
     uint256[] calldata tokenIds,
     uint256[] calldata amounts,
-    bytes calldata params
+    bytes calldata params,
+    uint16 referralCode
   ) external override whenNotPaused 
   {
     NFTFlashLoanLocalVars memory vars;
@@ -543,7 +544,8 @@ contract LendingPool is VersionedInitializable, ILendingPool, LendingPoolStorage
       asset,
       tokenIds,
       amounts,
-      0
+      0,
+      referralCode
     );
   }
 
@@ -1066,11 +1068,13 @@ contract LendingPool is VersionedInitializable, ILendingPool, LendingPoolStorage
     emit Borrow(
       vars.asset,
       vars.user,
+      vars.onBehalfOf,
       vars.amount,
       vars.interestRateMode,
       //DataTypes.InterestRateMode(vars.interestRateMode) == DataTypes.InterestRateMode.STABLE
       //  ? currentStableRate
-      reserve.currentVariableBorrowRate
+      reserve.currentVariableBorrowRate,
+      vars.referralCode
     );
   }
 

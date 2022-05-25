@@ -17,7 +17,8 @@ interface ILendingPool {
     address indexed reserve,
     address user,
     address indexed onBehalfOf,
-    uint256 amount
+    uint256 amount,
+    uint16 indexed referral
   );
 
   /**
@@ -34,7 +35,8 @@ interface ILendingPool {
     address user,
     address indexed onBehalfOf, 
     uint256[] tokenIds, 
-    uint256[] amounts
+    uint256[] amounts,
+    uint16 indexed referral
   );
 
   event WithdrawNFT(
@@ -60,7 +62,8 @@ interface ILendingPool {
     address indexed asset,
     uint256[] tokenIds,
     uint256[] amounts,
-    uint256 premium
+    uint256 premium,
+    uint16 referralCode
   );
 
 
@@ -75,10 +78,12 @@ interface ILendingPool {
    **/
   event Borrow(
     address indexed reserve,
-    address indexed user,
+    address user,
+    address indexed onBehalfOf,
     uint256 amount,
     uint256 borrowRateMode,
-    uint256 borrowRate
+    uint256 borrowRate,
+    uint16 indexed referral
   );
 
   /**
@@ -90,6 +95,7 @@ interface ILendingPool {
   event Repay(
     address indexed reserve,
     address indexed user,
+    address indexed repayer,
     uint256 amount
   );
 
@@ -285,7 +291,8 @@ interface ILendingPool {
     address asset,
     uint256[] calldata tokenIds,
     uint256[] calldata amounts,
-    bytes calldata params
+    bytes calldata params,
+    uint16 referralCode
   ) external;
 
   /**
