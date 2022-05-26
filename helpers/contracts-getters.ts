@@ -197,7 +197,7 @@ export const getAllMockedTokens = async () => {
   const tokens: MockTokenMap = await Object.keys(TokenContractId).reduce<Promise<MockTokenMap>>(
     async (acc, tokenSymbol) => {
       const accumulator = await acc;
-      const address = (await db.get(`${tokenSymbol.toUpperCase()}.${DRE.network.name}`).value()).address;
+      const address = (await db.get(`${tokenSymbol}.${DRE.network.name}`).value()).address;
       accumulator[tokenSymbol] = await getMintableERC20(address);
       return Promise.resolve(acc);
     },
@@ -211,7 +211,7 @@ export const getAllMockedERC721Tokens = async () => {
   const tokens: MockERC721TokenMap = await Object.keys(ERC721TokenContractId).reduce<Promise<MockERC721TokenMap>>(
     async (acc, tokenSymbol) => {
       const accumulator = await acc;
-            const address = (await db.get(`${tokenSymbol.toUpperCase()}.${DRE.network.name}`).value()).address;
+            const address = (await db.get(`${tokenSymbol}.${DRE.network.name}`).value()).address;
       accumulator[tokenSymbol] = await getMockERC721Token(address);
       return Promise.resolve(acc);
     },
