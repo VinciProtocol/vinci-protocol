@@ -1,5 +1,6 @@
 import { Contract } from 'ethers';
 import { DRE, notFalsyOrZeroAddress } from './misc-utils';
+import { BigNumber } from 'BigNumber.js';
 
 import {
   tEthereumAddress,
@@ -11,7 +12,6 @@ import {
   iMultiPoolsAssets,
   IReserveParams,
   INFTVaultParams,
-  PoolConfiguration,
   eEthereumNetwork,
 } from './types';
 import { MintableERC20 } from '../types/MintableERC20';
@@ -478,7 +478,11 @@ export const deployNTokenImplementations = async (
 ) => {
   const NFTVault = Object.entries(NFTVaultInputParams);
   for (let [symbol, params] of NFTVault) {
-    await deployTimeLockableNToken(marketId, symbol, verify);
+    if(new BigNumber(params.lockdropExpiration) > new BigNumber(0)){
+      await deployTimeLockableNToken(marketId, symbol, verify);
+    } else {
+      await deployNToken(marketId, symbol, verify);
+    }
   };
 };
 
@@ -489,7 +493,11 @@ export const deployNTokenImplementationsForTest = async (
 ) => {
   const NFTVault = Object.entries(NFTVaultInputParams);
   for (let [symbol, params] of NFTVault) {
-    await deployTimeLockableNTokenForTest(marketId, symbol, verify);
+    if (new BigNumber(params.lockdropExpiration) > new BigNumber(0)){
+      await deployTimeLockableNTokenForTest(marketId, symbol, verify);
+    } else {
+      await deployNToken(marketId, symbol, verify);
+    }
   };
 };
 
