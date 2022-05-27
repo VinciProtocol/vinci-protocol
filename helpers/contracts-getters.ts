@@ -173,11 +173,11 @@ export const getMockERC721Token = async (address: tEthereumAddress) =>
     await getFirstSigner()
   );
 
-export const getMockEligibility = async (address: tEthereumAddress) =>
+export const getMockEligibility = async (marketId: string, address: tEthereumAddress) =>
     await NFTXRangeEligibility__factory.connect(
         address ||
         (
-            await getDb().get(`${eContractid.NFTXRangeEligibility}.${DRE.network.name}`).value()
+            await getMarketDb().get(`${eContractid.NFTXRangeEligibility}.${DRE.network.name}.${marketId}`).value()
         ).address,
         await getFirstSigner()
     );
@@ -221,12 +221,12 @@ export const getAllMockedERC721Tokens = async () => {
 };
 
 export const getAllMockedEligibility = async (marketId: string) => {
-    const db = getDb();
+    const db = getMarketDb();
     const eligibilities: MockEligibilityMap = await Object.keys(ERC721TokenContractId).reduce<Promise<MockEligibilityMap>>(
         async (acc, tokenSymbol) => {
             const accumulator = await acc;
-            const address = (await db.get(`${tokenSymbol.toUpperCase()}Eligibility.${DRE.network.name}`).value()).address;
-            accumulator[tokenSymbol] = await getMockEligibility(address);
+            const address = (await db.get(`${tokenSymbol.toUpperCase()}Eligibility.${DRE.network.name}.${marketId}`).value()).address;
+            accumulator[tokenSymbol] = await getMockEligibility(marketId, address);
             return Promise.resolve(acc);
         },
         Promise.resolve({})
@@ -235,11 +235,11 @@ export const getAllMockedEligibility = async (marketId: string) => {
 };
 
 export const getAllEligibilityAddresses = async (marketId: string, tokenSymbols: string[]) => {
-    const db = getDb();
+    const db = getMarketDb();
     const eligibilities: EligibilityAddressMap = await tokenSymbols.reduce<Promise<EligibilityAddressMap>>(
         async (acc, tokenSymbol) => {
             const accumulator = await acc;
-            const address = (await db.get(`${tokenSymbol.toUpperCase()}Eligibility.${DRE.network.name}`).value()).address;
+            const address = (await db.get(`${tokenSymbol.toUpperCase()}Eligibility.${DRE.network.name}.${marketId}`).value()).address;
             accumulator[tokenSymbol] = address;
             return Promise.resolve(acc);
         },

@@ -125,15 +125,11 @@ export const deployAllMockERC721Tokens = async (verify?: boolean) => {
   return tokens;
 };
 
-export const deployMockERC721Tokens = async (tokenSymbol: string, verify?: boolean) => {
+export const deployMockERC721Tokens = async (tokenSymbol: string, tokenName: string, verify?: boolean) => {
   const tokens: { [symbol: string]: MockContract | ERC721Mocked } = {};
 
-  const protoConfigData = getNFTVaultConfigByPool(VinciPools.proto);
-  
-  const configData = (<any>protoConfigData)[tokenSymbol];
-
   tokens[tokenSymbol] = await deployERC721Mocked(
-    [configData.name, configData.symbol],
+    [tokenName, tokenSymbol],
     verify
   );
   return tokens;
