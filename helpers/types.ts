@@ -14,6 +14,7 @@ export enum eEthereumNetwork {
   vinci = 'vinci',
   kovan = 'kovan',
   hardhat = 'hardhat',
+  rinkeby = 'rinkeby',
 }
 
 export enum eContractid {
@@ -173,26 +174,22 @@ export enum TokenContractId {
 export enum ERC721TokenContractId {
   BAYC = 'BAYC',
   MAYC = 'MAYC',
+  CloneX = 'CloneX',
+  MEKA = 'MEKA',
 }
 
-export interface iERC20AssetBase<T> {
+export interface iAssetBase<T> {
   DAI: T;
   USD: T;
   WETH: T;
-}
-
-export interface iERC721AssetBase<T> {
   BAYC: T;
+  //CRYPTOPANDA: T;
   MAYC: T;
+  CloneX: T;
+  MEKA: T;
 }
 
-export interface iAssetBase<T> extends iERC20AssetBase<T>, iERC721AssetBase<T> {}
-
-export type iERC20AssetsWithoutUSD<T>=Omit<iERC20AssetBase<T>, 'USD'>;
 export type iAssetsWithoutUSD<T> = Omit<iAssetBase<T>, 'USD'>;
-
-export type ERC721Assets = keyof iERC721AssetBase<null>;
-export type ERC20Assets = keyof iERC20AssetsWithoutUSD<null>;
 
 export type iVinciPoolAssets<T> = Pick<
   iAssetsWithoutUSD<T>,
@@ -214,6 +211,12 @@ export type iVinciPoolBAYCAssets<T> = Pick<
 export type iVinciPoolMAYCAssets<T> = Pick<
   iAssetsWithoutUSD<T>,
   | 'MAYC'
+>;
+
+export type iVinciPoolLockDropAssets<T> = Pick<
+  iAssetsWithoutUSD<T>,
+  | 'CloneX'
+  | 'MEKA'
 >;
 
 export type iMultiPoolsAssets<T> = iAssetCommon<T> | iVinciPoolAssets<T> | iVinciPoolBAYCAssets<T> | iVinciPoolMAYCAssets<T>;
@@ -335,9 +338,19 @@ export interface IVinciConfigurationBAYC extends ICommonConfiguration {
   NFTVaultConfig: iVinciPoolBAYCAssets<INFTVaultParams>;
 }
 
+export interface IVinciConfigurationMAYCNoBorrowing extends ICommonConfiguration {
+  ReservesConfig: {};
+  NFTVaultConfig: iVinciPoolMAYCAssets<INFTVaultParams>;
+}
+
 export interface IVinciConfigurationMAYC extends ICommonConfiguration {
   ReservesConfig: iVinciPoolAssets<IReserveParams>;
   NFTVaultConfig: iVinciPoolMAYCAssets<INFTVaultParams>;
+}
+
+export interface IVinciConfigurationLockDrop extends ICommonConfiguration {
+  ReservesConfig: {};
+  NFTVaultConfig: iVinciPoolLockDropAssets<INFTVaultParams>;
 }
 
 export type iParamsPerNetwork<T> =
@@ -349,6 +362,16 @@ export interface iEthereumParamsPerNetwork<T> {
   [eEthereumNetwork.kovan]: T;
   [eEthereumNetwork.hardhat]: T;
   [eEthereumNetwork.buidlerevm]: T;
+  [eEthereumNetwork.rinkeby]: T;
+}
+
+export interface iParamsBuilderPerNetwork<T> {
+  [eEthereumNetwork.localhost]?: T;
+  [eEthereumNetwork.vinci]?: T;
+  [eEthereumNetwork.kovan]?: T;
+  [eEthereumNetwork.hardhat]?: T;
+  [eEthereumNetwork.buidlerevm]?: T;
+  [eEthereumNetwork.rinkeby]?: T;
 }
 
 export interface ITokenAddress {

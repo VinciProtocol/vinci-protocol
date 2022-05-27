@@ -10,16 +10,12 @@ import {
 } from './types';
 import { getEthersSignersAddresses, getParamPerPool, getParamPerNetwork } from './contracts-helpers';
 import VinciConfig from '../markets/vinci';
-import BAYCConfig from '../markets/vinciBAYC';
-import MAYCConfig from '../markets/vinciMAYC';
 import { DRE, filterMapBy } from './misc-utils';
 
 import { deployWETHMocked } from './contracts-deployments';
 
 export enum ConfigNames {
   Vinci = 'Vinci',
-  VinciBAYC = 'VinciBAYC',
-  VinciMAYC = 'VinciMAYC'
 }
 // ----------------
 // PROTOCOL PARAMS PER POOL
@@ -73,10 +69,6 @@ export const getEmergencyAdmin = async (config: IBaseConfiguration): Promise<tEt
     switch (configName) {
       case ConfigNames.Vinci:
         return VinciConfig;
-      case ConfigNames.VinciBAYC:
-        return BAYCConfig;
-      case ConfigNames.VinciMAYC:
-        return MAYCConfig;
       default:
         throw new Error(
           `Unsupported pool configuration: ${configName} is not one of the supported configs ${Object.values(
