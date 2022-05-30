@@ -10,6 +10,11 @@ interface KittyCore {
 }
 
 contract NFTXGen0FastKittyEligibility is NFTXEligibility {
+    uint256 public constant GEN_0_FAST_ELIGIBILITY_REVISION = 0x1;
+
+    function getRevision() internal pure override virtual returns (uint256) {
+        return GEN_0_FAST_ELIGIBILITY_REVISION;
+    }
 
     function name() public pure override virtual returns (string memory) {    
         return "Gen0FastKitty";

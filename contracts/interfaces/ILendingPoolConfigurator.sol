@@ -30,6 +30,7 @@ interface ILendingPoolConfigurator {
     string nTokenName;
     string nTokenSymbol;
     bytes params;
+    bytes eligibilityParams;
     string baseURI;
   }
 
@@ -83,7 +84,8 @@ interface ILendingPoolConfigurator {
    **/
   event NFTVaultInitialized(
     address indexed asset,
-    address indexed nToken
+    address indexed nToken,
+    address nftEligibility
   );
 
   /**
@@ -239,6 +241,12 @@ interface ILendingPoolConfigurator {
    * @param implementation The new vToken implementation
    **/
   event NTokenUpgraded(
+    address indexed asset,
+    address indexed proxy,
+    address indexed implementation
+  );
+
+  event NFTEligibilityUpgraded(
     address indexed asset,
     address indexed proxy,
     address indexed implementation

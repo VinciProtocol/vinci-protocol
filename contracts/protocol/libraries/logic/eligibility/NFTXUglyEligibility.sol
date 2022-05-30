@@ -10,6 +10,12 @@ interface IPolymorph {
 }
 
 contract NFTXUglyEligibility is NFTXEligibility {
+    uint256 public constant UGLY_ELIGIBILITY_REVISION = 0x1;
+
+    function getRevision() internal pure override virtual returns (uint256) {
+        return UGLY_ELIGIBILITY_REVISION;
+    }
+    
     function name() public pure override virtual returns (string memory) {
         return "Ugly";
     }

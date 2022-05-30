@@ -337,6 +337,7 @@ interface ILendingPool {
   function setConfiguration(address reserve, uint256 configuration) external;
   function setNFTVaultConfiguration(address reserve, uint256 configuration) external;
   function setNFTVaultActionExpiration(address nftValue, uint40 expiration) external;
+  function setNFTVaultEligibility(address nftValue, address eligibility) external;
 
   /**
    * @dev Returns the configuration of the reserve

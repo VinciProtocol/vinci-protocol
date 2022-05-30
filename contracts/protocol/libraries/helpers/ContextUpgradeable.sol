@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 
 pragma solidity ^0.8.0;
-import {Initializable} from "../../../dependencies/openzeppelin/upgradeability/Initializable.sol";
+import {VersionedInitializable} from "../aave-upgradeability/VersionedInitializable.sol";
 
 /*
  * @dev Provides information about the current execution context, including the
@@ -13,7 +13,7 @@ import {Initializable} from "../../../dependencies/openzeppelin/upgradeability/I
  *
  * This contract is only required for intermediate, library-like contracts.
  */
-abstract contract ContextUpgradeable is Initializable {
+abstract contract ContextUpgradeable is VersionedInitializable {
     function __Context_init() internal initializer {
         __Context_init_unchained();
     }

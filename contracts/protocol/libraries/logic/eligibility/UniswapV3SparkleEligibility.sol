@@ -99,6 +99,12 @@ contract UniswapV3SparkleEligibility is NFTXEligibility, OwnableUpgradeable {
         uint24 fee;
     }
 
+    uint256 public constant UNISWAP_V3_ELIGIBILITY_REVISION = 0x1;
+
+    function getRevision() internal pure override virtual returns (uint256) {
+        return UNISWAP_V3_ELIGIBILITY_REVISION;
+    }
+
     function name() public pure override virtual returns (string memory) {    
         return "UniswapV3Sparkle";
     }

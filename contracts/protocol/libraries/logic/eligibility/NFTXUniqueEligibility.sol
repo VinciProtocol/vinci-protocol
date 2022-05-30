@@ -12,6 +12,12 @@ contract NFTXUniqueEligibility is
     NFTXEligibility,
     UniqueEligibility
 {
+    uint256 public constant UNIQUE_ELIGIBILITY_REVISION = 0x1;
+
+    function getRevision() internal pure override virtual returns (uint256) {
+        return UNIQUE_ELIGIBILITY_REVISION;
+    }
+    
     function name() public pure override virtual returns (string memory) {
         return "Unique";
     }

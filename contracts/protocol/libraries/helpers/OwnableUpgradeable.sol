@@ -3,7 +3,7 @@
 pragma solidity ^0.8.0;
 
 import {ContextUpgradeable} from "./ContextUpgradeable.sol";
-import {Initializable} from "../../../dependencies/openzeppelin/upgradeability/Initializable.sol";
+import {VersionedInitializable} from "../aave-upgradeability/VersionedInitializable.sol";
 /**
  * @dev Contract module which provides a basic access control mechanism, where
  * there is an account (an owner) that can be granted exclusive access to
@@ -16,7 +16,7 @@ import {Initializable} from "../../../dependencies/openzeppelin/upgradeability/I
  * `onlyOwner`, which can be applied to your functions to restrict their use to
  * the owner.
  */
-abstract contract OwnableUpgradeable is Initializable, ContextUpgradeable {
+abstract contract OwnableUpgradeable is VersionedInitializable, ContextUpgradeable {
     address private _owner;
 
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);

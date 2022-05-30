@@ -6,6 +6,12 @@ import {UniqueEligibility} from "./UniqueEligibility.sol";
 import {NFTXEligibility} from "./NFTXEligibility.sol";
 
 contract NFTXListEligibility is NFTXEligibility, UniqueEligibility {
+    uint256 public constant LIST_ELIGIBILITY_REVISION = 0x1;
+
+    function getRevision() internal pure override virtual returns (uint256) {
+        return LIST_ELIGIBILITY_REVISION;
+    }
+
     function name() public pure override virtual returns (string memory) {    
         return "List";
     }

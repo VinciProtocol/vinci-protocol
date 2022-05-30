@@ -6,6 +6,11 @@ import {NFTXEligibility} from "./NFTXEligibility.sol";
 import {IPrevNftxContract} from "../../../../interfaces/IPrevNftxContract.sol";
 
 contract NFTXDeferEligibility is NFTXEligibility {
+    uint256 public constant DEFER_ELIGIBILITY_REVISION = 0x1;
+
+    function getRevision() internal pure override virtual returns (uint256) {
+        return DEFER_ELIGIBILITY_REVISION;
+    }
 
     function name() public pure override virtual returns (string memory) {    
         return "Defer";

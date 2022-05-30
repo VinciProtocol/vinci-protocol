@@ -2,11 +2,12 @@
 
 pragma solidity ^0.8.0;
 
-import {Initializable} from "../../../../dependencies/openzeppelin/upgradeability/Initializable.sol";
+import {VersionedInitializable} from "../../aave-upgradeability/VersionedInitializable.sol";
 import {INFTXEligibility} from "../../../../interfaces/INFTXEligibility.sol";
 
 // This is a contract meant to be inherited and overriden to implement eligibility modules. 
-abstract contract NFTXEligibility is INFTXEligibility, Initializable {
+abstract contract NFTXEligibility is INFTXEligibility, VersionedInitializable {
+
   function name() public pure override virtual returns (string memory);
   function finalized() public view override virtual returns (bool);
   function targetAsset() public pure override virtual returns (address);

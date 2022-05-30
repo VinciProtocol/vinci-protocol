@@ -5,6 +5,11 @@ pragma solidity ^0.8.0;
 import {NFTXEligibility} from "./NFTXEligibility.sol";
 
 contract NFTXOpenseaEligibility is NFTXEligibility {
+    uint256 public constant OPENSEA_ELIGIBILITY_REVISION = 0x1;
+
+    function getRevision() internal pure override virtual returns (uint256) {
+        return OPENSEA_ELIGIBILITY_REVISION;
+    }
 
     function name() public pure override virtual returns (string memory) {    
         return "Opensea";

@@ -978,6 +978,14 @@ contract LendingPool is VersionedInitializable, ILendingPool, LendingPoolStorage
     _nftVaults.data[vault].expiration = expiration;
   }
 
+  function setNFTVaultEligibility(address vault, address eligibility)
+   external
+   override
+   onlyLendingPoolConfigurator
+  {
+    _nftVaults.data[vault].nftEligibility = eligibility;
+  }
+
   /**
    * @dev Set the _pause state of a reserve
    * - Only callable by the LendingPoolConfigurator contract

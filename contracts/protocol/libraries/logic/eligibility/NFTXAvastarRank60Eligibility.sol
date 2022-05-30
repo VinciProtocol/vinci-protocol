@@ -21,6 +21,11 @@ interface Avastar {
 }
 
 contract NFTXAvastarRank60Eligibility is NFTXEligibility {
+    uint256 public constant AVASTAR_60_ELIGIBILITY_REVISION = 0x1;
+
+    function getRevision() internal pure override virtual returns (uint256) {
+        return AVASTAR_60_ELIGIBILITY_REVISION;
+    }
 
     function name() public pure override virtual returns (string memory) {    
         return "AvastarRank60";

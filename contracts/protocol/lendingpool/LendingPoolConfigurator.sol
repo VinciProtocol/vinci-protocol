@@ -18,6 +18,7 @@ import {DataTypes} from '../libraries/types/DataTypes.sol';
 import {IInitializableDebtToken} from '../../interfaces/IInitializableDebtToken.sol';
 import {IInitializableVToken} from '../../interfaces/IInitializableVToken.sol';
 import {IInitializableNToken} from '../../interfaces/IInitializableNToken.sol';
+import {INFTXEligibility} from '../../interfaces/INFTXEligibility.sol';
 import {IAaveIncentivesController} from '../../interfaces/IAaveIncentivesController.sol';
 import {ILendingPoolConfigurator} from '../../interfaces/ILendingPoolConfigurator.sol';
 
@@ -71,7 +72,7 @@ contract LendingPoolConfigurator is VersionedInitializable, ILendingPoolConfigur
 
   function _initReserve(ILendingPool pool, InitReserveInput calldata input) internal {
     address vTokenProxyAddress =
-      _initTokenWithProxy(
+      _initContractWithProxy(
         input.vTokenImpl,
         abi.encodeWithSelector(
           IInitializableVToken.initialize.selector,
@@ -87,7 +88,7 @@ contract LendingPoolConfigurator is VersionedInitializable, ILendingPoolConfigur
       );
 
     address stableDebtTokenProxyAddress =
-      _initTokenWithProxy(
+      _initContractWithProxy(
         input.stableDebtTokenImpl,
         abi.encodeWithSelector(
           IInitializableDebtToken.initialize.selector,
@@ -102,7 +103,7 @@ contract LendingPoolConfigurator is VersionedInitializable, ILendingPoolConfigur
       );
 
     address variableDebtTokenProxyAddress =
-      _initTokenWithProxy(
+      _initContractWithProxy(
         input.variableDebtTokenImpl,
         abi.encodeWithSelector(
           IInitializableDebtToken.initialize.selector,
@@ -155,7 +156,7 @@ contract LendingPoolConfigurator is VersionedInitializable, ILendingPoolConfigur
 
   function _initNFTVault(ILendingPool pool, InitNFTVaultInput calldata input) internal {
     address nTokenProxyAddress =
-      _initTokenWithProxy(
+      _initContractWithProxy(
         input.nTokenImpl,
         abi.encodeWithSelector(
           IInitializableNToken.initialize.selector,
@@ -168,10 +169,19 @@ contract LendingPoolConfigurator is VersionedInitializable, ILendingPoolConfigur
         )
       );
 
+    address eligibilityProxyAddress = 
+      _initContractWithProxy(
+        input.nftEligibility,
+        abi.encodeWithSelector(
+          INFTXEligibility.__NFTXEligibility_init_bytes.selector,
+          input.eligibilityParams
+        )
+      );
+
     pool.initNFTVault(
       input.underlyingAsset,
       nTokenProxyAddress,
-      input.nftEligibility
+      eligibilityProxyAddress
     );
 
     DataTypes.NFTVaultConfigurationMap memory currentConfig =
@@ -184,7 +194,8 @@ contract LendingPoolConfigurator is VersionedInitializable, ILendingPoolConfigur
 
     emit NFTVaultInitialized(
       input.underlyingAsset,
-      nTokenProxyAddress
+      nTokenProxyAddress,
+      eligibilityProxyAddress
     );
   }
 
@@ -210,7 +221,7 @@ contract LendingPoolConfigurator is VersionedInitializable, ILendingPoolConfigur
         input.params
       );
 
-    _upgradeTokenImplementation(
+    _upgradeImplementation(
       reserveData.vTokenAddress,
       input.implementation,
       encodedCall
@@ -240,7 +251,7 @@ contract LendingPoolConfigurator is VersionedInitializable, ILendingPoolConfigur
         input.params
       );
 
-    _upgradeTokenImplementation(
+    _upgradeImplementation(
       reserveData.stableDebtTokenAddress,
       input.implementation,
       encodedCall
@@ -277,7 +288,7 @@ contract LendingPoolConfigurator is VersionedInitializable, ILendingPoolConfigur
         input.params
       );
 
-    _upgradeTokenImplementation(
+    _upgradeImplementation(
       reserveData.variableDebtTokenAddress,
       input.implementation,
       encodedCall
@@ -307,13 +318,53 @@ contract LendingPoolConfigurator is VersionedInitializable, ILendingPoolConfigur
         input.params
       );
 
-    _upgradeTokenImplementation(
+    _upgradeImplementation(
       vaultData.nTokenAddress,
       input.implementation,
       encodedCall
     );
 
     emit NTokenUpgraded(input.asset, vaultData.nTokenAddress, input.implementation);
+  }
+
+  function updateNFTEligibility(address asset, address implementation, bytes calldata params) external onlyPoolAdmin {
+    ILendingPool cachedPool = pool;
+
+    DataTypes.NFTVaultData memory vaultData = cachedPool.getNFTVaultData(asset);
+
+    bytes memory encodedCall = abi.encodeWithSelector(
+        INFTXEligibility.__NFTXEligibility_init_bytes.selector,
+        params
+      );
+
+    _upgradeImplementation(
+      vaultData.nftEligibility,
+      implementation,
+      encodedCall
+    );
+
+    emit NFTEligibilityUpgraded(asset, vaultData.nftEligibility, implementation);
+  }
+
+  function setNFTEligibility(address asset, address implementation, bytes calldata params) external onlyPoolAdmin {
+    ILendingPool cachedPool = pool;
+
+    bytes memory encodedCall = abi.encodeWithSelector(
+        INFTXEligibility.__NFTXEligibility_init_bytes.selector,
+        params
+      );
+
+    address eligibilityProxyAddress = 
+      _initContractWithProxy(
+        implementation,
+        abi.encodeWithSelector(
+          INFTXEligibility.__NFTXEligibility_init_bytes.selector,
+          params
+        )
+      );
+
+    cachedPool.setNFTVaultEligibility(asset, eligibilityProxyAddress);
+    emit NFTEligibilityUpgraded(asset, eligibilityProxyAddress, implementation);
   }
 
   /**
@@ -574,7 +625,7 @@ contract LendingPoolConfigurator is VersionedInitializable, ILendingPoolConfigur
     pool.setPause(val);
   }
 
-  function _initTokenWithProxy(address implementation, bytes memory initParams)
+  function _initContractWithProxy(address implementation, bytes memory initParams)
     internal
     returns (address)
   {
@@ -586,7 +637,7 @@ contract LendingPoolConfigurator is VersionedInitializable, ILendingPoolConfigur
     return address(proxy);
   }
 
-  function _upgradeTokenImplementation(
+  function _upgradeImplementation(
     address proxyAddress,
     address implementation,
     bytes memory initParams
