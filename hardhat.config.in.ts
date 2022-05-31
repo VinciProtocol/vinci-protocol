@@ -41,3 +41,9 @@ export const solidity = {
 export const mocha = {
   timeout: 0,
 };
+
+export const etherscan = {
+  apiKey: {
+    kovan: process.env.ETHERSCAN_KEY
+  }
+};
