@@ -38,6 +38,13 @@ export const getNTokenExtraParams = async (nTokenName: string, tokenAddress: tEt
   }
 };
 
+export const getNTokenEligibilityParams = async (nTokenName: string, tokenAddress: tEthereumAddress, eligibilityAddress: tEthereumAddress) => {
+  switch (nTokenName) {
+    default:
+      return new Array();
+  }
+}
+
 export const initNFTVaultByHelper = async (
   NFTVaultInputParams: iMultiPoolsAssets<INFTVaultParams>,
   tokenAddresses: { [symbol: string]: tEthereumAddress },
@@ -64,6 +71,7 @@ export const initNFTVaultByHelper = async (
     nTokenSymbol: string;
     baseURI: string;
     params: BytesLike;
+    eligibilityParams: BytesLike;
   }[] = [];
 
   const NFTVault = Object.entries(NFTVaultInputParams);
@@ -85,6 +93,7 @@ export const initNFTVaultByHelper = async (
       nTokenSymbol: `n${symbolPrefix}${symbol}`,
       baseURI: baseURI,
       params: await getNTokenExtraParams(tokenAddresses[symbol], ntoken.address),
+      eligibilityParams: await getNTokenEligibilityParams(tokenAddresses[symbol], ntoken.address, eligibilityAddresses[symbol]),
     });
   }
 

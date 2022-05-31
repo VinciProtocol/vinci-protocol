@@ -32,7 +32,7 @@ import { Signer } from 'ethers';
 import { TokenContractId, ERC721TokenContractId, eContractid, tEthereumAddress, VinciPools } from '../helpers/types';
 import { MintableERC20 } from '../types/MintableERC20';
 import { ERC721Mocked } from '../types/ERC721Mocked';
-import { NFTXRangeEligibility } from '../types/NFTXRangeEligibility';
+import { NFTXEligibility } from '../types/NFTXEligibility';
 import {
   ConfigNames,
   getReservesConfigByPool,
@@ -109,7 +109,7 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
     ...(await deployAllMockTokens(deployer)),
   };
   const eligibilities: {
-    [symbol: string]: NFTXRangeEligibility
+    [symbol: string]: NFTXEligibility
   } = { 
     ... (await deployAllMockEligibilities(marketId)), 
   };

@@ -73,7 +73,7 @@ import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { LendingPoolLibraryAddresses } from '../types/factories/LendingPool__factory';
 import { eNetwork } from './types';
 import internal from 'stream';
-import { NFTXRangeEligibility } from '../types/NFTXRangeEligibility';
+import { NFTXEligibility } from '../types/NFTXEligibility';
 
 export const deployLendingPoolAddressesProvider = async (marketId: string, verify?: boolean) =>
   withSaveAndVerify(
@@ -664,8 +664,6 @@ export const deployTreasury = async (
 };
 
 export const deployRangeEligibility = async (
-  rangeStart: number,
-  rangeEnd: number,
   tokenSymbol: string,
   marketId: string,
   verify?: boolean
@@ -677,20 +675,7 @@ export const deployRangeEligibility = async (
     verify,
     marketId
   );
-  const contract = await withSaveAndVerify(
-    await new InitializableAdminUpgradeabilityProxy__factory(await getFirstSigner()).deploy(),
-    `${tokenSymbol}Eligibility`,
-    [],
-    verify,
-    marketId
-  );
-  const tx = await contract['initialize(address,address,bytes)'](
-    implementation.address,
-    await (await getFirstSigner()).getAddress(),
-    implementation.interface.encodeFunctionData("__NFTXEligibility_init", [rangeStart, rangeEnd])
-  );
-  await tx.wait()
-  return NFTXRangeEligibility__factory.connect(contract.address, await getFirstSigner());
+  return implementation;
 }
 
 export const deployNFTXAllowAllEligibility = async (
@@ -705,24 +690,11 @@ export const deployNFTXAllowAllEligibility = async (
         verify,
         marketId
     );
-    const contract = await withSaveAndVerify(
-        await new InitializableAdminUpgradeabilityProxy__factory(await getFirstSigner()).deploy(),
-        `${tokenSymbol}Eligibility`,
-        [],
-        verify,
-        marketId
-    );
-    const tx = await contract['initialize(address,address,bytes)'](
-        implementation.address,
-        await (await getFirstSigner()).getAddress(),
-        implementation.interface.encodeFunctionData("__NFTXEligibility_init")
-    );
-    await tx.wait()
-    return NFTXRangeEligibility__factory.connect(contract.address, await getFirstSigner());
+    return implementation;
 }
 
 export const deployAllMockEligibilities = async (marketId: string, verify?: boolean) => {
-  const eligibilities: { [symbol: string]: NFTXRangeEligibility} = {};
+  const eligibilities: { [symbol: string]: NFTXEligibility} = {};
   for (const tokenSymbol of Object.keys(ERC721TokenContractId)) {
     eligibilities[tokenSymbol] = await deployNFTXAllowAllEligibility(tokenSymbol.toLocaleUpperCase(), marketId, verify);
   }
