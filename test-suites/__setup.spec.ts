@@ -169,6 +169,7 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
       USD: USD_ADDRESS,
       CloneX: mockTokens.CloneX.address,
       MEKA: mockTokens.MEKA.address,
+      Azuki: mockTokens.Azuki.address,
     },
     fallbackOracle
   );
