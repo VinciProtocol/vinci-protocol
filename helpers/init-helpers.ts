@@ -49,8 +49,6 @@ export const initNFTVaultByHelper = async (
   ntokenGetter: (marketId: string, nftSymbol: string, address?: tEthereumAddress)=> Promise<any>,
   verify: boolean
 ) => {
-  const addressProvider = await getLendingPoolAddressesProvider(marketId);
-  
   // CHUNK CONFIGURATION
   const initChunks = 1;
 
@@ -283,8 +281,6 @@ export const configureNFTVaultByHelper = async (
   admin: tEthereumAddress,
   marketId: string
 ) => {
-  const addressProvider = await getLendingPoolAddressesProvider(marketId);
-    const vtokenAndRatesDeployer = await getVTokensAndRatesHelper(marketId);
   const tokens: string[] = [];
   const symbols: string[] = [];
 

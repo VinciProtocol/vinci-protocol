@@ -81,6 +81,7 @@ export const setInitialAssetPricesInOracle = async (
     const [, assetAddress] = (Object.entries(assetsAddresses) as [string, string][])[
       assetAddressIndex
     ];
+    if (!assetAddress) continue;
     await waitForTx(await priceOracleInstance.setAssetPrice(assetAddress, price));
   }
 };
