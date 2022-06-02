@@ -66,10 +66,6 @@ export const buildLibrary = <T>(
 ): iParamsPerNetwork<T | undefined> => {
     return build(
         param,
-        {
-            ["contracts/protocol/libraries/logic/ReserveLogic.sol:ReserveLogic"]: '',
-            ["contracts/protocol/libraries/logic/NFTVaultLogic.sol:NFTVaultLogic"]: '',
-            ["contracts/protocol/libraries/logic/ValidationLogic.sol:ValidationLogic"]: '',
-        },
+        {},
     );
 };

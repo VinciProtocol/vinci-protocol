@@ -177,6 +177,7 @@ export enum ERC721TokenContractId {
   CloneX = 'CloneX',
   MEKA = 'MEKA',
   Azuki = 'Azuki',
+  DOODLE = 'DOODLE',
 }
 
 export interface iAssetBase<T> {
@@ -189,6 +190,7 @@ export interface iAssetBase<T> {
   CloneX: T;
   MEKA: T;
   Azuki: T;
+  DOODLE: T;
 }
 
 export type iAssetsWithoutUSD<T> = Omit<iAssetBase<T>, 'USD'>;
@@ -218,6 +220,11 @@ export type iVinciPoolMAYCAssets<T> = Pick<
 export type iVinciPoolAzukiAssets<T> = Pick<
   iAssetsWithoutUSD<T>,
   | 'Azuki'
+>;
+
+export type iVinciPoolDOODLEAssets<T> = Pick<
+  iAssetsWithoutUSD<T>,
+  | 'DOODLE'
 >;
 
 export type iVinciPoolLockDropAssets<T> = Pick<
@@ -353,6 +360,11 @@ export interface IVinciConfigurationMAYCNoBorrowing extends ICommonConfiguration
 export interface IVinciConfigurationAzuki extends ICommonConfiguration {
   ReservesConfig: {};
   NFTVaultConfig: iVinciPoolAzukiAssets<INFTVaultParams>;
+}
+
+export interface IVinciConfigurationDOODLE extends ICommonConfiguration {
+  ReservesConfig: {};
+  NFTVaultConfig: iVinciPoolDOODLEAssets<INFTVaultParams>;
 }
 
 export interface IVinciConfigurationMAYC extends ICommonConfiguration {

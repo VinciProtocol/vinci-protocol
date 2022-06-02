@@ -300,6 +300,16 @@ export const deployLendingPool = async (marketId: string, verify?: boolean) => {
   return withSaveAndVerify(lendingPoolImpl, eContractid.LendingPool, [], verify, marketId);
 };
 
+export const deployLendingPoolWithLibraries = async (
+  marketId: string,
+  libraries: LendingPoolLibraryAddresses,
+  verify?: boolean,
+) => {
+  const lendingPoolImpl = await new LendingPool__factory(libraries, await getFirstSigner()).deploy();
+  await insertContractAddressInDb(eContractid.LendingPoolImpl, lendingPoolImpl.address, marketId);
+  return withSaveAndVerify(lendingPoolImpl, eContractid.LendingPool, [], verify, marketId);
+};
+
 export const deployLendingPoolConfigurator = async (marketId: string, verify?: boolean) => {
   const lendingPoolConfiguratorImpl = await new LendingPoolConfigurator__factory(
     await getFirstSigner()
