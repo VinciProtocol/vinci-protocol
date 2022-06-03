@@ -25,14 +25,11 @@ import {
   deployNTokenImplementations,
   deployAaveOracle,
   deployTreasury,
-  deployRangeEligibility,
-  deployAllMockEligibilities
 } from '../helpers/contracts-deployments';
 import { Signer } from 'ethers';
 import { TokenContractId, ERC721TokenContractId, eContractid, tEthereumAddress, VinciPools } from '../helpers/types';
 import { MintableERC20 } from '../types/MintableERC20';
 import { ERC721Mocked } from '../types/ERC721Mocked';
-import { NFTXEligibility } from '../types/NFTXEligibility';
 import {
   ConfigNames,
   getReservesConfigByPool,
@@ -108,11 +105,6 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
   } = {
     ...(await deployAllMockTokens(deployer)),
   };
-  const eligibilities: {
-    [symbol: string]: NFTXEligibility
-  } = { 
-    ... (await deployAllMockEligibilities(marketId)), 
-  };
   const addressesProvider = await deployLendingPoolAddressesProvider(marketId);
   await waitForTx(await addressesProvider.setPoolAdmin(aaveAdmin));
 
@@ -184,13 +176,6 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
     {}
   );
 
-  const allEligibilityAddresses = Object.entries(eligibilities).reduce(
-    (accum: { [tokenSymbol: string]: tEthereumAddress }, [tokenSymbol, eligibility]) => ({
-      ...accum,
-      [tokenSymbol]: eligibility.address,
-    }),
-    {}
-  )
   const allAggregatorsAddresses = Object.entries(mockAggregators).reduce(
     (accum: { [tokenSymbol: string]: tEthereumAddress }, [tokenSymbol, aggregator]) => ({
       ...accum,
@@ -272,7 +257,6 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
   await initNFTVaultByHelper(
     nftVaultsParams,
     allReservesAddresses,
-    allEligibilityAddresses,
     'https://meta.vinci.com/',
     VTokenNamePrefix,
     SymbolPrefix,

@@ -12,4 +12,8 @@ export const strategyBAYC: INFTVaultParams = {
   liquidationBonus: '10500',
   nTokenImpl: eContractid.NToken,
   lockdropExpiration: '1672502400', // 2023-01-01 0:00:00
+  eligibility: {
+    name: 'Range',
+    args: [1, 1000],
+  },
 };

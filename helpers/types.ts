@@ -1,3 +1,6 @@
+import { any, string } from "hardhat/internal/core/params/argumentTypes";
+import { INFTXEligibility } from "../types";
+
 export interface SymbolMap<T> {
   [symbol: string]: T;
 }
@@ -257,11 +260,17 @@ export interface IReserveParams extends IReserveBorrowParams, IReserveCollateral
   strategy: IInterestRateStrategyParams;
 }
 
+export interface INFTEligibilityParams {
+  name: string;
+  args: any;
+}
+
 export interface INFTVaultParams extends IReserveCollateralParams {
   name: string;
   symbol: string;
   nTokenImpl: eContractid;
   lockdropExpiration: string;
+  eligibility: INFTEligibilityParams;
 }
 
 export interface IReserveBorrowParams {

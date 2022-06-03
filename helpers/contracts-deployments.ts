@@ -678,7 +678,7 @@ export const deployRangeEligibility = async (
   return implementation;
 }
 
-export const deployNFTXAllowAllEligibility = async (
+export const deployAllowAllEligibility = async (
     tokenSymbol: string,
     marketId: string,
     verify?: boolean
@@ -693,10 +693,18 @@ export const deployNFTXAllowAllEligibility = async (
     return implementation;
 }
 
-export const deployAllMockEligibilities = async (marketId: string, verify?: boolean) => {
-  const eligibilities: { [symbol: string]: NFTXEligibility} = {};
-  for (const tokenSymbol of Object.keys(ERC721TokenContractId)) {
-    eligibilities[tokenSymbol] = await deployNFTXAllowAllEligibility(tokenSymbol.toLocaleUpperCase(), marketId, verify);
+export const deployEligibility = async (
+  tokenSymbol: string,
+  eligibilityName: string,
+  marketId: string,
+  verify?: boolean
+) => {
+  switch(eligibilityName.toUpperCase()){
+    case 'ALLOWALL':
+      return deployAllowAllEligibility(tokenSymbol, marketId, verify);
+    case 'RANGE':
+      return deployRangeEligibility(tokenSymbol, marketId, verify);
+    default:
+      throw `Unkown eligibility type: ${eligibilityName} for ${tokenSymbol} in market ${marketId}`;
   }
-  return eligibilities;
 }

@@ -182,15 +182,14 @@ export const getMockEligibility = async (marketId: string, address: tEthereumAdd
         await getFirstSigner()
     );
 
-export const getEligibilityAddress = async (marketId: string, tokenSymbol: string, address?: tEthereumAddress) => {
-    await NFTXRangeEligibility__factory.connect(
+export const getEligibility = async (marketId: string, tokenSymbol: string, address?: tEthereumAddress) =>
+    await NFTXEligibility__factory.connect(
         address ||
         (
             await getMarketDb().get(`${tokenSymbol}Eligibility.${DRE.network.name}.${marketId}`).value()
         ).address,
         await getFirstSigner()
     );
-}
 
 export const getAllMockedTokens = async () => {
   const db = getDb();
@@ -225,7 +224,7 @@ export const getAllMockedEligibility = async (marketId: string) => {
     const eligibilities: MockEligibilityMap = await Object.keys(ERC721TokenContractId).reduce<Promise<MockEligibilityMap>>(
         async (acc, tokenSymbol) => {
             const accumulator = await acc;
-            const address = (await db.get(`${tokenSymbol.toUpperCase()}Eligibility.${DRE.network.name}.${marketId}`).value()).address;
+            const address = (await db.get(`${tokenSymbol}Eligibility.${DRE.network.name}.${marketId}`).value()).address;
             accumulator[tokenSymbol] = await getMockEligibility(marketId, address);
             return Promise.resolve(acc);
         },
@@ -239,7 +238,7 @@ export const getAllEligibilityAddresses = async (marketId: string, tokenSymbols:
     const eligibilities: EligibilityAddressMap = await tokenSymbols.reduce<Promise<EligibilityAddressMap>>(
         async (acc, tokenSymbol) => {
             const accumulator = await acc;
-            const address = (await db.get(`${tokenSymbol.toUpperCase()}Eligibility.${DRE.network.name}.${marketId}`).value()).address;
+            const address = (await db.get(`${tokenSymbol}Eligibility.${DRE.network.name}.${marketId}`).value()).address;
             accumulator[tokenSymbol] = address;
             return Promise.resolve(acc);
         },

@@ -16,13 +16,14 @@ import {
   getNToken,
   getTimeLockableNToken,
   getTimeLockableNTokenForTest,
+  getEligibility,
 } from './contracts-getters';
 import {
   getContractAddressWithJsonFallback,
 } from './contracts-helpers';
-import { BigNumberish, BytesLike } from 'ethers';
+import { BigNumberish, BytesLike, utils } from 'ethers';
 import { ConfigNames, loadPoolConfig } from './configuration';
-import { deployRateStrategy } from './contracts-deployments';
+import { deployRateStrategy, deployEligibility } from './contracts-deployments';
 
 export const getVTokenExtraParams = async (vTokenName: string, tokenAddress: tEthereumAddress) => {
   switch (vTokenName) {
@@ -38,17 +39,27 @@ export const getNTokenExtraParams = async (nTokenName: string, tokenAddress: tEt
   }
 };
 
-export const getNTokenEligibilityParams = async (nTokenName: string, tokenAddress: tEthereumAddress, eligibilityAddress: tEthereumAddress) => {
-  switch (nTokenName) {
-    default:
-      return new Array();
-  }
+export const getNFTXRangeEligibilityParams = (start: BigNumberish, end: BigNumberish): BytesLike => {
+  const abiCoder = new utils.AbiCoder;
+  return abiCoder.encode(["uint256", "uint256"], [start, end]);
 }
+
+export const getNTokenEligibilityParams = async (nTokenName: string, eligibilityAddress: tEthereumAddress, eligibilityParams: any, marketId: string): Promise<BytesLike> => {
+  const eligibility = await getEligibility(marketId, nTokenName, eligibilityAddress);
+  const eligibilityName = await eligibility.name();
+  switch (eligibilityName.toUpperCase()) {
+    case 'ALLOWALL':
+      return '';
+    case 'RANGE':
+      return getNFTXRangeEligibilityParams(eligibilityParams[0], eligibilityParams[1]);
+    default:
+      return '';
+  }
+};
 
 export const initNFTVaultByHelper = async (
   NFTVaultInputParams: iMultiPoolsAssets<INFTVaultParams>,
   tokenAddresses: { [symbol: string]: tEthereumAddress },
-  eligibilityAddresses: { [symbol: string]: tEthereumAddress },
   baseURI,
   nTokenNamePrefix: string,
   symbolPrefix: string,
@@ -83,17 +94,18 @@ export const initNFTVaultByHelper = async (
     }
     // Prepare input parameters
     const ntoken = await ntokenGetter(marketId, symbol);
+    const eligibility = await deployEligibility(symbol, params.eligibility.name, marketId, verify);
     reserveSymbols.push(symbol);
     initNFTVaultInputParams.push({
       nTokenImpl: ntoken.address,
       underlyingAsset: tokenAddresses[symbol],
-      nftEligibility: eligibilityAddresses[symbol],
+      nftEligibility: eligibility.address,
       underlyingAssetName: symbol,
       nTokenName: `${nTokenNamePrefix} ${symbol}`,
       nTokenSymbol: `n${symbolPrefix}${symbol}`,
       baseURI: baseURI,
       params: await getNTokenExtraParams(tokenAddresses[symbol], ntoken.address),
-      eligibilityParams: await getNTokenEligibilityParams(tokenAddresses[symbol], ntoken.address, eligibilityAddresses[symbol]),
+      eligibilityParams: await getNTokenEligibilityParams(symbol, eligibility.address, params.eligibility.args, marketId),
     });
   }
 
