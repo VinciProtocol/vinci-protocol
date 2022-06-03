@@ -49,11 +49,11 @@ export const getNTokenEligibilityParams = async (nTokenName: string, eligibility
   const eligibilityName = await eligibility.name();
   switch (eligibilityName.toUpperCase()) {
     case 'ALLOWALL':
-      return '';
+      return new Array();
     case 'RANGE':
       return getNFTXRangeEligibilityParams(eligibilityParams[0], eligibilityParams[1]);
     default:
-      return '';
+      return new Array();
   }
 };
 
