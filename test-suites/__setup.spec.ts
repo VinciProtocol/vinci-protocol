@@ -25,6 +25,8 @@ import {
   deployNTokenImplementations,
   deployAaveOracle,
   deployTreasury,
+  deployVinciLibraries,
+  deployLendingPoolWithLibraries,
 } from '../helpers/contracts-deployments';
 import { Signer } from 'ethers';
 import { TokenContractId, ERC721TokenContractId, eContractid, tEthereumAddress, VinciPools } from '../helpers/types';
@@ -48,9 +50,11 @@ import VinciConfig from '../markets/vinci';
 import { oneEther, ZERO_ADDRESS } from '../helpers/constants';
 import {
   getLendingPool,
+  getLendingPoolCollateralManager,
   getLendingPoolConfiguratorProxy,
   getPairsTokenAggregator,
   getTimeLockableNToken,
+  getVinciLibraries,
 } from '../helpers/contracts-getters';
 import { WETH9Mocked } from '../types/WETH9Mocked';
 
@@ -118,7 +122,9 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
     await addressesProviderRegistry.registerAddressesProvider(addressesProvider.address, 1)
   );
 
-  const lendingPoolImpl = await deployLendingPool(marketId);
+  await deployVinciLibraries();
+
+  const lendingPoolImpl = await deployLendingPoolWithLibraries(marketId, await getVinciLibraries(), false);
 
   await waitForTx(await addressesProvider.setLendingPoolImpl(lendingPoolImpl.address));
 
@@ -267,9 +273,9 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
 
   await configureNFTVaultByHelper(nftVaultsParams, allReservesAddresses, testHelpers, admin, marketId);
 
-  const collateralManager = await deployLendingPoolCollateralManager(marketId);
+  await deployLendingPoolCollateralManager();
   await waitForTx(
-    await addressesProvider.setLendingPoolCollateralManager(collateralManager.address)
+    await addressesProvider.setLendingPoolCollateralManager((await getLendingPoolCollateralManager()).address)
   );
 
   await deployWalletBalancerProvider();

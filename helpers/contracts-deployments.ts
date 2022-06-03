@@ -209,11 +209,11 @@ export const deployReserveLogicLibrary = async (verify?: boolean) =>
 export const deployNFTVaultLogic = async (verify?: boolean) => {
   const NFTVaultLogicArtifact = await readArtifact(eContractid.NFTVaultLogic);
 
-  const linkedGenericLogicByteCode = linkBytecode(NFTVaultLogicArtifact, {});
+  const linkedNFTVaultLogicByteCode = linkBytecode(NFTVaultLogicArtifact, {});
 
   const NFTVaultLogicFactory = await DRE.ethers.getContractFactory(
     NFTVaultLogicArtifact.abi,
-    linkedGenericLogicByteCode
+    linkedNFTVaultLogicByteCode
   );
 
   const NFTVaultLogic = await (
@@ -559,21 +559,19 @@ export const deployAaveOracle = async (
     verify
   );
 
-export const deployLendingPoolCollateralManager = async (marketId: string, verify?: boolean) => {
+export const deployLendingPoolCollateralManager = async (verify?: boolean) => {
     const collateralManagerImpl = await new LendingPoolCollateralManager__factory(
       await getFirstSigner()
     ).deploy();
     await insertContractAddressInDb(
       eContractid.LendingPoolCollateralManagerImpl,
       collateralManagerImpl.address,
-      marketId
     );
     return withSaveAndVerify(
       collateralManagerImpl,
       eContractid.LendingPoolCollateralManager,
       [],
       verify,
-      marketId
     );
   };
 

@@ -12,6 +12,7 @@ import {
     MockAggregator__factory,
     ReserveLogic__factory,
     GenericLogic__factory,
+    ValidationLogic__factory,
     VToken__factory,
     VTokensAndRatesHelper__factory,
     WETH9Mocked__factory,
@@ -27,13 +28,19 @@ import {
     NFTXEligibility__factory,
     AaveCollector,
     TimeLockableNToken__factory,
-    TimeLockableNTokenForTest__factory
+    TimeLockableNTokenForTest__factory,
+    LendingPoolCollateralManager__factory
  } from "../types";
 import { MintableERC20 } from '../types/MintableERC20';
 import { ERC721Mocked } from '../types/ERC721Mocked';
-import { getEthersSigners } from './contracts-helpers';
+import { getEthersSigners, linkBytecode } from './contracts-helpers';
 import { DRE, getDb, getMarketDb,notFalsyOrZeroAddress, omit } from './misc-utils';
-import { eContractid, tEthereumAddress, TokenContractId, ERC721TokenContractId } from "./types";
+import { eContractid, tEthereumAddress, TokenContractId, ERC721TokenContractId, eEthereumNetwork } from "./types";
+import { LendingPoolLibraryAddresses } from '../types/factories/LendingPool__factory';
+import { readArtifact as buidlerReadArtifact } from '@nomiclabs/buidler/plugins';
+import { HardhatRuntimeEnvironment } from 'hardhat/types';
+import { ethers } from "ethers";
+
 export const getFirstSigner = async () => (await getEthersSigners())[0];
 export type MockTokenMap = { [symbol: string]: MintableERC20 };
 export type MockERC721TokenMap = { [symbol: string]: ERC721Mocked };
@@ -80,11 +87,31 @@ export const getGenericLogic = async (address?: tEthereumAddress) =>
     await getFirstSigner()
   );
 
-export const getNFTVaultLogic = async (address?: tEthereumAddress) =>
-  await GenericLogic__factory.connect(
+const readArtifact = async (id: string) => {
+    if (DRE.network.name === eEthereumNetwork.buidlerevm) {
+      return buidlerReadArtifact(DRE.config.paths.artifacts, id);
+    }
+    return (DRE as HardhatRuntimeEnvironment).artifacts.readArtifact(id);
+  };
+
+export const getNFTVaultLogic = async (address?: tEthereumAddress) => {
+  const NFTVaultLogicArtifact = await readArtifact(eContractid.NFTVaultLogic);
+
+  return new DRE.ethers.Contract(
     address ||
       (
-        await getDb().get(`${eContractid.GenericLogic}.${DRE.network.name}`).value()
+        await getDb().get(`${eContractid.NFTVaultLogic}.${DRE.network.name}`).value()
+      ).address,
+    NFTVaultLogicArtifact.abi,
+    await getFirstSigner()
+  );
+}
+
+export const getValidationLogic = async (address?: tEthereumAddress) =>
+  await ValidationLogic__factory.connect(
+    address ||
+      (
+        await getDb().get(`${eContractid.ValidationLogic}.${DRE.network.name}`).value()
       ).address,
     await getFirstSigner()
   );
@@ -116,6 +143,15 @@ export const getLendingPoolConfiguratorProxy = async (marketId: string, address?
     await getFirstSigner()
   );
 };
+
+export const getLendingPoolCollateralManager = async (address?: tEthereumAddress) => 
+  await LendingPoolCollateralManager__factory.connect(
+    address ||
+    (
+      await getDb().get(`${eContractid.LendingPoolCollateralManagerImpl}.${DRE.network.name}`).value()
+    ).address,
+    await getFirstSigner()
+  );
 
 export const getStableAndVariableTokensHelper = async (marketId: string, address?: tEthereumAddress) =>
   await StableAndVariableTokensHelper__factory.connect(
@@ -392,3 +428,28 @@ export const getTreasury = async (address?: tEthereumAddress) =>
     address || (await getDb().get(`AaveTreasury.${DRE.network.name}`).value()).address,
     await getFirstSigner()
   );
+
+  export const getVinciLibraries = async (
+  ): Promise<LendingPoolLibraryAddresses> => {
+    const reserveLogic = await getReserveLogic();
+    const NFTVaultLogic = await getNFTVaultLogic();
+    const validationLogic = await getValidationLogic();
+  
+    // Hardcoded solidity placeholders, if any library changes path this will fail.
+    // The '__$PLACEHOLDER$__ can be calculated via solidity keccak, but the LendingPoolLibraryAddresses Type seems to
+    // require a hardcoded string.
+    //
+    //  how-to:
+    //  1. PLACEHOLDER = solidityKeccak256(['string'], `${libPath}:${libName}`).slice(2, 36)
+    //  2. LIB_PLACEHOLDER = `__$${PLACEHOLDER}$__`
+    // or grab placeholdes from LendingPoolLibraryAddresses at Typechain generation.
+    //
+    // libPath example: contracts/libraries/logic/GenericLogic.sol
+    // libName example: GenericLogic
+  
+    return {
+      ["contracts/protocol/libraries/logic/ReserveLogic.sol:ReserveLogic"]: reserveLogic.address,
+      ["contracts/protocol/libraries/logic/NFTVaultLogic.sol:NFTVaultLogic"]: NFTVaultLogic.address,
+      ["contracts/protocol/libraries/logic/ValidationLogic.sol:ValidationLogic"]: validationLogic.address,
+    };
+  };
