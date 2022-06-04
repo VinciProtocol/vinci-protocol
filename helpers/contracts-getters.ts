@@ -310,7 +310,7 @@ export const getLendingPoolConfiguratorImpl = async (address?: tEthereumAddress)
   await LendingPoolConfigurator__factory.connect(
     address ||
       (
-        await getMarketDb().get(`${eContractid.LendingPoolConfiguratorImpl}.${DRE.network.name}`).value()
+        await getDb().get(`${eContractid.LendingPoolConfiguratorImpl}.${DRE.network.name}`).value()
       ).address,
     await getFirstSigner()
   );
