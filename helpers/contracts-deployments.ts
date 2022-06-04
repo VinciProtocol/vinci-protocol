@@ -1,6 +1,6 @@
 import { Contract } from 'ethers';
 import { DRE, notFalsyOrZeroAddress } from './misc-utils';
-import { BigNumber } from 'BigNumber.js';
+
 
 import {
   tEthereumAddress,
@@ -9,9 +9,7 @@ import {
   VinciPools,
   TokenContractId,
   ERC721TokenContractId,
-  iMultiPoolsAssets,
   IReserveParams,
-  INFTVaultParams,
   eEthereumNetwork,
 } from './types';
 import { MintableERC20 } from '../types/MintableERC20';
@@ -20,7 +18,6 @@ import { MockContract } from 'ethereum-waffle';
 import { 
   ConfigNames, 
   getReservesConfigByPool, 
-  getNFTVaultConfigByPool, 
   loadPoolConfig 
 } from './configuration';
 
@@ -440,62 +437,38 @@ export const deployVTokenImplementations = async (
 };
 
 
-export const deployNToken = async (marketId: string, nftSymbol: string, verify?: boolean) =>
+export const deployNToken = async (verify?: boolean) =>
   withSaveAndVerify(
     await new NToken__factory(await getFirstSigner()).deploy(),
     eContractid.NToken,
     [],
-    verify,
-    `${marketId}.vn${nftSymbol}`
+    verify
   );
 
-export const deployTimeLockableNToken = async (marketId: string, nftSymbol: string, verify?: boolean) =>
+export const deployTimeLockableNToken = async (verify?: boolean) =>
   withSaveAndVerify(
     await new TimeLockableNToken__factory(await getFirstSigner()).deploy(),
     eContractid.TimeLockableNToken,
     [],
-    verify,
-    `${marketId}.vn${nftSymbol}`
+    verify
   );
 
-export const deployTimeLockableNTokenForTest = async (marketId: string, nftSymbol: string, verify?: boolean) =>
+export const deployTimeLockableNTokenForTest = async (verify?: boolean) =>
   withSaveAndVerify(
     await new TimeLockableNTokenForTest__factory(await getFirstSigner()).deploy(),
     eContractid.TimeLockableNTokenForTest,
     [],
-    verify,
-    `${marketId}.vn${nftSymbol}`
+    verify
   );
 
-
-export const deployNTokenImplementations = async (
-  marketId: string,
-  NFTVaultInputParams: iMultiPoolsAssets<INFTVaultParams>,
-  verify?: boolean
-) => {
-  const NFTVault = Object.entries(NFTVaultInputParams);
-  for (let [symbol, params] of NFTVault) {
-    if(new BigNumber(params.lockdropExpiration) > new BigNumber(0)){
-      await deployTimeLockableNToken(marketId, symbol, verify);
-    } else {
-      await deployNToken(marketId, symbol, verify);
-    }
-  };
+export const deployNTokenImplementations = async(verify?: boolean) => {
+  await deployTimeLockableNToken(verify);
+  await deployNToken(verify);
 };
 
-export const deployNTokenImplementationsForTest = async (
-  marketId: string,
-  NFTVaultInputParams: iMultiPoolsAssets<INFTVaultParams>,
-  verify?: boolean
-) => {
-  const NFTVault = Object.entries(NFTVaultInputParams);
-  for (let [symbol, params] of NFTVault) {
-    if (new BigNumber(params.lockdropExpiration) > new BigNumber(0)){
-      await deployTimeLockableNTokenForTest(marketId, symbol, verify);
-    } else {
-      await deployNToken(marketId, symbol, verify);
-    }
-  };
+export const deployNTokenImplementationsForTest = async(verify?: boolean) => {
+  await deployTimeLockableNTokenForTest(verify);
+  await deployNToken(verify);
 };
 
 export const deployPriceOracle = async (verify?: boolean) =>
@@ -653,47 +626,42 @@ export const deployTreasury = async (
 };
 
 export const deployRangeEligibility = async (
-  tokenSymbol: string,
-  marketId: string,
   verify?: boolean
-) => {
-  const implementation = await withSaveAndVerify(
+) => await withSaveAndVerify(
     await new NFTXRangeEligibility__factory(await getFirstSigner()).deploy(),
-    `${tokenSymbol}EligibilityImpl`,
+    `RangeEligibilityImpl`,
     [],
-    verify,
-    marketId
+    verify
   );
-  return implementation;
-}
 
 export const deployAllowAllEligibility = async (
-    tokenSymbol: string,
-    marketId: string,
     verify?: boolean
-) => {
-    const implementation = await withSaveAndVerify(
-        await new NFTXAllowAllEligibility__factory(await getFirstSigner()).deploy(),
-        `${tokenSymbol}EligibilityImpl`,
-        [],
-        verify,
-        marketId
-    );
-    return implementation;
-}
+) => await withSaveAndVerify(
+    await new NFTXAllowAllEligibility__factory(await getFirstSigner()).deploy(),
+    `AllowAllEligibilityImpl`,
+    [],
+    verify
+  );
 
 export const deployEligibility = async (
-  tokenSymbol: string,
   eligibilityName: string,
-  marketId: string,
   verify?: boolean
 ) => {
   switch(eligibilityName.toUpperCase()){
     case 'ALLOWALL':
-      return deployAllowAllEligibility(tokenSymbol, marketId, verify);
+      return deployAllowAllEligibility(verify);
     case 'RANGE':
-      return deployRangeEligibility(tokenSymbol, marketId, verify);
+      return deployRangeEligibility(verify);
     default:
-      throw `Unkown eligibility type: ${eligibilityName} for ${tokenSymbol} in market ${marketId}`;
+      throw `Unkown eligibility type: ${eligibilityName}`;
   }
-}
+};
+
+export const deployEligibilities = async (
+  eligibilityNames: Array<string>,
+  verify?: boolean
+) => {
+  for(const eligibilityName of eligibilityNames){
+    await deployEligibility(eligibilityName);
+  }
+};

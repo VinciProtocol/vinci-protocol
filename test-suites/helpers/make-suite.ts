@@ -150,7 +150,7 @@ export async function initializeMakeSuite() {
 
   testEnv.dai = await getMintableERC20(daiAddress);
 
-  testEnv.nNFT = await getTimeLockableNToken(testEnv.marketId, 'BAYC', nNFTAddress);
+  testEnv.nNFT = await getTimeLockableNToken(nNFTAddress);
   testEnv.nft = await getMockERC721Token(nftAddress);
   //testEnv.wethGateway = await getWETHGateway();
 }

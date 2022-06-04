@@ -22,7 +22,6 @@ import {
     AaveOracle__factory,
     PriceOracle__factory,
     AaveCollector__factory,
-    NFTXRangeEligibility__factory,
     NFTXRangeEligibility,
     WETHGateway__factory,
     NFTXEligibility__factory,
@@ -31,6 +30,11 @@ import {
     TimeLockableNTokenForTest__factory,
     LendingPoolCollateralManager__factory
  } from "../types";
+import {
+  iMultiPoolsAssets,
+  INFTVaultParams,
+} from './types';
+import { BigNumber } from 'BigNumber.js';
 import { MintableERC20 } from '../types/MintableERC20';
 import { ERC721Mocked } from '../types/ERC721Mocked';
 import { getEthersSigners, linkBytecode } from './contracts-helpers';
@@ -218,11 +222,34 @@ export const getMockERC721Token = async (address: tEthereumAddress) =>
     await getFirstSigner()
   );
 
-export const getEligibility = async (marketId: string, tokenSymbol: string, address?: tEthereumAddress) =>
+export const getEligibility = async (
+    eligibilityName: string,
+    address?: tEthereumAddress
+  ) => {
+    switch(eligibilityName.toUpperCase()){
+      case 'ALLOWALL':
+        return getAllowAllEligibility(address);
+      case 'RANGE':
+        return getRangeEligibility(address);
+      default:
+        throw `Unkown eligibility type: ${eligibilityName}`;
+    }
+  }
+
+export const getAllowAllEligibility = async (address?: tEthereumAddress) =>
     await NFTXEligibility__factory.connect(
         address ||
         (
-            await getMarketDb().get(`${tokenSymbol}EligibilityImpl.${DRE.network.name}.${marketId}`).value()
+            await getDb().get(`AllowAllEligibilityImpl.${DRE.network.name}`).value()
+        ).address,
+        await getFirstSigner()
+    );
+
+export const getRangeEligibility = async (address?: tEthereumAddress) =>
+    await NFTXEligibility__factory.connect(
+        address ||
+        (
+            await getDb().get(`RangeEligibilityImpl.${DRE.network.name}`).value()
         ).address,
         await getFirstSigner()
     );
@@ -346,30 +373,48 @@ export const getWETHMocked = async (address?: tEthereumAddress) =>
   );
 
 export const getNTokenAddressFromDb = async (
-  marketId: string,
   contractId: eContractid,
-  nftSymbol: string
 ): Promise<tEthereumAddress> => {
-  return (await getMarketDb().get(`${contractId}.${DRE.network.name}.${marketId}.vn${nftSymbol}`).value()).address;
+  return (await getDb().get(`${contractId}.${DRE.network.name}`).value()).address;
 }
 
-export const getNToken = async (marketId: string, nftSymbol: string, address?: tEthereumAddress) =>
+export const getNToken = async (address?: tEthereumAddress) =>
   await NToken__factory.connect(
-    address || (await getNTokenAddressFromDb(marketId, eContractid.NToken, nftSymbol)),
+    address || (await getNTokenAddressFromDb(eContractid.NToken)),
     await getFirstSigner()
   );
 
-export const getTimeLockableNToken = async (marketId: string, nftSymbol: string, address?: tEthereumAddress) =>
+export const getTimeLockableNToken = async (address?: tEthereumAddress) =>
   await TimeLockableNToken__factory.connect(
-    address || (await getNTokenAddressFromDb(marketId, eContractid.TimeLockableNToken, nftSymbol)),
+    address || (await getNTokenAddressFromDb(eContractid.TimeLockableNToken)),
     await getFirstSigner()
   );
 
-export const getTimeLockableNTokenForTest = async (marketId: string, nftSymbol: string, address?: tEthereumAddress) =>
+export const getTimeLockableNTokenForTest = async (address?: tEthereumAddress) =>
   await TimeLockableNTokenForTest__factory.connect(
-    address || (await getNTokenAddressFromDb(marketId, eContractid.TimeLockableNTokenForTest, nftSymbol)),
+    address || (await getNTokenAddressFromDb(eContractid.TimeLockableNTokenForTest)),
     await getFirstSigner()
   );
+
+export const getNTokenImplementation = async (
+    params: INFTVaultParams,
+  ) => {
+    if(new BigNumber(params.lockdropExpiration) > new BigNumber(0)){
+      return getTimeLockableNToken();
+    } else {
+      return getNToken();
+    }
+  };
+  
+  export const getNTokenImplementationForTest = async (
+    params: INFTVaultParams,
+  ) => {
+    if (new BigNumber(params.lockdropExpiration) > new BigNumber(0)){
+      return getTimeLockableNTokenForTest();
+    } else {
+      return getNToken();
+    }
+  };
   
 export const getAaveProtocolDataProvider = async (marketId: string, address?: tEthereumAddress) =>
   await AaveProtocolDataProvider__factory.connect(

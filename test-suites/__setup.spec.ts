@@ -12,7 +12,8 @@ import {
   deployERC721Mocked,
   deployLendingPoolAddressesProviderRegistry,
   deployLendingPoolConfigurator,
-  deployLendingPool,
+  deployEligibilities,
+  deployNTokenImplementationsForTest,
   deployPriceOracle,
   deployLendingPoolCollateralManager,
   deployWalletBalancerProvider,
@@ -22,7 +23,6 @@ import {
   deployVTokensAndRatesHelper,
   deployWETHMocked,
   deployVTokenImplementations,
-  deployNTokenImplementations,
   deployAaveOracle,
   deployTreasury,
   deployVinciLibraries,
@@ -53,7 +53,7 @@ import {
   getLendingPoolCollateralManager,
   getLendingPoolConfiguratorProxy,
   getPairsTokenAggregator,
-  getTimeLockableNToken,
+  getNTokenImplementationForTest,
   getVinciLibraries,
 } from '../helpers/contracts-getters';
 import { WETH9Mocked } from '../types/WETH9Mocked';
@@ -109,6 +109,8 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
   } = {
     ...(await deployAllMockTokens(deployer)),
   };
+  await deployEligibilities(['AllowAll', 'Range']);
+  await deployNTokenImplementationsForTest();
   const addressesProvider = await deployLendingPoolAddressesProvider(marketId);
   await waitForTx(await addressesProvider.setPoolAdmin(aaveAdmin));
 
@@ -236,7 +238,6 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
   const testHelpers = await deployAaveProtocolDataProvider(addressesProvider.address, marketId);
 
   await deployVTokenImplementations(ConfigNames.Vinci, reservesParams, false);
-  await deployNTokenImplementations(marketId, nftVaultsParams, false);
 
   const admin = await deployer.getAddress();
 
@@ -267,7 +268,7 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
     VTokenNamePrefix,
     SymbolPrefix,
     marketId,
-    getTimeLockableNToken,
+    getNTokenImplementationForTest,
     false,
   );
 
