@@ -186,11 +186,11 @@ export const getStableAndVariableTokensHelper = async (marketId: string, address
     await getFirstSigner()
   );*/
 
-export const getVariableDebtToken = async (marketId: string, address?: tEthereumAddress) =>
+export const getVariableDebtToken = async (address?: tEthereumAddress) =>
   await VariableDebtToken__factory.connect(
     address ||
       (
-        await getMarketDb().get(`${eContractid.VariableDebtToken}.${DRE.network.name}.${marketId}`).value()
+        await getDb().get(`${eContractid.VariableDebtToken}.${DRE.network.name}`).value()
       ).address,
     await getFirstSigner()
   );

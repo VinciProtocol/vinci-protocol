@@ -27,6 +27,7 @@ import {
   deployTreasury,
   deployVinciLibraries,
   deployLendingPoolWithLibraries,
+  deployGenericVariableDebtToken,
 } from '../helpers/contracts-deployments';
 import { Signer } from 'ethers';
 import { TokenContractId, ERC721TokenContractId, eContractid, tEthereumAddress, VinciPools } from '../helpers/types';
@@ -238,6 +239,7 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
   const testHelpers = await deployAaveProtocolDataProvider(addressesProvider.address, marketId);
 
   await deployVTokenImplementations(ConfigNames.Vinci, reservesParams, false);
+  await deployGenericVariableDebtToken(false);
 
   const admin = await deployer.getAddress();
 

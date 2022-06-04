@@ -27,7 +27,7 @@ export const getReserveData = async (
   const marketId = VinciConfig.MarketId
 
   //const stableDebtToken = await getStableDebtToken(marketId, tokenAddresses.stableDebtTokenAddress);
-  const variableDebtToken = await getVariableDebtToken(marketId, tokenAddresses.variableDebtTokenAddress);
+  const variableDebtToken = await getVariableDebtToken(tokenAddresses.variableDebtTokenAddress);
 
   const principalStableDebt = '0';
   //const { 0: principalStableDebt } = await stableDebtToken.getSupplyData();

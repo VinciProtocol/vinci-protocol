@@ -380,13 +380,12 @@ export const chooseVTokenDeployment = (id: eContractid) => {
     marketId
   );*/
 
-export const deployGenericVariableDebtToken = async (marketId: string, verify?: boolean) =>
+export const deployGenericVariableDebtToken = async (verify?: boolean) =>
   withSaveAndVerify(
     await new VariableDebtToken__factory(await getFirstSigner()).deploy(),
     eContractid.VariableDebtToken,
     [],
-    verify,
-    marketId
+    verify
   );
 
 export const deployVTokenImplementations = async (
@@ -418,7 +417,7 @@ export const deployVTokenImplementations = async (
   }
 
   // Debt tokens, for now all Market configs follows same implementations
-  const genericStableDebtTokenAddress = getOptionalParamAddressPerNetwork(
+  /*const genericStableDebtTokenAddress = getOptionalParamAddressPerNetwork(
     poolConfig.StableDebtTokenImplementation,
     network
   );
@@ -426,14 +425,14 @@ export const deployVTokenImplementations = async (
   const geneticVariableDebtTokenAddress = getOptionalParamAddressPerNetwork(
     poolConfig.VariableDebtTokenImplementation,
     network
-  );
+  );*/
 
   /*if (!notFalsyOrZeroAddress(genericStableDebtTokenAddress)) {
     await deployGenericStableDebtToken(poolConfig.MarketId, verify);
   }*/
-  if (!notFalsyOrZeroAddress(geneticVariableDebtTokenAddress)) {
-    await deployGenericVariableDebtToken(poolConfig.MarketId, verify);
-  }
+  /*if (!notFalsyOrZeroAddress(geneticVariableDebtTokenAddress)) {
+    await deployGenericVariableDebtToken(verify);
+  }*/
 };
 
 

@@ -14,6 +14,7 @@ import {
   getLendingPoolAddressesProvider,
   getLendingPoolConfiguratorProxy,
   getEligibility,
+  getVariableDebtToken,
 } from './contracts-getters';
 import {
   getContractAddressWithJsonFallback,
@@ -224,10 +225,10 @@ export const initReservesByHelper = async (
         eContractid.StableDebtToken,
         poolName
       ),*/
-      variableDebtTokenImpl: await getContractAddressWithJsonFallback(
+      variableDebtTokenImpl: (await getVariableDebtToken()).address,/*getContractAddressWithJsonFallback(
         eContractid.VariableDebtToken,
         poolName
-      ),
+      ),*/
       underlyingAssetDecimals: reserveDecimals,
       interestRateStrategyAddress: strategyAddresses[strategy.name],
       underlyingAsset: tokenAddresses[symbol],
