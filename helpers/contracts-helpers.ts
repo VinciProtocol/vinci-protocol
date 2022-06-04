@@ -208,7 +208,7 @@ export const getContractAddressWithJsonFallback = async (
     return contractAtMarketConfig;
   }
 
-  const contractAtDb = await getMarketDb().get(`${id}.${DRE.network.name}.${poolConfig.MarketId}`).value();
+  const contractAtDb = await getDb().get(`${id}.${DRE.network.name}`).value();
   if (contractAtDb?.address) {
     return contractAtDb.address as tEthereumAddress;
   }

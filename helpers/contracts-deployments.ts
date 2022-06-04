@@ -342,22 +342,20 @@ export const deployVTokensAndRatesHelper = async (
     marketId
   );
 
-export const deployGenericVTokenImpl = async (marketId: string, verify: boolean) =>
+export const deployGenericVTokenImpl = async (verify: boolean) =>
   withSaveAndVerify(
     await new VToken__factory(await getFirstSigner()).deploy(),
     eContractid.VToken,
     [],
-    verify,
-    marketId
+    verify
   );
 
-export const deployDelegationAwareVTokenImpl = async (marketId: string, verify: boolean) =>
+export const deployDelegationAwareVTokenImpl = async (verify: boolean) =>
   withSaveAndVerify(
     await new DelegationAwareVToken__factory(await getFirstSigner()).deploy(),
     eContractid.DelegationAwareVToken,
     [],
-    verify,
-    marketId
+    verify
   );
 
 export const chooseVTokenDeployment = (id: eContractid) => {
@@ -389,52 +387,13 @@ export const deployGenericVariableDebtToken = async (verify?: boolean) =>
   );
 
 export const deployVTokenImplementations = async (
-  pool: ConfigNames,
-  reservesConfig: { [key: string]: IReserveParams },
-  verify = false
+  ids: Array<eContractid>,
+  verify?: boolean,
 ) => {
-  const poolConfig = loadPoolConfig(pool);
-  const network = <eNetwork>DRE.network.name;
-
-  // Obtain the different VToken implementations of all reserves inside the Market config
-  const VTokenImplementations = [
-    ...Object.entries(reservesConfig).reduce<Set<eContractid>>((acc, [, entry]) => {
-      acc.add(entry.vTokenImpl);
-      return acc;
-    }, new Set<eContractid>()),
-  ];
-
-  for (let x = 0; x < VTokenImplementations.length; x++) {
-    const VTokenAddress = getOptionalParamAddressPerNetwork(
-      poolConfig[VTokenImplementations[x].toString()],
-      network
-    );
-    if (!notFalsyOrZeroAddress(VTokenAddress)) {
-      const deployImplementationMethod = chooseVTokenDeployment(VTokenImplementations[x]);
-      console.log(`Deploying implementation`, VTokenImplementations[x]);
-      await deployImplementationMethod(poolConfig.MarketId, verify);
-    }
+  for(const id of ids){
+    await chooseVTokenDeployment(id)(verify);
   }
-
-  // Debt tokens, for now all Market configs follows same implementations
-  /*const genericStableDebtTokenAddress = getOptionalParamAddressPerNetwork(
-    poolConfig.StableDebtTokenImplementation,
-    network
-  );
-
-  const geneticVariableDebtTokenAddress = getOptionalParamAddressPerNetwork(
-    poolConfig.VariableDebtTokenImplementation,
-    network
-  );*/
-
-  /*if (!notFalsyOrZeroAddress(genericStableDebtTokenAddress)) {
-    await deployGenericStableDebtToken(poolConfig.MarketId, verify);
-  }*/
-  /*if (!notFalsyOrZeroAddress(geneticVariableDebtTokenAddress)) {
-    await deployGenericVariableDebtToken(verify);
-  }*/
 };
-
 
 export const deployNToken = async (verify?: boolean) =>
   withSaveAndVerify(
@@ -460,14 +419,23 @@ export const deployTimeLockableNTokenForTest = async (verify?: boolean) =>
     verify
   );
 
-export const deployNTokenImplementations = async(verify?: boolean) => {
-  await deployTimeLockableNToken(verify);
-  await deployNToken(verify);
-};
+export const deployNTokenImplementation = async(id: eContractid, verify?: boolean) => {
+  switch(id){
+    case eContractid.NToken:
+      return deployNToken(verify);
+    case eContractid.TimeLockableNToken:
+      return deployTimeLockableNToken(verify);
+    case eContractid.TimeLockableNTokenForTest:
+      return deployTimeLockableNTokenForTest(verify);
+    default:
+      throw Error(`Missing NToken implementation deployment script for: ${id}`);
+  }
+}
 
-export const deployNTokenImplementationsForTest = async(verify?: boolean) => {
-  await deployTimeLockableNTokenForTest(verify);
-  await deployNToken(verify);
+export const deployNTokenImplementations = async(ids: Array<eContractid>, verify?: boolean) => {
+  for(const id of ids){
+    deployNTokenImplementation(id, verify);
+  }
 };
 
 export const deployPriceOracle = async (verify?: boolean) =>

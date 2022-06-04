@@ -342,9 +342,9 @@ export const getLendingPoolConfiguratorImpl = async (address?: tEthereumAddress)
     await getFirstSigner()
   );
 
-export const getVToken = async (marketId: string, address?: tEthereumAddress) =>
+export const getVToken = async (address?: tEthereumAddress) =>
   await VToken__factory.connect(
-    address || (await getMarketDb().get(`${eContractid.VToken}.${DRE.network.name}.${marketId}`).value()).address,
+    address || (await getDb().get(`${eContractid.VToken}.${DRE.network.name}`).value()).address,
     await getFirstSigner()
   );
 

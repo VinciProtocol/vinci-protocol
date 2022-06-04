@@ -146,7 +146,7 @@ export async function initializeMakeSuite() {
     process.exit(1);
   }
 
-  testEnv.aDai = await getVToken(testEnv.marketId, aDaiAddress);
+  testEnv.aDai = await getVToken(aDaiAddress);
 
   testEnv.dai = await getMintableERC20(daiAddress);
 

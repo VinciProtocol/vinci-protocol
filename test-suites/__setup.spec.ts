@@ -13,7 +13,7 @@ import {
   deployLendingPoolAddressesProviderRegistry,
   deployLendingPoolConfigurator,
   deployEligibilities,
-  deployNTokenImplementationsForTest,
+  deployNTokenImplementations,
   deployPriceOracle,
   deployLendingPoolCollateralManager,
   deployWalletBalancerProvider,
@@ -111,7 +111,7 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
     ...(await deployAllMockTokens(deployer)),
   };
   await deployEligibilities(['AllowAll', 'Range']);
-  await deployNTokenImplementationsForTest();
+  await deployNTokenImplementations([eContractid.TimeLockableNTokenForTest]);
   const addressesProvider = await deployLendingPoolAddressesProvider(marketId);
   await waitForTx(await addressesProvider.setPoolAdmin(aaveAdmin));
 
@@ -238,7 +238,7 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
 
   const testHelpers = await deployAaveProtocolDataProvider(addressesProvider.address, marketId);
 
-  await deployVTokenImplementations(ConfigNames.Vinci, reservesParams, false);
+  await deployVTokenImplementations([eContractid.VToken], false);
   await deployGenericVariableDebtToken(false);
 
   const admin = await deployer.getAddress();

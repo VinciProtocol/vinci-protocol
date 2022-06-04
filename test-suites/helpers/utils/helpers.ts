@@ -145,7 +145,7 @@ const getVTokenUserData = async (
   const vTokenAddress: string = (await helpersContract.getReserveTokensAddresses(reserve))
     .vTokenAddress;
 
-  const vToken = await getVToken(VinciConfig.MarketId, vTokenAddress);
+  const vToken = await getVToken(vTokenAddress);
 
   const scaledBalance = await vToken.scaledBalanceOf(user);
   return scaledBalance.toString();
