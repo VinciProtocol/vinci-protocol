@@ -13,6 +13,7 @@ const fatalErrors = [
 const okErrors = [`Contract source code already verified`];
 
 const unableVerifyError = 'Fail - Unable to verify';
+const alreadyVerified = 'Already Verified';
 
 export const SUPPORTED_ETHERSCAN_NETWORKS = ['localhost', 'vinci', 'kovan', 'matic', 'mumbai', 'rinkeby'];
 
@@ -101,6 +102,9 @@ export const runTaskWithRetry = async (
     }
     console.error('[ETHERSCAN][ERROR]', error.message);
     console.log();
+    if (error.message.includes(alreadyVerified)) {
+      return;
+    }
     console.info(`[ETHERSCAN][[INFO] Retrying attemps: ${counter}.`);
     if (error.message.includes(unableVerifyError)) {
       console.log('[ETHERSCAN][WARNING] Trying to verify via uploading all sources.');
