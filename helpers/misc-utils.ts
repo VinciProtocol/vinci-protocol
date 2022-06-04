@@ -22,7 +22,14 @@ export const evmSnapshot = async () => await DRE.ethers.provider.send('evm_snaps
 export const evmRevert = async (id: string) => DRE.ethers.provider.send('evm_revert', [id]);
 
 
-export const waitForTx = async (tx: ContractTransaction) => await tx.wait(1);
+export const waitForTx = async (tx: ContractTransaction) => {
+  console.log();
+  console.log('🍵 TransactionHash:', tx.hash);
+  const tx3 = await tx.wait(1);
+  console.log('✅ gasUsed', tx3.gasUsed.toString());
+  console.log();
+  return tx3;
+};
 
 interface DbEntry {
   [network: string]: {
