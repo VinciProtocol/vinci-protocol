@@ -2,7 +2,6 @@
 pragma solidity 0.8.11;
 pragma experimental ABIEncoderV2;
 
-import {StableDebtToken} from '../protocol/tokenization/StableDebtToken.sol';
 import {VariableDebtToken} from '../protocol/tokenization/VariableDebtToken.sol';
 import {LendingRateOracle} from '../mocks/oracle/LendingRateOracle.sol';
 import {Ownable} from '../dependencies/openzeppelin/contracts/Ownable.sol';
@@ -22,7 +21,7 @@ contract StableAndVariableTokensHelper is Ownable {
     require(tokens.length == symbols.length, 'Arrays not same length');
     require(pool != address(0), 'Pool can not be zero address');
     for (uint256 i = 0; i < tokens.length; i++) {
-      emit deployedContracts(address(new StableDebtToken()), address(new VariableDebtToken()));
+      emit deployedContracts(address(0), address(new VariableDebtToken()));
     }
   }
 

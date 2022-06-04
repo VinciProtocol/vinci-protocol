@@ -47,7 +47,7 @@ makeSuite('LendingPoolAddressesProvider', (testEnv: TestEnv) => {
 
     const currentAddressesProviderOwner = users[1];
 
-    const mockLendingPool = await deployLendingPool(marketId);
+    const mockLendingPool = await deployLendingPool();
     const proxiedAddressId = utils.keccak256(utils.toUtf8Bytes('RANDOM_PROXIED'));
 
     const proxiedAddressSetReceipt = await waitForTx(

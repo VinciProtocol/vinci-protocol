@@ -87,8 +87,8 @@ contract LendingPoolConfigurator is VersionedInitializable, ILendingPoolConfigur
         )
       );
 
-    address stableDebtTokenProxyAddress =
-      _initContractWithProxy(
+    address stableDebtTokenProxyAddress = address(0);
+    /*  _initContractWithProxy(
         input.stableDebtTokenImpl,
         abi.encodeWithSelector(
           IInitializableDebtToken.initialize.selector,
@@ -100,7 +100,7 @@ contract LendingPoolConfigurator is VersionedInitializable, ILendingPoolConfigur
           input.stableDebtTokenSymbol,
           input.params
         )
-      );
+      );*/
 
     address variableDebtTokenProxyAddress =
       _initContractWithProxy(
@@ -234,7 +234,7 @@ contract LendingPoolConfigurator is VersionedInitializable, ILendingPoolConfigur
    * @dev Updates the stable debt token implementation for the reserve
    **/
   function updateStableDebtToken(UpdateDebtTokenInput calldata input) external onlyPoolAdmin {
-    ILendingPool cachedPool = pool;
+    /*ILendingPool cachedPool = pool;
 
     DataTypes.ReserveData memory reserveData = cachedPool.getReserveData(input.asset);
      
@@ -261,7 +261,7 @@ contract LendingPoolConfigurator is VersionedInitializable, ILendingPoolConfigur
       input.asset,
       reserveData.stableDebtTokenAddress,
       input.implementation
-    );
+    );*/
   }
 
   /**

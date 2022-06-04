@@ -124,7 +124,7 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
 
   await deployVinciLibraries();
 
-  const lendingPoolImpl = await deployLendingPoolWithLibraries(marketId, await getVinciLibraries(), false);
+  const lendingPoolImpl = await deployLendingPoolWithLibraries(await getVinciLibraries(), false);
 
   await waitForTx(await addressesProvider.setLendingPoolImpl(lendingPoolImpl.address));
 
@@ -133,7 +133,7 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
 
   await insertContractAddressInDb(eContractid.LendingPool, lendingPoolProxy.address, marketId);
 
-  const lendingPoolConfiguratorImpl = await deployLendingPoolConfigurator(marketId);
+  const lendingPoolConfiguratorImpl = await deployLendingPoolConfigurator();
   await waitForTx(
     await addressesProvider.setLendingPoolConfiguratorImpl(lendingPoolConfiguratorImpl.address)
   );

@@ -38,7 +38,7 @@ import {
     VTokensAndRatesHelper__factory,
     VToken__factory,
     DelegationAwareVToken__factory,
-    StableDebtToken__factory,
+    //StableDebtToken__factory,
     VariableDebtToken__factory,
     NToken__factory,
     PriceOracle__factory,
@@ -293,38 +293,29 @@ export const deployVinciLibraries = async (
   };
 };
 
-export const deployLendingPool = async (marketId: string, verify?: boolean) => {
+export const deployLendingPool = async (verify?: boolean) => {
   const libraries = await deployVinciLibraries(verify);
   const lendingPoolImpl = await new LendingPool__factory(libraries, await getFirstSigner()).deploy();
-  await insertContractAddressInDb(eContractid.LendingPoolImpl, lendingPoolImpl.address, marketId);
-  return withSaveAndVerify(lendingPoolImpl, eContractid.LendingPool, [], verify, marketId);
+  return withSaveAndVerify(lendingPoolImpl, eContractid.LendingPoolImpl, [], verify);
 };
 
 export const deployLendingPoolWithLibraries = async (
-  marketId: string,
   libraries: LendingPoolLibraryAddresses,
   verify?: boolean,
 ) => {
   const lendingPoolImpl = await new LendingPool__factory(libraries, await getFirstSigner()).deploy();
-  await insertContractAddressInDb(eContractid.LendingPoolImpl, lendingPoolImpl.address, marketId);
-  return withSaveAndVerify(lendingPoolImpl, eContractid.LendingPool, [], verify, marketId);
+  return withSaveAndVerify(lendingPoolImpl, eContractid.LendingPoolImpl, [], verify);
 };
 
-export const deployLendingPoolConfigurator = async (marketId: string, verify?: boolean) => {
+export const deployLendingPoolConfigurator = async (verify?: boolean) => {
   const lendingPoolConfiguratorImpl = await new LendingPoolConfigurator__factory(
     await getFirstSigner()
   ).deploy();
-  await insertContractAddressInDb(
-    eContractid.LendingPoolConfiguratorImpl,
-    lendingPoolConfiguratorImpl.address,
-    marketId
-  );
   return withSaveAndVerify(
     lendingPoolConfiguratorImpl,
-    eContractid.LendingPoolConfigurator,
+    eContractid.LendingPoolConfiguratorImpl,
     [],
     verify,
-    marketId
   );
 };
 
@@ -383,14 +374,14 @@ export const chooseVTokenDeployment = (id: eContractid) => {
   }
 };
 
-export const deployGenericStableDebtToken = async (marketId: string, verify?: boolean) =>
+/*export const deployGenericStableDebtToken = async (marketId: string, verify?: boolean) =>
   withSaveAndVerify(
     await new StableDebtToken__factory(await getFirstSigner()).deploy(),
     eContractid.StableDebtToken,
     [],
     verify,
     marketId
-  );
+  );*/
 
 export const deployGenericVariableDebtToken = async (marketId: string, verify?: boolean) =>
   withSaveAndVerify(
@@ -440,9 +431,9 @@ export const deployVTokenImplementations = async (
     network
   );
 
-  if (!notFalsyOrZeroAddress(genericStableDebtTokenAddress)) {
+  /*if (!notFalsyOrZeroAddress(genericStableDebtTokenAddress)) {
     await deployGenericStableDebtToken(poolConfig.MarketId, verify);
-  }
+  }*/
   if (!notFalsyOrZeroAddress(geneticVariableDebtTokenAddress)) {
     await deployGenericVariableDebtToken(poolConfig.MarketId, verify);
   }

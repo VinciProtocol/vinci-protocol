@@ -5,7 +5,7 @@ import {
     LendingRateOracle__factory,
     LendingPoolConfigurator__factory,
     StableAndVariableTokensHelper__factory,
-    StableDebtToken__factory,
+    //StableDebtToken__factory,
     VariableDebtToken__factory,
     IERC20Metadata__factory,
     MintableERC20__factory,
@@ -116,6 +116,15 @@ export const getValidationLogic = async (address?: tEthereumAddress) =>
     await getFirstSigner()
   );
 
+export const getLendingPoolImpl = async (address?: tEthereumAddress) =>
+  await LendingPool__factory.connect(
+    address ||
+      (
+        await getDb().get(`${eContractid.LendingPoolImpl}.${DRE.network.name}`).value()
+      ).address,
+    await getFirstSigner()
+  );
+
 export const getLendingPool = async (marketId: string, address?: tEthereumAddress) =>
   await LendingPool__factory.connect(
     address ||
@@ -164,14 +173,14 @@ export const getStableAndVariableTokensHelper = async (marketId: string, address
     await getFirstSigner()
   );
 
-export const getStableDebtToken = async (marketId: string, address?: tEthereumAddress) =>
+/*export const getStableDebtToken = async (marketId: string, address?: tEthereumAddress) =>
   await StableDebtToken__factory.connect(
     address ||
       (
         await getMarketDb().get(`${eContractid.StableDebtToken}.${DRE.network.name}.${marketId}`).value()
       ).address,
     await getFirstSigner()
-  );
+  );*/
 
 export const getVariableDebtToken = async (marketId: string, address?: tEthereumAddress) =>
   await VariableDebtToken__factory.connect(
@@ -297,11 +306,11 @@ export const getMockAggregator = async (id: string, address?: tEthereumAddress) 
     );
   };
 
-export const getLendingPoolConfiguratorImpl = async (marketId: string, address?: tEthereumAddress) =>
+export const getLendingPoolConfiguratorImpl = async (address?: tEthereumAddress) =>
   await LendingPoolConfigurator__factory.connect(
     address ||
       (
-        await getMarketDb().get(`${eContractid.LendingPoolConfiguratorImpl}.${DRE.network.name}.${marketId}`).value()
+        await getMarketDb().get(`${eContractid.LendingPoolConfiguratorImpl}.${DRE.network.name}`).value()
       ).address,
     await getFirstSigner()
   );

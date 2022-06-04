@@ -5,7 +5,7 @@ import {
   getIErc20Detailed,
   getMintableERC20,
   getVToken,
-  getStableDebtToken,
+  //getStableDebtToken,
   getVariableDebtToken,
   getMockERC721Token,
 } from '../../../helpers/contracts-getters';
@@ -26,11 +26,12 @@ export const getReserveData = async (
   ]);
   const marketId = VinciConfig.MarketId
 
-  const stableDebtToken = await getStableDebtToken(marketId, tokenAddresses.stableDebtTokenAddress);
+  //const stableDebtToken = await getStableDebtToken(marketId, tokenAddresses.stableDebtTokenAddress);
   const variableDebtToken = await getVariableDebtToken(marketId, tokenAddresses.variableDebtTokenAddress);
 
-  const { 0: principalStableDebt } = await stableDebtToken.getSupplyData();
-  const totalStableDebtLastUpdated = await stableDebtToken.getTotalSupplyLastUpdated();
+  const principalStableDebt = '0';
+  //const { 0: principalStableDebt } = await stableDebtToken.getSupplyData();
+  const totalStableDebtLastUpdated = '0'; //await stableDebtToken.getTotalSupplyLastUpdated();
 
   const scaledVariableDebt = await variableDebtToken.scaledTotalSupply();
 

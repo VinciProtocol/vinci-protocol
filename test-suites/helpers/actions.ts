@@ -21,7 +21,7 @@ import { convertToCurrencyDecimals } from '../../../helpers/contracts-helpers';
 import {
   getVToken,
   getMintableERC20,
-  getStableDebtToken,
+  //getStableDebtToken,
   getVariableDebtToken,
 } from '../../../helpers/contracts-getters';
 import { MAX_UINT_AMOUNT, ONE_YEAR } from '../../../helpers/constants';
@@ -305,9 +305,9 @@ export const delegateBorrowAllowance = async (
   const reserveData = await pool.getReserveData(reserveAddress);
 
   const debtToken =
-    interestRateMode === '1'
+    /*interestRateMode === '1'
       ? await getStableDebtToken(reserveData.stableDebtTokenAddress)
-      : await getVariableDebtToken(reserveData.variableDebtTokenAddress);
+      :*/ await getVariableDebtToken(reserveData.variableDebtTokenAddress);
 
   const delegateAllowancePromise = debtToken
     .connect(user.signer)

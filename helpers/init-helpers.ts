@@ -21,7 +21,7 @@ import {
 import {
   getContractAddressWithJsonFallback,
 } from './contracts-helpers';
-import { BigNumberish, BytesLike, utils } from 'ethers';
+import { BigNumberish, BytesLike, utils, constants } from 'ethers';
 import { ConfigNames, loadPoolConfig } from './configuration';
 import { deployRateStrategy, deployEligibility } from './contracts-deployments';
 
@@ -225,10 +225,10 @@ export const initReservesByHelper = async (
     reserveSymbols.push(symbol);
     initInputParams.push({
       vTokenImpl: await getContractAddressWithJsonFallback(vTokenImpl, poolName),
-      stableDebtTokenImpl: await getContractAddressWithJsonFallback(
+      stableDebtTokenImpl: constants.AddressZero, /*await getContractAddressWithJsonFallback(
         eContractid.StableDebtToken,
         poolName
-      ),
+      ),*/
       variableDebtTokenImpl: await getContractAddressWithJsonFallback(
         eContractid.VariableDebtToken,
         poolName
