@@ -173,6 +173,11 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
       Azuki: mockTokens.Azuki.address,
       DOODLE: mockTokens.DOODLE.address,
       Sandbox: mockTokens.Sandbox.address,
+      OTHR: mockTokens.OTHR.address,
+      PUNK: mockTokens.PUNK.address,
+      MOONBIRD: mockTokens.MOONBIRD.address,
+      Meebits: mockTokens.Meebits.address,
+      DLAND: mockTokens.DLAND.address,
     },
     fallbackOracle
   );

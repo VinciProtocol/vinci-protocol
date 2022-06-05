@@ -182,6 +182,11 @@ export enum ERC721TokenContractId {
   Azuki = 'Azuki',
   DOODLE = 'DOODLE',
   Sandbox = 'Sandbox',
+  OTHR = 'OTHR',
+  PUNK = 'PUNK',
+  DLAND = 'DLAND',
+  Meebits = 'Meebits',
+  MOONBIRD = 'MOONBIRD',
 }
 
 export interface iAssetBase<T> {
@@ -196,6 +201,11 @@ export interface iAssetBase<T> {
   Azuki: T;
   DOODLE: T;
   Sandbox: T;
+  OTHR: T;
+  PUNK: T;
+  DLAND: T;
+  Meebits: T;
+  MOONBIRD: T;
 }
 
 export type iAssetsWithoutUSD<T> = Omit<iAssetBase<T>, 'USD'>;
@@ -235,6 +245,36 @@ export type iVinciPoolDOODLEAssets<T> = Pick<
 export type iVinciPoolSandboxAssets<T> = Pick<
   iAssetsWithoutUSD<T>,
   | 'Sandbox'
+>;
+
+export type iVinciPoolCloneXAssets<T> = Pick<
+iAssetsWithoutUSD<T>,
+| 'CloneX'
+>;
+
+export type iVinciPoolOTHRAssets<T> = Pick<
+iAssetsWithoutUSD<T>,
+| 'OTHR'
+>;
+
+export type iVinciPoolPUNKAssets<T> = Pick<
+iAssetsWithoutUSD<T>,
+| 'PUNK'
+>;
+
+export type iVinciPoolDLANDAssets<T> = Pick<
+iAssetsWithoutUSD<T>,
+| 'DLAND'
+>;
+
+export type iVinciPoolMOONBIRDAssets<T> = Pick<
+iAssetsWithoutUSD<T>,
+| 'MOONBIRD'
+>;
+
+export type iVinciPoolMeebitsAssets<T> = Pick<
+iAssetsWithoutUSD<T>,
+| 'Meebits'
 >;
 
 export type iVinciPoolLockDropAssets<T> = Pick<
@@ -386,6 +426,36 @@ export interface IVinciConfigurationDOODLE extends ICommonConfiguration {
 export interface IVinciConfigurationSandbox extends ICommonConfiguration {
   ReservesConfig: {};
   NFTVaultConfig: iVinciPoolSandboxAssets<INFTVaultParams>;
+}
+
+export interface IVinciConfigurationCloneX extends ICommonConfiguration {
+  ReservesConfig: {};
+  NFTVaultConfig: iVinciPoolCloneXAssets<INFTVaultParams>;
+}
+
+export interface IVinciConfigurationOTHR extends ICommonConfiguration {
+  ReservesConfig: {};
+  NFTVaultConfig: iVinciPoolOTHRAssets<INFTVaultParams>;
+}
+
+export interface IVinciConfigurationPUNK extends ICommonConfiguration {
+  ReservesConfig: {};
+  NFTVaultConfig: iVinciPoolPUNKAssets<INFTVaultParams>;
+}
+
+export interface IVinciConfigurationMeebits extends ICommonConfiguration {
+  ReservesConfig: {};
+  NFTVaultConfig: iVinciPoolMeebitsAssets<INFTVaultParams>;
+}
+
+export interface IVinciConfigurationMOONBIRD extends ICommonConfiguration {
+  ReservesConfig: {};
+  NFTVaultConfig: iVinciPoolMOONBIRDAssets<INFTVaultParams>;
+}
+
+export interface IVinciConfigurationDLAND extends ICommonConfiguration {
+  ReservesConfig: {};
+  NFTVaultConfig: iVinciPoolDLANDAssets<INFTVaultParams>;
 }
 
 export interface IVinciConfigurationMAYC extends ICommonConfiguration {

@@ -23,11 +23,17 @@ export const evmRevert = async (id: string) => DRE.ethers.provider.send('evm_rev
 
 
 export const waitForTx = async (tx: ContractTransaction) => {
-  console.log();
-  console.log('🍵 TransactionHash:', tx.hash);
+  const isTester = DRE ? DRE.network.name == 'hardhat': true;
+  if (!isTester) {
+    console.log();
+    console.log('🍵 TransactionHash:', tx.hash);
+  };
   const tx3 = await tx.wait(1);
-  console.log('✅ gasUsed', tx3.gasUsed.toString());
-  console.log();
+
+  if (!isTester) {
+    console.log('✅ gasUsed', tx3.gasUsed.toString());
+    console.log();
+  };
   return tx3;
 };
 
