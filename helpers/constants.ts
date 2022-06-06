@@ -34,6 +34,12 @@ export const MOCK_CHAINLINK_AGGREGATORS_PRICES = {
     MEKA: '1000000000000000000',
     Azuki: '1000000000000000000',
     DOODLE: '1000000000000000000',
+    Sandbox: '0',
+    DLAND: '0',
+    MOONBIRD: '0',
+    Meebits: '0',
+    OTHR: '0',
+    PUNK: '0',
   };
 
   export const chainlinkAggregatorProxy = {
