@@ -353,6 +353,7 @@ export interface IBaseConfiguration {
   MarketId: string;
   BaseURI: string;
   VTokenNamePrefix: string;
+  NTokenNamePrefix: string;
   StableDebtTokenNamePrefix: string;
   VariableDebtTokenNamePrefix: string;
   SymbolPrefix: string;

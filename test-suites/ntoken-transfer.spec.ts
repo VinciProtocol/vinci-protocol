@@ -30,7 +30,7 @@ makeSuite('NToken: Transfer', (testEnv: TestEnv) => {
 
     const name = await nNFT.name();
 
-    expect(name).to.be.equal('Vinci interest bearing BAYC');
+    expect(name).to.be.equal('Vinci wrapped BAYC');
 
     const fromBalance = await nNFT['balanceOf(address)'](users[0].address);
     const toBalance = await nNFT['balanceOf(address)'](users[1].address);

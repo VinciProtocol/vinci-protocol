@@ -132,13 +132,13 @@ export async function initializeMakeSuite() {
   const daiAddress = reservesTokens.find((token) => token.symbol === 'DAI')?.tokenAddress;
 
   const allNTokens = await testEnv.helpersContract.getAllNTokens();
-  const nNFTAddress = allNTokens.find((nToken) => nToken.symbol === 'nBAYC')?.tokenAddress;
+  const nNFTAddress = allNTokens.find((nToken) => nToken.symbol === 'vBAYC')?.tokenAddress;
 
   const vaultsTokens = await testEnv.helpersContract.getAlNFTVaultsTokens();
   const nftAddress = vaultsTokens.find((token) => token.symbol == 'BAYC')?.tokenAddress;
 
   if (!aDaiAddress || !nNFTAddress) {
-    console.log('can not get adai or nBAYC address');
+    console.log('can not get adai or vBAYC address');
     process.exit(1);
   }
   if (!daiAddress || !nftAddress) {

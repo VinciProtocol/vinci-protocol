@@ -22,8 +22,9 @@ export const CommonsConfig: ICommonConfiguration = {
   MarketId: 'Commons',
   BaseURI: 'https://meta.vinci.io/',
   VTokenNamePrefix: 'Vinci interest bearing',
+  NTokenNamePrefix: "Vinci wrapped",
   StableDebtTokenNamePrefix: 'Vinci stable debt bearing',
-  VariableDebtTokenNamePrefix: 'Vinci variable debt bearing',
+  VariableDebtTokenNamePrefix: 'Vinci debt bearing',
   SymbolPrefix: '',
   ProviderId: 0, // Overriden in index.ts
   OracleQuoteCurrency: 'ETH',

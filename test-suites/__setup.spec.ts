@@ -249,7 +249,7 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
 
   const admin = await deployer.getAddress();
 
-  const { VTokenNamePrefix, StableDebtTokenNamePrefix, VariableDebtTokenNamePrefix, SymbolPrefix } =
+  const { VTokenNamePrefix, NTokenNamePrefix, StableDebtTokenNamePrefix, VariableDebtTokenNamePrefix, SymbolPrefix } =
     config;
   const treasuryAddress = treasury.address;
 
@@ -273,7 +273,7 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
     nftVaultsParams,
     allReservesAddresses,
     'https://meta.vinci.com/',
-    VTokenNamePrefix,
+    NTokenNamePrefix,
     SymbolPrefix,
     marketId,
     getNTokenImplementationForTest,
