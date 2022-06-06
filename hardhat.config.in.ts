@@ -45,6 +45,8 @@ export const mocha = {
 
 export const etherscan = {
   apiKey: {
-    kovan: process.env.ETHERSCAN_KEY
+    kovan: process.env.ETHERSCAN_KEY,
+    rinkeby: process.env.ETHERSCAN_KEY,
+    mainnet: process.env.ETHERSCAN_KEY,
   }
 };

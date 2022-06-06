@@ -18,6 +18,7 @@ export enum eEthereumNetwork {
   kovan = 'kovan',
   hardhat = 'hardhat',
   rinkeby = 'rinkeby',
+  mainnet = 'mainnet',
 }
 
 export enum eContractid {
@@ -479,6 +480,7 @@ export interface iEthereumParamsPerNetwork<T> {
   [eEthereumNetwork.hardhat]: T;
   [eEthereumNetwork.buidlerevm]: T;
   [eEthereumNetwork.rinkeby]: T;
+  [eEthereumNetwork.mainnet]: T;
 }
 
 export interface iParamsBuilderPerNetwork<T> {
@@ -488,6 +490,7 @@ export interface iParamsBuilderPerNetwork<T> {
   [eEthereumNetwork.hardhat]?: T;
   [eEthereumNetwork.buidlerevm]?: T;
   [eEthereumNetwork.rinkeby]?: T;
+  [eEthereumNetwork.mainnet]?: T;
 }
 
 export interface ITokenAddress {

@@ -151,7 +151,7 @@ export const verifyContract = async (
   };
 
 export const getParamPerNetwork = <T>(param: iParamsPerNetwork<T>, network: eNetwork) => {
-  const { localhost, vinci, kovan, hardhat, buidlerevm, rinkeby } =
+  const { localhost, vinci, kovan, hardhat, buidlerevm, rinkeby, mainnet } =
     param as iEthereumParamsPerNetwork<T>;
   if (process.env.FORK) {
     return param[process.env.FORK as eNetwork] as T;
@@ -170,6 +170,8 @@ export const getParamPerNetwork = <T>(param: iParamsPerNetwork<T>, network: eNet
       return hardhat;
     case eEthereumNetwork.rinkeby:
       return rinkeby;
+    case eEthereumNetwork.mainnet:
+      return mainnet;
   }
 };
 

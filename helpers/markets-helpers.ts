@@ -20,6 +20,7 @@ export const build = <T>(
         [eEthereumNetwork.hardhat]: defaultValue,
         [eEthereumNetwork.buidlerevm]: defaultValue,
         [eEthereumNetwork.rinkeby]: defaultValue,
+        [eEthereumNetwork.mainnet]: defaultValue,
     };
     if (param) {
         for (let [network, value] of Object.entries(param)) {
