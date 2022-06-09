@@ -378,7 +378,6 @@ export const configureReservesByHelper = async (
   marketId: string
 ) => {
   const addressProvider = await getLendingPoolAddressesProvider(marketId);
-  const vtokenAndRatesDeployer = await getVTokensAndRatesHelper(marketId);
   const tokens: string[] = [];
   const symbols: string[] = [];
 
@@ -441,6 +440,7 @@ export const configureReservesByHelper = async (
     symbols.push(assetSymbol);
   }
   if (tokens.length) {
+    const vtokenAndRatesDeployer = await getVTokensAndRatesHelper(marketId);
     // Set vTokenAndRatesDeployer as temporal admin
     await waitForTx(await addressProvider.setPoolAdmin(vtokenAndRatesDeployer.address));
 

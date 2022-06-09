@@ -21,7 +21,6 @@ export const setInitialMarketRatesInRatesOracleByHelper = async (
   admin: tEthereumAddress,
   marketId: string
 ) => {
-  const stableAndVariableTokenHelper = await getStableAndVariableTokensHelper(marketId);
   const assetAddresses: string[] = [];
   const borrowRates: string[] = [];
   const symbols: string[] = [];
@@ -46,26 +45,29 @@ export const setInitialMarketRatesInRatesOracleByHelper = async (
   const chunkedRates = chunk(borrowRates, ratesChunks);
   const chunkedSymbols = chunk(symbols, ratesChunks);
 
-  // Set helper as owner
-  await waitForTx(
-    await lendingRateOracleInstance.transferOwnership(stableAndVariableTokenHelper.address)
-  );
-
-  console.log(`- Oracle borrow initalization in ${chunkedTokens.length} txs`);
-  for (let chunkIndex = 0; chunkIndex < chunkedTokens.length; chunkIndex++) {
-    const tx3 = await waitForTx(
-      await stableAndVariableTokenHelper.setOracleBorrowRates(
-        chunkedTokens[chunkIndex],
-        chunkedRates[chunkIndex],
-        lendingRateOracleInstance.address
-      )
+  if(chunkedTokens.length > 0){
+    const stableAndVariableTokenHelper = await getStableAndVariableTokensHelper(marketId);
+    // Set helper as owner
+    await waitForTx(
+      await lendingRateOracleInstance.transferOwnership(stableAndVariableTokenHelper.address)
     );
-    console.log(`  - Setted Oracle Borrow Rates for: ${chunkedSymbols[chunkIndex].join(', ')}`);
+
+    console.log(`- Oracle borrow initalization in ${chunkedTokens.length} txs`);
+    for (let chunkIndex = 0; chunkIndex < chunkedTokens.length; chunkIndex++) {
+      const tx3 = await waitForTx(
+        await stableAndVariableTokenHelper.setOracleBorrowRates(
+          chunkedTokens[chunkIndex],
+          chunkedRates[chunkIndex],
+          lendingRateOracleInstance.address
+        )
+      );
+      console.log(`  - Setted Oracle Borrow Rates for: ${chunkedSymbols[chunkIndex].join(', ')}`);
+    }
+    // Set back ownership
+    await waitForTx(
+      await stableAndVariableTokenHelper.setOracleOwnership(lendingRateOracleInstance.address, admin)
+    );
   }
-  // Set back ownership
-  await waitForTx(
-    await stableAndVariableTokenHelper.setOracleOwnership(lendingRateOracleInstance.address, admin)
-  );
 };
 
 export const setInitialAssetPricesInOracle = async (
