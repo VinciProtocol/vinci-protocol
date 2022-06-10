@@ -71,6 +71,7 @@ export const CommonsConfig: ICommonConfiguration = {
   WETH: buildAddress({
     [eEthereumNetwork.kovan]: '0xd0a1e359811322d97991e03f863a0c30c2cf029c',
   }),
+  CRYPTOPUNKS: buildAddress(),
   WrappedNativeToken: buildAddress({
     [eEthereumNetwork.kovan]: '0xd0a1e359811322d97991e03f863a0c30c2cf029c',
   }),
@@ -89,6 +90,7 @@ export const CommonsConfig: ICommonConfiguration = {
   LendingPoolConfigurator: buildAddress(),
   LendingPool: buildAddress(),
   WethGateway: buildAddress(),
+  WpunkGateway: buildAddress(),
   TokenDistributor: buildAddress({
     [eEthereumNetwork.kovan]: '0x971efe90088f21dc6a36f610ffed77fc19710708',
   }),

@@ -378,8 +378,10 @@ export interface IBaseConfiguration {
   EmergencyAdminIndex: number;
   VTokenDomainSeparator: iParamsPerNetwork<string>;
   WETH: iParamsPerNetwork<tEthereumAddress>;
+  CRYPTOPUNKS: iParamsPerNetwork<tEthereumAddress>;
   WrappedNativeToken: iParamsPerNetwork<tEthereumAddress>;
   WethGateway: iParamsPerNetwork<tEthereumAddress>;
+  WpunkGateway: iParamsPerNetwork<tEthereumAddress>;
   ReserveFactorTreasuryAddress: iParamsPerNetwork<tEthereumAddress>;
   IncentivesController: iParamsPerNetwork<tEthereumAddress>;
   StableDebtTokenImplementation?: iParamsPerNetwork<tEthereumAddress>;
