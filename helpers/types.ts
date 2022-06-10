@@ -35,6 +35,7 @@ export enum eContractid {
   PriceOracle = 'PriceOracle',
   VToken = 'VToken',
   WETHGateway = 'WETHGateway',
+  WPUNKSGateway = 'WPUNKSGateway',
   WETHMocked = 'WETH',
   ETH = 'ETH',
   ERC721Mocked = 'ERC721Mocked',

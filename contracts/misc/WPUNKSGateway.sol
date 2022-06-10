@@ -10,9 +10,9 @@ import {ILendingPool} from "../interfaces/ILendingPool.sol";
 import {INToken} from "../interfaces/INToken.sol";
 import {IPunks} from "./interfaces/IPunks.sol";
 import {IWrappedPunks} from "./interfaces/IWrappedPunks.sol";
-import {IPunkGateway} from "./interfaces/IPunkGateway.sol";
+import {IWPUNKSGateway} from "./interfaces/IWPUNKSGateway.sol";
 
-contract PunkGateway is IPunkGateway, IERC721Receiver, Ownable {
+contract WPUNKSGateway is IWPUNKSGateway, IERC721Receiver, Ownable {
   
   IPunks internal immutable PUNKS;
   IWrappedPunks internal immutable WPUNKS;
@@ -29,7 +29,7 @@ contract PunkGateway is IPunkGateway, IERC721Receiver, Ownable {
     WPUNKS.setApprovalForAll(lendingPool, true);
   }
 
-  function _mintToWPunk(
+  function _mintToWPUNKS(
     uint256[] calldata punkIndices,
     uint256[] calldata amounts) internal {
     require(punkIndices.length == amounts.length, "PunkGateway: Invalid amount");
@@ -44,18 +44,18 @@ contract PunkGateway is IPunkGateway, IERC721Receiver, Ownable {
     }
   }
   
-  function depositPunk(
+  function depositPUNKS(
     address lendingPool, 
     uint256[] calldata punkIndices,
     uint256[] calldata amounts,
     address onBehalfOf,
     uint16 referralCode
   ) external override {
-    _mintToWPunk(punkIndices, amounts);
+    _mintToWPUNKS(punkIndices, amounts);
     ILendingPool(lendingPool).depositNFT(address(WPUNKS), punkIndices, amounts, onBehalfOf, referralCode);
   }
 
-  function depositAndLockPunk(
+  function depositAndLockPUNKS(
     address lendingPool,
     uint256[] calldata punkIndices,
     uint256[] calldata amounts,
@@ -63,11 +63,11 @@ contract PunkGateway is IPunkGateway, IERC721Receiver, Ownable {
     uint16 lockType,
     uint16 referralCode
   ) external override {
-    _mintToWPunk(punkIndices, amounts);
+    _mintToWPUNKS(punkIndices, amounts);
     ILendingPool(lendingPool).depositAndLockNFT(address(WPUNKS), punkIndices, amounts, onBehalfOf, lockType, referralCode);
   }
 
-  function withdrawPunk(
+  function withdrawPUNKS(
     address lendingPool,
     uint256[] calldata punkIndices,
     uint256[] calldata amounts,

@@ -54,6 +54,7 @@ import {
     NFTXAllowAllEligibility__factory,
     TimeLockableNToken__factory,
     TimeLockableNTokenForTest__factory,
+    WPUNKSGateway__factory,
 } from '../types';
 import {
     withSaveAndVerify,
@@ -140,12 +141,28 @@ export const deployWETHGateway = async (args: [tEthereumAddress], verify?: boole
     verify
   );
 
+export const deployWPUNKSGateway = async (args: [tEthereumAddress, tEthereumAddress], verify?: boolean) =>
+  withSaveAndVerify(
+    await new WPUNKSGateway__factory(await getFirstSigner()).deploy(...args),
+    eContractid.WPUNKSGateway,
+    args,
+    verify
+  );
+
 export const authorizeWETHGateway = async (
   wethGateWay: tEthereumAddress,
   lendingPool: tEthereumAddress
 ) =>
   await new WETHGateway__factory(await getFirstSigner())
     .attach(wethGateWay)
+    .authorizeLendingPool(lendingPool);
+
+export const authorizeWPUNKSGateway = async (
+  wpunksGateWay: tEthereumAddress,
+  lendingPool: tEthereumAddress
+) =>
+  await new WPUNKSGateway__factory(await getFirstSigner())
+    .attach(wpunksGateWay)
     .authorizeLendingPool(lendingPool);
 
 export const deployWETHMocked = async (verify?: boolean) =>

@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: agpl-3.0
 pragma solidity 0.8.11;
 
-interface IPunkGateway {
-  function depositPunk(
+interface IWPUNKSGateway {
+  function depositPUNKS(
     address lendingPool,
     uint256[] calldata punkIndices,
     uint256[] calldata amounts,
@@ -10,7 +10,7 @@ interface IPunkGateway {
     uint16 referralCode
   ) external;
 
-  function depositAndLockPunk(
+  function depositAndLockPUNKS(
     address lendingPool,
     uint256[] calldata punkIndices,
     uint256[] calldata amounts,
@@ -19,7 +19,7 @@ interface IPunkGateway {
     uint16 referralCode
   ) external;
 
-  function withdrawPunk(
+  function withdrawPUNKS(
     address lendingPool,
     uint256[] calldata punkIndices,
     uint256[] calldata amounts,

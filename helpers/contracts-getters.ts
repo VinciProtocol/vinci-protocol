@@ -28,7 +28,8 @@ import {
     AaveCollector,
     TimeLockableNToken__factory,
     TimeLockableNTokenForTest__factory,
-    LendingPoolCollateralManager__factory
+    LendingPoolCollateralManager__factory,
+    WPUNKSGateway__factory
  } from "../types";
 import {
   iMultiPoolsAssets,
@@ -362,6 +363,15 @@ export const getWETHGateway = async (address?: tEthereumAddress) =>
     address ||
       (
         await getDb().get(`${eContractid.WETHGateway}.${DRE.network.name}`).value()
+      ).address,
+    await getFirstSigner()
+  );
+
+export const getWPUNKSGateway = async (address?: tEthereumAddress) =>
+  await WPUNKSGateway__factory.connect(
+    address ||
+      (
+        await getDb().get(`${eContractid.WPUNKSGateway}.${DRE.network.name}`).value()
       ).address,
     await getFirstSigner()
   );
