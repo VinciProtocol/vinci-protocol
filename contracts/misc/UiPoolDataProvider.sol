@@ -342,11 +342,13 @@ contract UiPoolDataProvider is IUiPoolDataProvider {
     address[] memory addressesProvidersList = registry.getAddressesProvidersList();
     PoolData[] memory poolsData = new PoolData[](addressesProvidersList.length);
     for(uint256 i = 0; i < addressesProvidersList.length; ++i) {
-      ILendingPoolAddressesProvider provider = ILendingPoolAddressesProvider(addressesProvidersList[i]);
-      poolsData[i].marketId = provider.getMarketId();
-      poolsData[i].currencyInfo = _getBaseCurrencyInfo(provider);
-      poolsData[i].reservesData = _getReservesData(provider);
-      poolsData[i].nftVaultsData = _getNFTVaultsData(provider);
+      if(addressesProvidersList[i] != address(0)){
+        ILendingPoolAddressesProvider provider = ILendingPoolAddressesProvider(addressesProvidersList[i]);
+        poolsData[i].marketId = provider.getMarketId();
+        poolsData[i].currencyInfo = _getBaseCurrencyInfo(provider);
+        poolsData[i].reservesData = _getReservesData(provider);
+        poolsData[i].nftVaultsData = _getNFTVaultsData(provider);
+      }
     }
     return poolsData;
   }
@@ -360,10 +362,12 @@ contract UiPoolDataProvider is IUiPoolDataProvider {
     address[] memory addressesProvidersList = registry.getAddressesProvidersList();
     UserPoolData[] memory userPoolsData = new UserPoolData[](addressesProvidersList.length);
     for(uint256 i = 0; i < addressesProvidersList.length; ++i) {
-      ILendingPoolAddressesProvider provider = ILendingPoolAddressesProvider(addressesProvidersList[i]);
-      userPoolsData[i].marketId = provider.getMarketId();
-      userPoolsData[i].userReservesData = _getUserReservesData(provider, user);
-      userPoolsData[i].userNFTVaultsData = _getUserNFTVaultsData(provider, user);
+      if(addressesProvidersList[i] != address(0)){
+       ILendingPoolAddressesProvider provider = ILendingPoolAddressesProvider(addressesProvidersList[i]);
+       userPoolsData[i].marketId = provider.getMarketId();
+       userPoolsData[i].userReservesData = _getUserReservesData(provider, user);
+       userPoolsData[i].userNFTVaultsData = _getUserNFTVaultsData(provider, user);
+      }
     }
     return userPoolsData;
 

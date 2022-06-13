@@ -451,7 +451,7 @@ export const deployNTokenImplementation = async(id: eContractid, verify?: boolea
 
 export const deployNTokenImplementations = async(ids: Array<eContractid>, verify?: boolean) => {
   for(const id of ids){
-    deployNTokenImplementation(id, verify);
+    await deployNTokenImplementation(id, verify);
   }
 };
 
