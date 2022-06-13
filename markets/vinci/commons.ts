@@ -90,7 +90,7 @@ export const CommonsConfig: ICommonConfiguration = {
   LendingPoolConfigurator: buildAddress(),
   LendingPool: buildAddress(),
   WethGateway: buildAddress(),
-  WpunkGateway: buildAddress(),
+  WpunksGateway: buildAddress(),
   TokenDistributor: buildAddress({
     [eEthereumNetwork.kovan]: '0x971efe90088f21dc6a36f610ffed77fc19710708',
   }),
