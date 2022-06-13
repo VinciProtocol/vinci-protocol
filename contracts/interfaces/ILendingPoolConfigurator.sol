@@ -59,6 +59,7 @@ interface ILendingPoolConfigurator {
     string symbol;
     address implementation;
     bytes params;
+    string baseURI;
   }
 
   /**

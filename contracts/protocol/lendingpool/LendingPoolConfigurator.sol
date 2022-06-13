@@ -315,6 +315,7 @@ contract LendingPoolConfigurator is VersionedInitializable, ILendingPoolConfigur
         input.asset,
         input.name,
         input.symbol,
+        input.baseURI,
         input.params
       );
 
