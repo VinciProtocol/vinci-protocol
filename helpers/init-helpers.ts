@@ -294,8 +294,6 @@ export const getPairsTokenAggregator = (
 export const configureNFTVaultByHelper = async (
   reservesParams: iMultiPoolsAssets<INFTVaultParams>,
   tokenAddresses: { [symbol: string]: tEthereumAddress },
-  helpers: AaveProtocolDataProvider,
-  admin: tEthereumAddress,
   marketId: string
 ) => {
   const tokens: string[] = [];
@@ -332,14 +330,6 @@ export const configureNFTVaultByHelper = async (
     const [, tokenAddress] = (Object.entries(tokenAddresses) as [string, string][])[
       assetAddressIndex
     ];
-    const { usageAsCollateralEnabled: alreadyEnabled } = await helpers.getReserveConfigurationData(
-      tokenAddress
-    );
-
-    if (alreadyEnabled) {
-      console.log(`- Reserve ${assetSymbol} is already enabled as collateral, skipping`);
-      continue;
-    }
     // Push data
 
     inputParams.push({
@@ -356,9 +346,9 @@ export const configureNFTVaultByHelper = async (
   const configurator = await getLendingPoolConfiguratorProxy(marketId);
 
   if (tokens.length) {
-    // Deploy init per chunks
     for (let index = 0; index < inputParams.length; index++) {
       const inputParam = inputParams[index];
+      console.log(` - Ready NFT Reserve for:`, inputParam);
       await waitForTx(
         await configurator.configureNFTVaultAsCollateral(inputParam.asset, inputParam.baseLTV, inputParam.liquidationThreshold, inputParam.liquidationBonus)
       );
@@ -373,11 +363,8 @@ export const configureNFTVaultByHelper = async (
 export const configureReservesByHelper = async (
   reservesParams: iMultiPoolsAssets<IReserveParams>,
   tokenAddresses: { [symbol: string]: tEthereumAddress },
-  helpers: AaveProtocolDataProvider,
-  admin: tEthereumAddress,
   marketId: string
 ) => {
-  const addressProvider = await getLendingPoolAddressesProvider(marketId);
   const tokens: string[] = [];
   const symbols: string[] = [];
 
@@ -416,14 +403,6 @@ export const configureReservesByHelper = async (
     const [, tokenAddress] = (Object.entries(tokenAddresses) as [string, string][])[
       assetAddressIndex
     ];
-    const { usageAsCollateralEnabled: alreadyEnabled } = await helpers.getReserveConfigurationData(
-      tokenAddress
-    );
-
-    if (alreadyEnabled) {
-      console.log(`- Reserve ${assetSymbol} is already enabled as collateral, skipping`);
-      continue;
-    }
     // Push data
 
     inputParams.push({
@@ -439,25 +418,22 @@ export const configureReservesByHelper = async (
     tokens.push(tokenAddress);
     symbols.push(assetSymbol);
   }
+
+  const configurator = await getLendingPoolConfiguratorProxy(marketId);
   if (tokens.length) {
-    const vtokenAndRatesDeployer = await getVTokensAndRatesHelper(marketId);
-    // Set vTokenAndRatesDeployer as temporal admin
-    await waitForTx(await addressProvider.setPoolAdmin(vtokenAndRatesDeployer.address));
-
-    // Deploy init per chunks
-    const enableChunks = 20;
-    const chunkedSymbols = chunk(symbols, enableChunks);
-    const chunkedInputParams = chunk(inputParams, enableChunks);
-
-    console.log(`- Configure reserves in ${chunkedInputParams.length} txs`);
-    for (let chunkIndex = 0; chunkIndex < chunkedInputParams.length; chunkIndex++) {
+    for (let index = 0; index < inputParams.length; index++) {
+      const inputParam = inputParams[index];
+      console.log(` - Ready Reserve for:`, inputParam);
+      if (inputParam.borrowingEnabled) {
+        await waitForTx(
+          await configurator.enableBorrowingOnReserve(inputParam.asset, inputParam.stableBorrowingEnabled)
+        )
+      }
       await waitForTx(
-        await vtokenAndRatesDeployer.configureReserves(chunkedInputParams[chunkIndex])
-      );
-      console.log(`  - Init for: ${chunkedSymbols[chunkIndex].join(', ')}`);
+        await configurator.setReserveFactor(inputParam.asset, inputParam.reserveFactor)
+      )
+      console.log(`  - Init Reserve for: ${symbols[index]}`);
     }
-    // Set deployer back as admin
-    await waitForTx(await addressProvider.setPoolAdmin(admin));
   }
 };
 

@@ -18,8 +18,6 @@ export const setInitialMarketRatesInRatesOracleByHelper = async (
   marketRates: iMultiPoolsAssets<IMarketRates>,
   assetsAddresses: { [x: string]: tEthereumAddress },
   lendingRateOracleInstance: LendingRateOracle,
-  admin: tEthereumAddress,
-  marketId: string
 ) => {
   const assetAddresses: string[] = [];
   const borrowRates: string[] = [];
@@ -39,34 +37,17 @@ export const setInitialMarketRatesInRatesOracleByHelper = async (
     borrowRates.push(borrowRate);
     symbols.push(assetSymbol);
   }
-  // Set borrow rates per chunks
-  const ratesChunks = 20;
-  const chunkedTokens = chunk(assetAddresses, ratesChunks);
-  const chunkedRates = chunk(borrowRates, ratesChunks);
-  const chunkedSymbols = chunk(symbols, ratesChunks);
 
-  if(chunkedTokens.length > 0){
-    const stableAndVariableTokenHelper = await getStableAndVariableTokensHelper(marketId);
-    // Set helper as owner
-    await waitForTx(
-      await lendingRateOracleInstance.transferOwnership(stableAndVariableTokenHelper.address)
-    );
-
-    console.log(`- Oracle borrow initalization in ${chunkedTokens.length} txs`);
-    for (let chunkIndex = 0; chunkIndex < chunkedTokens.length; chunkIndex++) {
-      const tx3 = await waitForTx(
-        await stableAndVariableTokenHelper.setOracleBorrowRates(
-          chunkedTokens[chunkIndex],
-          chunkedRates[chunkIndex],
-          lendingRateOracleInstance.address
-        )
+  if(assetAddresses.length > 0){
+    console.log(`- Oracle borrow initalization in ${assetAddresses.length} txs`);
+    for (let index = 0; index < assetAddresses.length; index++) {
+      const asset = assetAddresses[index];
+      const rate = borrowRates[index];
+      console.log('- setMarketBorrowRate:', symbols[index], asset, rate);
+      await waitForTx(
+        await lendingRateOracleInstance.setMarketBorrowRate(asset, rate)
       );
-      console.log(`  - Setted Oracle Borrow Rates for: ${chunkedSymbols[chunkIndex].join(', ')}`);
     }
-    // Set back ownership
-    await waitForTx(
-      await stableAndVariableTokenHelper.setOracleOwnership(lendingRateOracleInstance.address, admin)
-    );
   }
 };
 

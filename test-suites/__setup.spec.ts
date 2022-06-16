@@ -100,7 +100,7 @@ const deployAllMockTokens = async (deployer: Signer) => {
 
 const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
   console.time('setup');
-  const aaveAdmin = await deployer.getAddress();
+  const poolAdmin = await deployer.getAddress();
   const config = loadPoolConfig(ConfigNames.Vinci);
   const marketId = config.MarketId;
   const treasury = await deployTreasury();
@@ -113,7 +113,7 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
   await deployEligibilities(['AllowAll', 'Range']);
   await deployNTokenImplementations([eContractid.TimeLockableNTokenForTest]);
   const addressesProvider = await deployLendingPoolAddressesProvider(marketId);
-  await waitForTx(await addressesProvider.setPoolAdmin(aaveAdmin));
+  await waitForTx(await addressesProvider.setPoolAdmin(poolAdmin));
 
   //setting users[1] as emergency admin, which is in position 2 in the DRE addresses list
   const addressList = await getEthersSignersAddresses();
@@ -225,8 +225,6 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
     LENDING_RATE_ORACLE_RATES_COMMON,
     allReservesAddresses,
     lendingRateOracle,
-    aaveAdmin,
-    marketId
   );
 
   console.log(
@@ -242,12 +240,11 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
     ...config.NFTVaultConfig,
   }
 
-  const testHelpers = await deployAaveProtocolDataProvider(addressesProvider.address, marketId);
+  // just for tests
+  await deployAaveProtocolDataProvider(addressesProvider.address, marketId);
 
   await deployVTokenImplementations([eContractid.VToken], false);
   await deployGenericVariableDebtToken(false);
-
-  const admin = await deployer.getAddress();
 
   const { VTokenNamePrefix, NTokenNamePrefix, StableDebtTokenNamePrefix, VariableDebtTokenNamePrefix, SymbolPrefix } =
     config;
@@ -260,14 +257,14 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
     StableDebtTokenNamePrefix,
     VariableDebtTokenNamePrefix,
     SymbolPrefix,
-    admin,
+    poolAdmin,
     treasuryAddress,
     ZERO_ADDRESS,
     ConfigNames.Vinci,
     false
   );
 
-  await configureReservesByHelper(reservesParams, allReservesAddresses, testHelpers, admin, marketId);
+  await configureReservesByHelper(reservesParams, allReservesAddresses, marketId);
 
   await initNFTVaultByHelper(
     nftVaultsParams,
@@ -280,7 +277,7 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
     false,
   );
 
-  await configureNFTVaultByHelper(nftVaultsParams, allReservesAddresses, testHelpers, admin, marketId);
+  await configureNFTVaultByHelper(nftVaultsParams, allReservesAddresses, marketId);
 
   await deployLendingPoolCollateralManager();
   await waitForTx(
