@@ -218,6 +218,11 @@ export type iVinciPoolAssets<T> = Pick<
   | 'WETH'
 >;
 
+export type iVinciPoolWETHAssets<T> = Pick<
+  iAssetsWithoutUSD<T>,
+  | 'WETH'
+>;
+
 export type iVinciPoolNFTAssets<T> = Pick<
   iAssetsWithoutUSD<T>,
   //| 'CRYPTOPANDA'
@@ -409,7 +414,7 @@ export interface IVinciConfiguration extends ICommonConfiguration {
 }
 
 export interface IVinciConfigurationBAYC extends ICommonConfiguration {
-  ReservesConfig: iVinciPoolAssets<IReserveParams>;
+  ReservesConfig: iVinciPoolWETHAssets<IReserveParams>;
   NFTVaultConfig: iVinciPoolBAYCAssets<INFTVaultParams>;
 }
 
