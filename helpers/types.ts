@@ -469,7 +469,7 @@ export interface IVinciConfigurationDLAND extends ICommonConfiguration {
 }
 
 export interface IVinciConfigurationMAYC extends ICommonConfiguration {
-  ReservesConfig: iVinciPoolAssets<IReserveParams>;
+  ReservesConfig: iVinciPoolWETHAssets<IReserveParams>;
   NFTVaultConfig: iVinciPoolMAYCAssets<INFTVaultParams>;
 }
 
