@@ -11,7 +11,7 @@ import {
   getPriceOracle,
   getLendingPoolAddressesProviderRegistry,
   getWETHMocked,
-  getTreasury,
+  getIncentivesVault,
   getTimeLockableNToken,
 } from '../../helpers/contracts-getters';
 import { eEthereumNetwork, eNetwork, tEthereumAddress } from '../../helpers/types';
@@ -38,7 +38,7 @@ import { solidity } from 'ethereum-waffle';
 import { VinciConfig } from '../../markets/vinci';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { usingTenderly } from '../../helpers/tenderly-utils';
-import { AaveCollector } from '../../types';
+import { IncentivesVault } from '../../types';
 
 chai.use(bignumberChai());
 chai.use(almostEqual());
@@ -61,7 +61,7 @@ export interface TestEnv {
   nNFT: NToken;
   addressesProvider: LendingPoolAddressesProvider;
   registry: LendingPoolAddressesProviderRegistry;
-  treasury: AaveCollector;
+  treasury: IncentivesVault;
   marketId: string;
 }
 
@@ -84,7 +84,7 @@ const testEnv: TestEnv = {
   addressesProvider: {} as LendingPoolAddressesProvider,
   registry: {} as LendingPoolAddressesProviderRegistry,
   wethGateway: {} as WETHGateway,
-  treasury: {} as AaveCollector,
+  treasury: {} as IncentivesVault,
   marketId: '',
 } as TestEnv;
 
@@ -107,7 +107,7 @@ export async function initializeMakeSuite() {
 
   testEnv.marketId = VinciConfig.MarketId;
   testEnv.pool = await getLendingPool(testEnv.marketId);
-  testEnv.treasury = await getTreasury();
+  testEnv.treasury = await getIncentivesVault();
 
   testEnv.configurator = await getLendingPoolConfiguratorProxy(testEnv.marketId);
 

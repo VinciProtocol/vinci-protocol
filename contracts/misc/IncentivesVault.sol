@@ -4,12 +4,12 @@ pragma solidity 0.8.11;
 import {VersionedInitializable} from '../protocol/libraries/aave-upgradeability/VersionedInitializable.sol';
 
 /**
- * @title AaveIncentivesVault
+ * @title IncentivesVault
  * @notice Stores all the AAVE kept for incentives, just giving approval to the different
  * systems that will pull AAVE funds for their specific use case
- * @author Aave
+ * @author Vinci
  **/
-contract AaveCollector is VersionedInitializable {
+contract IncentivesVault is VersionedInitializable {
 
   uint256 public constant REVISION = 1;
 

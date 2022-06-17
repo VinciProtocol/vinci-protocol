@@ -21,15 +21,15 @@ import {
     AaveProtocolDataProvider__factory,
     AaveOracle__factory,
     PriceOracle__factory,
-    AaveCollector__factory,
+    IncentivesVault__factory,
     NFTXRangeEligibility,
     WETHGateway__factory,
     NFTXEligibility__factory,
-    AaveCollector,
     TimeLockableNToken__factory,
     TimeLockableNTokenForTest__factory,
     LendingPoolCollateralManager__factory,
-    WPUNKSGateway__factory
+    WPUNKSGateway__factory,
+    InitializableAdminUpgradeabilityProxy__factory,
  } from "../types";
 import {
   iMultiPoolsAssets,
@@ -450,9 +450,21 @@ export const getAaveOracle = async (address?: tEthereumAddress) =>
     await getFirstSigner()
   );
 
-export const getTreasury = async (address?: tEthereumAddress) =>
-  await AaveCollector__factory.connect(
-    address || (await getDb().get(`AaveTreasury.${DRE.network.name}`).value()).address,
+export const getIncentivesVaultImpl = async (address?: tEthereumAddress) =>
+  await IncentivesVault__factory.connect(
+    address || (await getDb().get(`IncentivesVaultImpl.${DRE.network.name}`).value()).address,
+    await getFirstSigner()
+  );
+
+export const getIncentivesVault = async (address?: tEthereumAddress) =>
+  await IncentivesVault__factory.connect(
+    address || (await getDb().get(`IncentivesVault.${DRE.network.name}`).value()).address,
+    await getFirstSigner()
+  );
+
+export const getIncentivesVaultProxy = async (address?: tEthereumAddress) =>
+  await InitializableAdminUpgradeabilityProxy__factory.connect(
+    address || (await getDb().get(`IncentivesVault.${DRE.network.name}`).value()).address,
     await getFirstSigner()
   );
 

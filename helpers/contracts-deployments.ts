@@ -47,8 +47,7 @@ import {
     WalletBalanceProvider__factory,
     UiPoolDataProvider,
     InitializableAdminUpgradeabilityProxy__factory,
-    AaveCollector__factory,
-    AaveCollector,
+    IncentivesVault__factory,
     NFTXRangeEligibility__factory,
     WETHGateway__factory,
     NFTXAllowAllEligibility__factory,
@@ -66,12 +65,13 @@ import {
     verifyContract,
   } from './contracts-helpers';
 import { readArtifact as buidlerReadArtifact } from '@nomiclabs/buidler/plugins';
-import { getFirstSigner, getReserveLogic,  } from './contracts-getters';
+import { getFirstSigner, getIncentivesVaultImpl, getIncentivesVaultProxy } from './contracts-getters';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { LendingPoolLibraryAddresses } from '../types/factories/LendingPool__factory';
 import { eNetwork } from './types';
 import internal from 'stream';
 import { NFTXEligibility } from '../types/NFTXEligibility';
+import { verify } from 'crypto';
 
 export const deployLendingPoolAddressesProvider = async (marketId: string, verify?: boolean) =>
   withSaveAndVerify(
@@ -585,28 +585,42 @@ export const deployRateStrategy = async (
   }
 };
 
+export const deployIncentivesVaultImpl = async ( verify?: boolean ) => {
+  return await withSaveAndVerify(
+    await new IncentivesVault__factory(await getFirstSigner()).deploy(),
+    'IncentivesVaultImpl',
+    [],
+    verify
+  );
+}
+
+export const deployIncentivesVault = async ( verify?: boolean ) => {
+  return await withSaveAndVerify(
+    await new InitializableAdminUpgradeabilityProxy__factory(await getFirstSigner()).deploy(),
+    'IncentivesVault',
+    [],
+    verify
+  );
+}
+
+export const initIncentivesVault = async () => {
+  const implementation = await getIncentivesVaultImpl();
+  const contract = await getIncentivesVaultProxy();
+  const tx = await contract['initialize(address,address,bytes)'](
+    implementation.address,
+    await (await getFirstSigner()).getAddress(),
+    implementation.interface.encodeFunctionData("initialize")
+  );
+  await tx.wait();
+  return IncentivesVault__factory.connect(contract.address, await getFirstSigner());
+}
+
 export const deployTreasury = async (
-    verify?: boolean
+  verify?: boolean
 ) => {
-    const implementation = await withSaveAndVerify(
-        await new AaveCollector__factory(await getFirstSigner()).deploy(),
-        'AaveTreasuryImpl',
-        [],
-        verify
-    );
-    const contract = await withSaveAndVerify(
-        await new InitializableAdminUpgradeabilityProxy__factory(await getFirstSigner()).deploy(),
-        'AaveTreasury',
-        [],
-        verify
-    );
-    const tx = await contract['initialize(address,address,bytes)'](
-        implementation.address,
-        await (await getFirstSigner()).getAddress(),
-        implementation.interface.encodeFunctionData("initialize")
-    );
-    await tx.wait();
-    return AaveCollector__factory.connect(contract.address, await getFirstSigner());
+  await deployIncentivesVaultImpl(verify);
+  await deployIncentivesVault(verify);
+  return await initIncentivesVault();
 };
 
 export const deployRangeEligibility = async (
