@@ -449,7 +449,7 @@ export interface IVinciConfigurationOTHR extends ICommonConfiguration {
 }
 
 export interface IVinciConfigurationPUNK extends ICommonConfiguration {
-  ReservesConfig: {};
+  ReservesConfig: iVinciPoolWETHAssets<IReserveParams>;
   NFTVaultConfig: iVinciPoolPUNKAssets<INFTVaultParams>;
 }
 
