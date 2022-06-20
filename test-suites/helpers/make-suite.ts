@@ -125,7 +125,7 @@ export async function initializeMakeSuite() {
   testEnv.helpersContract = await getAaveProtocolDataProvider(testEnv.marketId);
 
   const allTokens = await testEnv.helpersContract.getAllVTokens();
-  const aDaiAddress = allTokens.find((vToken) => vToken.symbol === 'aDAI')?.tokenAddress;
+  const aDaiAddress = allTokens.find((vToken) => vToken.symbol === 'vDAI')?.tokenAddress;
 
   const reservesTokens = await testEnv.helpersContract.getAllReservesTokens();
 
@@ -138,7 +138,7 @@ export async function initializeMakeSuite() {
   const nftAddress = vaultsTokens.find((token) => token.symbol == 'BAYC')?.tokenAddress;
 
   if (!aDaiAddress || !nNFTAddress) {
-    console.log('can not get adai or vBAYC address');
+    console.log('can not get vdai or vBAYC address');
     process.exit(1);
   }
   if (!daiAddress || !nftAddress) {

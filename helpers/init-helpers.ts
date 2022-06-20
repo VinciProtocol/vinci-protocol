@@ -6,15 +6,13 @@ import {
   IReserveParams,
   tEthereumAddress,
 } from './types';
-import { AaveProtocolDataProvider } from '../types/AaveProtocolDataProvider';
 import { chunk, getDb, waitForTx } from './misc-utils';
 import {
   getVToken,
-  getVTokensAndRatesHelper,
   getLendingPoolAddressesProvider,
   getLendingPoolConfiguratorProxy,
   getEligibility,
-  getVariableDebtToken,
+  getRateStrategy,
 } from './contracts-getters';
 import {
   getContractAddressWithJsonFallback,
@@ -124,24 +122,53 @@ export const initNFTVaultByHelper = async (
   }
 };
 
-export const initReservesByHelper = async (
+
+export const deployReservesRateStrategy = async (
+  reservesParams: iMultiPoolsAssets<IReserveParams>,
+  MarketId: string,
+  verify: boolean,
+) => {
+  const addressesProvider = await getLendingPoolAddressesProvider(MarketId);
+  const reserves = Object.entries(reservesParams);
+
+  for (let [symbol, params] of reserves) {
+    const strategy = params.strategy;
+    console.log('==>', symbol, strategy.name, strategy);
+    await deployRateStrategy(
+      strategy.name,
+      [
+        addressesProvider.address,
+        strategy.optimalUtilizationRate,
+        strategy.baseVariableBorrowRate,
+        strategy.variableRateSlope1,
+        strategy.variableRateSlope2,
+        strategy.stableRateSlope1,
+        strategy.stableRateSlope2,
+      ],
+      MarketId,
+      verify,
+    );
+  };
+};
+
+
+export const initReservesByHelperV2 = async (
   reservesParams: iMultiPoolsAssets<IReserveParams>,
   tokenAddresses: { [symbol: string]: tEthereumAddress },
   vTokenNamePrefix: string,
-  stableDebtTokenNamePrefix: string,
   variableDebtTokenNamePrefix: string,
-  symbolPrefix: string,
-  admin: tEthereumAddress,
   treasuryAddress: tEthereumAddress,
   incentivesController: tEthereumAddress,
   poolName: ConfigNames,
-  verify: boolean
 ) => {
-  const poolConfig = loadPoolConfig(poolName);  
-  const addressProvider = await getLendingPoolAddressesProvider(poolConfig.MarketId);
-
-  // CHUNK CONFIGURATION
-  const initChunks = 1;
+  const poolConfig = loadPoolConfig(poolName);
+  // PoolName = VinciBlabla  => name = Blabla
+  let symbolPrefix = '';
+  let namePrefix = ''
+  if (poolName.length > 5) {
+    symbolPrefix = poolName.substring(5);
+    namePrefix = `${symbolPrefix}-`;
+  }
 
   // Initialize variables for future reserves initialization
   let reserveSymbols: string[] = [];
@@ -165,105 +192,75 @@ export const initReservesByHelper = async (
     params: BytesLike;
   }[] = [];
 
-  let strategyRates: [
-    string, // addresses provider
-    string,
-    string,
-    string,
-    string,
-    string,
-    string
-  ];
-  let rateStrategies: Record<string, typeof strategyRates> = {};
-  let strategyAddresses: Record<string, tEthereumAddress> = {};
-
   const reserves = Object.entries(reservesParams);
-
   for (let [symbol, params] of reserves) {
     if (!tokenAddresses[symbol]) {
       console.log(`- Skipping init of ${symbol} due token address is not set at markets config`);
       continue;
     }
     const { strategy, vTokenImpl, reserveDecimals } = params;
-    const {
-      optimalUtilizationRate,
-      baseVariableBorrowRate,
-      variableRateSlope1,
-      variableRateSlope2,
-      stableRateSlope1,
-      stableRateSlope2,
-    } = strategy;
-    if (!strategyAddresses[strategy.name]) {
-      // Strategy does not exist, create a new one
-      rateStrategies[strategy.name] = [
-        addressProvider.address,
-        optimalUtilizationRate,
-        baseVariableBorrowRate,
-        variableRateSlope1,
-        variableRateSlope2,
-        stableRateSlope1,
-        stableRateSlope2,
-      ];
 
-      console.log('----', strategy.name, rateStrategies[strategy.name]);
-      strategyAddresses[strategy.name] = await deployRateStrategy(
-        strategy.name,
-        rateStrategies[strategy.name],
-        poolConfig.MarketId,
-        verify
-      );
-
-      // This causes the last strategy to be printed twice, once under "DefaultReserveInterestRateStrategy"
-      // and once under the actual `strategyASSET` key.
-      // rawInsertContractAddressInDb(strategy.name, strategyAddresses[strategy.name]);
-    }
     // Prepare input parameters
     reserveSymbols.push(symbol);
     initInputParams.push({
       vTokenImpl: await getContractAddressWithJsonFallback(vTokenImpl, poolName),
-      stableDebtTokenImpl: constants.AddressZero, /*await getContractAddressWithJsonFallback(
-        eContractid.StableDebtToken,
-        poolName
-      ),*/
+      stableDebtTokenImpl: constants.AddressZero,
       variableDebtTokenImpl: await getContractAddressWithJsonFallback(
         eContractid.VariableDebtToken, 
         poolName
       ),
       underlyingAssetDecimals: reserveDecimals,
-      interestRateStrategyAddress: strategyAddresses[strategy.name],
+      interestRateStrategyAddress: (
+        await getRateStrategy(strategy.name, poolConfig.MarketId)
+      ).address,
       underlyingAsset: tokenAddresses[symbol],
       treasury: treasuryAddress,
       incentivesController: incentivesController,
       underlyingAssetName: symbol,
-      vTokenName: `${vTokenNamePrefix} ${symbol}`,
-      vTokenSymbol: `a${symbolPrefix}${symbol}`,
-      variableDebtTokenName: `${variableDebtTokenNamePrefix} ${symbolPrefix}${symbol}`,
-      variableDebtTokenSymbol: `variableDebt${symbolPrefix}${symbol}`,
-      stableDebtTokenName: `${stableDebtTokenNamePrefix} ${symbol}`,
-      stableDebtTokenSymbol: `stableDebt${symbolPrefix}${symbol}`,
+      vTokenName: `${vTokenNamePrefix} ${namePrefix}${symbol}`,
+      vTokenSymbol: `v${symbolPrefix}${symbol}`,
+      variableDebtTokenName: `${variableDebtTokenNamePrefix} ${namePrefix}${symbol}`,
+      variableDebtTokenSymbol: `vDebt${symbolPrefix}${symbol}`,
+      stableDebtTokenName: '',
+      stableDebtTokenSymbol: '',
       params: await getVTokenExtraParams(vTokenImpl, tokenAddresses[symbol]),
     });
   }
 
-  // Deploy init reserves per chunks
-  const chunkedSymbols = chunk(reserveSymbols, initChunks);
-  const chunkedInitInputParams = chunk(initInputParams, initChunks);
-
   const configurator = await getLendingPoolConfiguratorProxy(poolConfig.MarketId);
-
-  console.log(`- Reserves initialization in ${chunkedInitInputParams.length} txs`);
-  for (let chunkIndex = 0; chunkIndex < chunkedInitInputParams.length; chunkIndex++) {
-    console.log("--- Reserve -- ", chunkIndex, " -");
-    console.log(chunkedInitInputParams[chunkIndex]);
-  
-    const tx3 = await waitForTx(
-      await configurator.batchInitReserve(chunkedInitInputParams[chunkIndex])
-    );
-
-    console.log(`  - Reserve ready for: ${chunkedSymbols[chunkIndex].join(', ')}`);
-    console.log('    * gasUsed', tx3.gasUsed.toString());
-  }
+  console.log("--- Reserve -- ", reserveSymbols.join(', '), '-');
+  console.log(initInputParams);
+  await waitForTx(await configurator.batchInitReserve(initInputParams));
 };
+
+
+export const initReservesByHelper = async (
+  reservesParams: iMultiPoolsAssets<IReserveParams>,
+  tokenAddresses: { [symbol: string]: tEthereumAddress },
+  vTokenNamePrefix: string,
+  stableDebtTokenNamePrefix: string,
+  variableDebtTokenNamePrefix: string,
+  symbolPrefix: string,
+  admin: tEthereumAddress,
+  treasuryAddress: tEthereumAddress,
+  incentivesController: tEthereumAddress,
+  poolName: ConfigNames,
+  verify: boolean
+) => {
+  const poolConfig = loadPoolConfig(poolName);
+  await deployReservesRateStrategy(reservesParams, poolConfig.MarketId, verify);
+  await initReservesByHelperV2(
+    reservesParams,
+    tokenAddresses,
+    vTokenNamePrefix,
+    variableDebtTokenNamePrefix,
+    treasuryAddress,
+    incentivesController,
+    poolName,
+  );
+};
+
+
 
 export const getPairsTokenAggregator = (
   allAssetsAddresses: {

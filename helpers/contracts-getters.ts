@@ -30,6 +30,7 @@ import {
     LendingPoolCollateralManager__factory,
     WPUNKSGateway__factory,
     InitializableAdminUpgradeabilityProxy__factory,
+    DefaultReserveInterestRateStrategy__factory,
  } from "../types";
 import {
   iMultiPoolsAssets,
@@ -492,3 +493,20 @@ export const getIncentivesVaultProxy = async (address?: tEthereumAddress) =>
       ["contracts/protocol/libraries/logic/ValidationLogic.sol:ValidationLogic"]: validationLogic.address,
     };
   };
+
+
+export const getRateStrategy = async (
+  strategyName: string,
+  marketId: string,
+  address?: tEthereumAddress,
+) => {
+  switch (strategyName) {
+    default:
+      return await DefaultReserveInterestRateStrategy__factory.connect(
+        address || (
+          await getMarketDb().get(`${strategyName}.${DRE.network.name}.${marketId}`).value()
+        ).address,
+        await getFirstSigner()
+      );
+  }
+}
