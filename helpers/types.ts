@@ -429,7 +429,7 @@ export interface IVinciConfigurationAzuki extends ICommonConfiguration {
 }
 
 export interface IVinciConfigurationDOODLE extends ICommonConfiguration {
-  ReservesConfig: {};
+  ReservesConfig: iVinciPoolWETHAssets<IReserveParams>;
   NFTVaultConfig: iVinciPoolDOODLEAssets<INFTVaultParams>;
 }
 
