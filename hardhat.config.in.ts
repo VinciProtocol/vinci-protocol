@@ -10,6 +10,7 @@ import "@nomiclabs/hardhat-waffle";
 import "@nomiclabs/hardhat-etherscan";
 
 import "@tenderly/hardhat-tenderly";
+import "hardhat-gas-reporter";
 
 const SKIP_LOAD = process.env.SKIP_LOAD === "true";
 
@@ -41,6 +42,12 @@ export const solidity = {
 
 export const mocha = {
   timeout: 0,
+};
+
+export const gasReporter = {
+  currency: 'ETH',
+  gasPrice: 20,
+  enabled: (process.env.REPORT_GAS) ? true : false,
 };
 
 export const etherscan = {

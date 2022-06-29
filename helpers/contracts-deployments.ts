@@ -54,6 +54,7 @@ import {
     TimeLockableNToken__factory,
     TimeLockableNTokenForTest__factory,
     WPUNKSGateway__factory,
+    NFTOracle__factory,
 } from '../types';
 import {
     withSaveAndVerify,
@@ -455,13 +456,16 @@ export const deployNTokenImplementations = async(ids: Array<eContractid>, verify
   }
 };
 
-export const deployPriceOracle = async (verify?: boolean) =>
-  withSaveAndVerify(
+export const deployPriceOracle = async (
+  verify?: boolean,
+) => {
+  return withSaveAndVerify(
     await new PriceOracle__factory(await getFirstSigner()).deploy(),
     eContractid.PriceOracle,
     [],
     verify
   );
+};
 
 export const deployMockAggregator = async (
   args: [tStringTokenSmallUnits, string], 
@@ -662,4 +666,17 @@ export const deployEligibilities = async (
   for(const eligibilityName of eligibilityNames){
     await deployEligibility(eligibilityName);
   }
+};
+
+export const deployNFTOracle = async (
+  assetList?: tEthereumAddress[],
+  verify?: boolean,
+) => {
+  const args = assetList || [];
+  return withSaveAndVerify(
+    await new NFTOracle__factory(await getFirstSigner()).deploy(args),
+    'NFTOracle',
+    [args],
+    verify
+  );
 };

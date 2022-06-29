@@ -10,7 +10,6 @@ import {
   getLendingPoolConfiguratorProxy,
   getPriceOracle,
   getLendingPoolAddressesProviderRegistry,
-  getWETHMocked,
   getIncentivesVault,
   getTimeLockableNToken,
 } from '../../helpers/contracts-getters';
@@ -32,7 +31,6 @@ import { LendingPoolAddressesProvider } from '../../types/LendingPoolAddressesPr
 import { LendingPoolAddressesProviderRegistry } from '../../types/LendingPoolAddressesProviderRegistry';
 import { getEthersSigners } from '../../helpers/contracts-helpers';
 import { getParamPerNetwork } from '../../helpers/contracts-helpers';
-import { WETH9Mocked } from '../../types/WETH9Mocked';
 import { WETHGateway } from '../../types/WETHGateway';
 import { solidity } from 'ethereum-waffle';
 import { VinciConfig } from '../../markets/vinci';

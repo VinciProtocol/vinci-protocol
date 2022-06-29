@@ -6,7 +6,7 @@ pragma solidity 0.8.11;
 @notice Interface for the Aave price oracle.*/
 interface IPriceOracle {
   /***********
-    @dev returns the asset price in ETH
+    @dev returns the asset price in wei
      */
   function getAssetPrice(address asset) external view returns (uint256);
 
