@@ -1,4 +1,5 @@
 import { Contract, Signer, ethers } from 'ethers';
+import abi from 'ethereumjs-abi';
 import * as ethsigutils from 'eth-sig-util';
 import { fromRpcSig, ECDSASignature } from 'ethereumjs-util';
 import BigNumber from 'bignumber.js';
@@ -232,6 +233,8 @@ export const convertToCurrencyUnits = async (tokenAddress: string, amount: strin
   return amountInCurrencyUnits.toFixed();
 };
 
+export const convertToString = (input: number) => new BigNumber(input).toString();
+
 export const buildPermitParams = (
   chainId: number,
   token: tEthereumAddress,
@@ -284,3 +287,12 @@ export const getSignatureFromTypedData = (
   return fromRpcSig(signature);
 };
 
+export const encodeCall = (
+  name: string,
+  args: string[],
+  values: any[],
+) => {
+  const methodId = abi.methodID(name, args).toString("hex");
+  const params = abi.rawEncode(args, values).toString("hex");
+  return "0x" + methodId + params;
+};

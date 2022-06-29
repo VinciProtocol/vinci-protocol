@@ -31,6 +31,7 @@ import {
     WPUNKSGateway__factory,
     InitializableAdminUpgradeabilityProxy__factory,
     DefaultReserveInterestRateStrategy__factory,
+    NFTOracle__factory,
  } from "../types";
 import {
   iMultiPoolsAssets,
@@ -509,4 +510,10 @@ export const getRateStrategy = async (
         await getFirstSigner()
       );
   }
-}
+};
+
+export const getNFTOracle = async (address?: tEthereumAddress) =>
+  await NFTOracle__factory.connect(
+    address || (await getDb().get(`NFTOracle.${DRE.network.name}`).value()).address,
+    await getFirstSigner()
+  );

@@ -159,7 +159,6 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
   ]);
 
   const fallbackOracle = await deployPriceOracle();
-  await waitForTx(await fallbackOracle.setEthUsdPrice(MOCK_USD_PRICE_IN_WEI));
   await setInitialAssetPricesInOracle(
     ALL_ASSETS_INITIAL_PRICES,
     {
