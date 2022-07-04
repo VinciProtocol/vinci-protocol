@@ -457,14 +457,12 @@ export const deployNTokenImplementations = async(ids: Array<eContractid>, verify
 };
 
 export const deployPriceOracle = async (
-  assetList?: tEthereumAddress[],
   verify?: boolean,
 ) => {
-  const args = assetList || [];
   return withSaveAndVerify(
-    await new PriceOracle__factory(await getFirstSigner()).deploy(args),
+    await new PriceOracle__factory(await getFirstSigner()).deploy(),
     eContractid.PriceOracle,
-    args,
+    [],
     verify
   );
 };
@@ -678,7 +676,7 @@ export const deployNFTOracle = async (
   return withSaveAndVerify(
     await new NFTOracle__factory(await getFirstSigner()).deploy(args),
     'NFTOracle',
-    args,
+    [args],
     verify
   );
 };

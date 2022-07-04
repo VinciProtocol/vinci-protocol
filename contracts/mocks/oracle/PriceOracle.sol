@@ -1,22 +1,16 @@
 // SPDX-License-Identifier: agpl-3.0
 pragma solidity 0.8.11;
 
-import {NFTOracle} from '../../misc/NFTOracle.sol';
+import {Ownable} from '../../dependencies/openzeppelin/contracts/Ownable.sol';
 
-contract PriceOracle is NFTOracle {
+contract PriceOracle is Ownable {
   mapping(address => uint256) newPrices;
-
-  constructor(address[] memory assets) NFTOracle(assets) public {
-  }
 
   function setAssetPrice(address _asset, uint256 _price) external onlyOwner {
     newPrices[_asset] = _price;
-
-    _setAssetPrice(_asset, uint64(_price / 1e9));
   }
 
-  function getAssetPrice(address _asset) public view virtual override returns (uint256) {
-    super.getAssetPrice(_asset);
+  function getAssetPrice(address _asset) external view returns (uint256) {
     return newPrices[_asset];
   }
 }

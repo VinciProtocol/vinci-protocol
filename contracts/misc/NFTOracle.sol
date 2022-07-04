@@ -10,125 +10,157 @@ import {Ownable} from '../dependencies/openzeppelin/contracts/Ownable.sol';
  **/
 contract NFTOracle is INFTOracle, Ownable {
 
-  // batch update
-  struct Input {
-    uint64[4] prices;
-    address[4] addresses;
-    uint64 id;
-  }
-
   // asset address
-  struct Location {
-    uint64 id;
-    uint64 index;
-  }
-  mapping (address => Location) internal locations;
-  address[] internal addressList;
-  uint64 internal locationId;
-  uint64 internal locationIndex;
+  mapping (address => uint256) private _addressIndexes;
+  address[] private _addressList;
+  address private _operator;
 
   // price
   struct Price {
-    uint64 v1;
-    uint64 v2;
-    uint64 v3;
-    uint64 v4;
+    uint32 v1;
+    uint32 v2;
+    uint32 v3;
+    uint32 v4;
+    uint32 v5;
+    uint32 v6;
+    uint32 v7;
+    uint32 ts;
   }
-  mapping (uint256 => Price) internal prices;
+  Price private _price;
+  uint256 private constant PRECISION = 1e18;
+  uint256 public maxPriceDeviation = 15 * 1e16;  // 15%
+  uint256 public minUpdateTime = 30 * 60; // 30 min
+
+  event SetAssetData(Price record);
+  event ChangeOperator(address indexed oldOperator, address indexed newOperator);
 
   /// @notice Constructor
   /// @param assets The addresses of the assets
   constructor(address[] memory assets) public {
+    _operator = _msgSender();
     _addAssets(assets);
   }
 
-  function _addAssets(address[] memory addresses) internal {
-    uint64 id = locationId;
-    uint64 index = locationIndex;
+  function _addAssets(address[] memory addresses) private {
+    uint256 index = _addressList.length + 1;
     for (uint256 i = 0; i < addresses.length; i++) {
-      address _asset = addresses[i];
-      Location memory cacheLocation = locations[_asset];
-      if (cacheLocation.id == 0) {
-        if (index >= 4) {
-          index = 0;
-          id++;
-        }
+      address addr = addresses[i];
+      if (_addressIndexes[addr] == 0) {
+        _addressIndexes[addr] = index;
+        _addressList.push(addr);
         index++;
-        addressList.push(_asset);
-        cacheLocation.id = id + 1;
-        cacheLocation.index = index;
-        locations[_asset] = cacheLocation;
-        emit AddAsset(_asset, id + 1, index);
       }
     }
-    locationId = id;
-    locationIndex = index;
   }
 
-  function getAddressList() external view returns(address[] memory) {
-    return addressList;
+  function operator() external view returns (address) {
+    return _operator;
   }
 
-  function getLocation(address _asset) external view returns (uint64, uint64) {
-    Location memory cacheLocation = locations[_asset];
-    return (cacheLocation.id, cacheLocation.index);
+  function getAddressList() external view returns (address[] memory) {
+    return _addressList;
   }
 
-  function _setAssetPrice(address _asset, uint64 _price) internal {
-    Location memory location = locations[_asset];
-    Price storage price = prices[location.id];
-    if (location.index == 1) {
-      price.v1 = _price;
-    } else if (location.index == 2) {
-      price.v2 = _price;
-    } else if (location.index == 3) {
-      price.v3 = _price;
-    } else if (location.index == 4) {
-      price.v4 = _price;
+  function getIndex(address asset) external view returns (uint256) {
+    return _addressIndexes[asset];
+  }
+
+  function addAssets(address[] memory assets) external onlyOwner {
+    require(assets.length > 0);
+    _addAssets(assets);
+  }
+
+  function setOperator(address newOperator) external onlyOwner {
+    address oldOperator = _operator;
+    _operator = newOperator;
+    emit ChangeOperator(oldOperator, newOperator);
+  }
+
+  function _getPriceByIndex(uint256 index) private view returns(uint256) {
+    Price memory cachePrice = _price;
+    if (index == 1) {
+      return cachePrice.v1;
+    } else if (index == 2) {
+      return cachePrice.v2;
+    } else if (index == 3) {
+      return cachePrice.v3;
+    } else if (index == 4) {
+      return cachePrice.v4;
+    } else if (index == 5) {
+      return cachePrice.v5;
+    } else if (index == 6) {
+      return cachePrice.v6;
+    } else if (index == 7) {
+      return cachePrice.v7;
     }
   }
 
-  function _setAllPrice(uint256 _id, uint64[4] memory _prices) internal {
-    Price storage price = prices[_id];
-    price.v1 = _prices[0];
-    price.v2 = _prices[1];
-    price.v3 = _prices[2];
-    price.v4 = _prices[3];
-  }
-
-  function addAssets(address[] memory _assets) external onlyOwner {
-    _addAssets(_assets);
-  }
-
-  function batchSetAssetPrice(Input[] calldata input) external onlyOwner {
-    for (uint256 i = 0; i < input.length; i++) {
-      Input memory cacheInput = input[i];
-      uint64[4] memory _prices = cacheInput.prices;
-      _setAllPrice(cacheInput.id, _prices);
-      emit BatchSetAssetData(cacheInput.addresses, _prices, block.timestamp);
-    }
-  }
-
-  // set in GWei
-  function setAssetPriceInGwei(address _asset, uint64 _price) external onlyOwner {
-    _setAssetPrice(_asset, _price);
-    emit SetAssetData(_asset, _price, block.timestamp);
+  function getLatestTimestamp() external view returns (uint256) {
+    return uint256(_price.ts);
   }
 
   // return in Wei
-  function getAssetPrice(address _asset) public view virtual returns (uint256) {
-    Location memory location = locations[_asset];
-    Price storage price = prices[location.id];
-    uint256 _price;
-    if (location.index == 1) {
-      _price = price.v1;
-    } else if (location.index == 2) {
-      _price = price.v2;
-    } else if (location.index == 3) {
-      _price = price.v3;
-    } else if (location.index == 4) {
-      _price = price.v4;
+  function getAssetPrice(address asset) external view returns (uint256) {
+    uint256 price = _getPriceByIndex(_addressIndexes[asset]);
+    return price * 1e14;
+  }
+
+  function getNewPrice(
+    uint256 latestPrice,
+    uint256 latestTimestamp,
+    uint256 currentPrice
+  ) private view returns (uint256) {
+
+    if (latestPrice == 0) {
+      return currentPrice;
     }
-    return _price * 1e9;
+
+    if (currentPrice == 0 || currentPrice == latestPrice) {
+      return latestPrice;
+    }
+
+    uint256 percentDeviation;
+    if (latestPrice > currentPrice) {
+      percentDeviation = ((latestPrice - currentPrice) * PRECISION) / latestPrice;
+    } else {
+      percentDeviation = ((currentPrice - latestPrice) * PRECISION) / latestPrice;
+    }
+
+    uint256 timeDeviation = block.timestamp - latestTimestamp;
+
+    if (percentDeviation > maxPriceDeviation) {
+      return latestPrice;
+    } else if (timeDeviation < minUpdateTime) {
+      return latestPrice;
+    }
+    return currentPrice;
+  }
+
+  function _setAssetPrice(uint256[7] memory prices) private {
+    Price storage cachePrice = _price;
+    uint256 latestTimestamp = cachePrice.ts;
+    // checkprice
+    cachePrice.v1 = uint32(getNewPrice(cachePrice.v1, latestTimestamp, prices[0]));
+    cachePrice.v2 = uint32(getNewPrice(cachePrice.v2, latestTimestamp, prices[1]));
+    cachePrice.v3 = uint32(getNewPrice(cachePrice.v3, latestTimestamp, prices[2]));
+    cachePrice.v4 = uint32(getNewPrice(cachePrice.v4, latestTimestamp, prices[3]));
+    cachePrice.v5 = uint32(getNewPrice(cachePrice.v5, latestTimestamp, prices[4]));
+    cachePrice.v6 = uint32(getNewPrice(cachePrice.v6, latestTimestamp, prices[5]));
+    cachePrice.v7 = uint32(getNewPrice(cachePrice.v7, latestTimestamp, prices[6]));
+    cachePrice.ts = uint32(block.timestamp);
+
+    emit SetAssetData(cachePrice);
+  }
+
+  // set with 1e4
+  function batchSetAssetPrice(address[] memory assets, uint256[] memory prices) external {
+    require(_operator == _msgSender(), "NFTOracle: caller is not the operator");
+    require(assets.length > 0 && assets.length == prices.length);
+    uint256[7] memory newPrices;
+    for (uint256 i = 0; i < assets.length; i++) {
+      uint256 index = _addressIndexes[assets[i]];
+      newPrices[index - 1] = prices[i];
+    }
+    _setAssetPrice(newPrices);
   }
 }

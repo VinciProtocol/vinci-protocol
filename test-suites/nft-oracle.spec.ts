@@ -1,6 +1,6 @@
 import { makeSuite, TestEnv } from './helpers/make-suite';
 import { expect } from 'chai';
-import { deployERC721Mocked, deployNFTOracle } from '../helpers/contracts-deployments';
+import { deployNFTOracle } from '../helpers/contracts-deployments';
 import { convertToString } from '../helpers/contracts-helpers';
 
 
@@ -11,7 +11,6 @@ makeSuite("NFTOracle - Oracle for NFT", (testEnv: TestEnv) => {
     before(async () => {
         const { users } = testEnv;
         NFTOracle = await deployNFTOracle();
-
         let addresses = [];
         let prices = [];
         let p = 1;
@@ -55,60 +54,26 @@ makeSuite("NFTOracle - Oracle for NFT", (testEnv: TestEnv) => {
         ).to.be.equal(addresses.length);
     });
 
-    it('setAssetPriceInGwei', async () => {
-        const address = testEnv.nft.address;
-
-        await NFTOracle.addAssets([address]);
-
-        // set price
-        await NFTOracle.setAssetPriceInGwei(address, 11234567890);
-
-        await expect(
-            (await NFTOracle.getAssetPrice(address)).toString()
-        ).to.be.equal(convertToString(11234567890 * 10 ** 9));
-    });
-
     it('batchSetAssetPrice', async () => {
         const addresses = mockPrices[0];
         const prices = mockPrices[1];
-        let res = {};
-        await NFTOracle.addAssets(addresses);
-        for (let i = 0; i < addresses.length; i++) {
-            const addr = addresses[i];
-            const price = prices[i];
-            const location = await NFTOracle.getLocation(addr);
-            const id = parseInt(location[0].toString());
-            const index = parseInt(location[1].toString());
-            if (res[id] == undefined) {
-                res[id] = {
-                    addresses: [],
-                    prices: [],
-                }
-            }
-            res[id].addresses.push(addr);
-            res[id].prices.push(price);
-        }
-
-        let batchInput = [];
-        for (let id in res) {
-            let _prices = res[id].prices;
-            let _addresses = res[id].addresses;
-            for (let i = 0; i < (4-_prices.length); i++) {
-                _prices.push(0)
-                _addresses.push('0x0000000000000000000000000000000000000000')
-            }
-            batchInput.push({
-                id: id,
-                addresses: res[id].addresses,
-                prices: _prices,
-            });
-        }
 
         // batchSetAssetPrice
-        await NFTOracle.batchSetAssetPrice(batchInput);
+        await NFTOracle.batchSetAssetPrice(addresses, prices);
 
         await expect(
             (await NFTOracle.getAssetPrice(addresses[0])).toString()
-        ).to.be.equal(convertToString(prices[0] * 10 ** 9));
+        ).to.be.equal(convertToString(prices[0] * 10 ** 14));
+    });
+
+    it('NFTOracle: caller is not the operator', async () => {
+        const addresses = mockPrices[0];
+        const prices = mockPrices[1];
+
+        // set opreator
+        await NFTOracle.setOperator(addresses[0]);
+        await expect(
+            NFTOracle.batchSetAssetPrice(addresses, prices)
+        ).to.be.revertedWith('NFTOracle: caller is not the operator');
     });
 });
