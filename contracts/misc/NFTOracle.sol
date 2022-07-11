@@ -36,7 +36,7 @@ contract NFTOracle is INFTOracle, Ownable {
 
   /// @notice Constructor
   /// @param assets The addresses of the assets
-  constructor(address[] memory assets) public {
+  constructor(address[] memory assets) {
     _operator = _msgSender();
     _addAssets(assets);
   }
@@ -107,7 +107,6 @@ contract NFTOracle is INFTOracle, Ownable {
 
   function getNewPrice(
     uint256 latestPrice,
-    uint256 latestTimestamp,
     uint256 currentPrice
   ) private view returns (uint256) {
 
@@ -126,11 +125,7 @@ contract NFTOracle is INFTOracle, Ownable {
       percentDeviation = ((currentPrice - latestPrice) * PRECISION) / latestPrice;
     }
 
-    uint256 timeDeviation = block.timestamp - latestTimestamp;
-
     if (percentDeviation > maxPriceDeviation) {
-      return latestPrice;
-    } else if (timeDeviation < minUpdateTime) {
       return latestPrice;
     }
     return currentPrice;
@@ -138,15 +133,14 @@ contract NFTOracle is INFTOracle, Ownable {
 
   function _setAssetPrice(uint256[7] memory prices) private {
     Price storage cachePrice = _price;
-    uint256 latestTimestamp = cachePrice.ts;
     // checkprice
-    cachePrice.v1 = uint32(getNewPrice(cachePrice.v1, latestTimestamp, prices[0]));
-    cachePrice.v2 = uint32(getNewPrice(cachePrice.v2, latestTimestamp, prices[1]));
-    cachePrice.v3 = uint32(getNewPrice(cachePrice.v3, latestTimestamp, prices[2]));
-    cachePrice.v4 = uint32(getNewPrice(cachePrice.v4, latestTimestamp, prices[3]));
-    cachePrice.v5 = uint32(getNewPrice(cachePrice.v5, latestTimestamp, prices[4]));
-    cachePrice.v6 = uint32(getNewPrice(cachePrice.v6, latestTimestamp, prices[5]));
-    cachePrice.v7 = uint32(getNewPrice(cachePrice.v7, latestTimestamp, prices[6]));
+    cachePrice.v1 = uint32(getNewPrice(cachePrice.v1, prices[0]));
+    cachePrice.v2 = uint32(getNewPrice(cachePrice.v2, prices[1]));
+    cachePrice.v3 = uint32(getNewPrice(cachePrice.v3, prices[2]));
+    cachePrice.v4 = uint32(getNewPrice(cachePrice.v4, prices[3]));
+    cachePrice.v5 = uint32(getNewPrice(cachePrice.v5, prices[4]));
+    cachePrice.v6 = uint32(getNewPrice(cachePrice.v6, prices[5]));
+    cachePrice.v7 = uint32(getNewPrice(cachePrice.v7, prices[6]));
     cachePrice.ts = uint32(block.timestamp);
 
     emit SetAssetData(cachePrice);
@@ -156,6 +150,10 @@ contract NFTOracle is INFTOracle, Ownable {
   function batchSetAssetPrice(address[] memory assets, uint256[] memory prices) external {
     require(_operator == _msgSender(), "NFTOracle: caller is not the operator");
     require(assets.length > 0 && assets.length == prices.length);
+
+    if ((block.timestamp - uint256(_price.ts)) < minUpdateTime) {
+      return;
+    }
     uint256[7] memory newPrices;
     for (uint256 i = 0; i < assets.length; i++) {
       uint256 index = _addressIndexes[assets[i]];

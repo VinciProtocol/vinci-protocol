@@ -64,6 +64,8 @@ makeSuite("NFTOracle - Oracle for NFT", (testEnv: TestEnv) => {
         await expect(
             (await NFTOracle.getAssetPrice(addresses[0])).toString()
         ).to.be.equal(convertToString(prices[0] * 10 ** 14));
+
+        await NFTOracle.batchSetAssetPrice(addresses, prices);
     });
 
     it('NFTOracle: caller is not the operator', async () => {
