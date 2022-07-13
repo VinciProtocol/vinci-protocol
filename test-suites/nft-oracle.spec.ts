@@ -54,18 +54,23 @@ makeSuite("NFTOracle - Oracle for NFT", (testEnv: TestEnv) => {
         ).to.be.equal(addresses.length);
     });
 
+    it('batchSetAssetPrice: prices length need 7', async () => {
+        await expect(
+            NFTOracle.batchSetAssetPrice([1, 2])
+        ).to.be.reverted;
+    });
+
     it('batchSetAssetPrice', async () => {
         const addresses = mockPrices[0];
         const prices = mockPrices[1];
 
-        // batchSetAssetPrice
-        await NFTOracle.batchSetAssetPrice(addresses, prices);
+        await NFTOracle.batchSetAssetPrice(prices);
 
-        await expect(
-            (await NFTOracle.getAssetPrice(addresses[0])).toString()
-        ).to.be.equal(convertToString(prices[0] * 10 ** 14));
-
-        await NFTOracle.batchSetAssetPrice(addresses, prices);
+        for (let index in addresses) {
+            await expect(
+                (await NFTOracle.getAssetPrice(addresses[index])).toString()
+            ).to.be.equal(convertToString(prices[index] * 10 ** 14));
+        }
     });
 
     it('NFTOracle: caller is not the operator', async () => {
@@ -75,7 +80,25 @@ makeSuite("NFTOracle - Oracle for NFT", (testEnv: TestEnv) => {
         // set opreator
         await NFTOracle.setOperator(addresses[0]);
         await expect(
-            NFTOracle.batchSetAssetPrice(addresses, prices)
+            NFTOracle.batchSetAssetPrice(prices)
         ).to.be.revertedWith('NFTOracle: caller is not the operator');
+    });
+
+    it('NFTOracle: caller is not the emergencyAdmin', async () => {
+        await expect(
+            NFTOracle.setPause(true)
+        ).to.be.revertedWith('NFTOracle: caller is not the emergencyAdmin');
+    });
+
+    it('Pausable: paused', async () => {
+
+        const signer = testEnv.users[3].signer;
+        await NFTOracle.setEmergencyAdmin(await signer.getAddress(), true);
+        const instance = NFTOracle.connect(signer);
+        await instance.setPause(true);
+
+        await expect(
+            NFTOracle.batchSetAssetPrice(mockPrices[1])
+        ).to.be.revertedWith('Pausable: paused');
     });
 });

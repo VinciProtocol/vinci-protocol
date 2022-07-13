@@ -3,15 +3,17 @@ pragma solidity 0.8.11;
 
 import {INFTOracle} from '../interfaces/INFTOracle.sol';
 import {Ownable} from '../dependencies/openzeppelin/contracts/Ownable.sol';
+import {Pausable} from '../dependencies/openzeppelin/contracts/Pausable.sol';
 
 /**
  * @title NFTOracle
  * @author Vinci
  **/
-contract NFTOracle is INFTOracle, Ownable {
+contract NFTOracle is INFTOracle, Ownable, Pausable {
 
   // asset address
   mapping (address => uint256) private _addressIndexes;
+  mapping (address => bool) private _emergencyAdmin;
   address[] private _addressList;
   address private _operator;
 
@@ -29,10 +31,11 @@ contract NFTOracle is INFTOracle, Ownable {
   Price private _price;
   uint256 private constant PRECISION = 1e18;
   uint256 public maxPriceDeviation = 15 * 1e16;  // 15%
-  uint256 public minUpdateTime = 30 * 60; // 30 min
+  uint32 public minUpdateTime = 30 * 60; // 30 min
 
-  event SetAssetData(Price record);
+  event SetAssetData(uint32[7] prices);
   event ChangeOperator(address indexed oldOperator, address indexed newOperator);
+  event SetEmergencyAdmin(address indexed admin, bool enabled);
 
   /// @notice Constructor
   /// @param assets The addresses of the assets
@@ -57,6 +60,10 @@ contract NFTOracle is INFTOracle, Ownable {
     return _operator;
   }
 
+  function isEmergencyAdmin(address admin) external view returns (bool) {
+    return _emergencyAdmin[admin];
+  }
+
   function getAddressList() external view returns (address[] memory) {
     return _addressList;
   }
@@ -70,10 +77,24 @@ contract NFTOracle is INFTOracle, Ownable {
     _addAssets(assets);
   }
 
+  function setPause(bool val) external {
+    require(_emergencyAdmin[_msgSender()], "NFTOracle: caller is not the emergencyAdmin");
+    if (val) {
+      _pause();
+    } else {
+      _unpause();
+    }
+  }
+
   function setOperator(address newOperator) external onlyOwner {
     address oldOperator = _operator;
     _operator = newOperator;
     emit ChangeOperator(oldOperator, newOperator);
+  }
+
+  function setEmergencyAdmin(address admin, bool enabled) external onlyOwner {
+    _emergencyAdmin[admin] = enabled;
+    emit SetEmergencyAdmin(admin, enabled);
   }
 
   function _getPriceByIndex(uint256 index) private view returns(uint256) {
@@ -131,34 +152,32 @@ contract NFTOracle is INFTOracle, Ownable {
     return currentPrice;
   }
 
-  function _setAssetPrice(uint256[7] memory prices) private {
-    Price storage cachePrice = _price;
-    // checkprice
-    cachePrice.v1 = uint32(getNewPrice(cachePrice.v1, prices[0]));
-    cachePrice.v2 = uint32(getNewPrice(cachePrice.v2, prices[1]));
-    cachePrice.v3 = uint32(getNewPrice(cachePrice.v3, prices[2]));
-    cachePrice.v4 = uint32(getNewPrice(cachePrice.v4, prices[3]));
-    cachePrice.v5 = uint32(getNewPrice(cachePrice.v5, prices[4]));
-    cachePrice.v6 = uint32(getNewPrice(cachePrice.v6, prices[5]));
-    cachePrice.v7 = uint32(getNewPrice(cachePrice.v7, prices[6]));
-    cachePrice.ts = uint32(block.timestamp);
-
-    emit SetAssetData(cachePrice);
-  }
-
   // set with 1e4
-  function batchSetAssetPrice(address[] memory assets, uint256[] memory prices) external {
+  function batchSetAssetPrice(uint256[7] memory prices) external whenNotPaused {
     require(_operator == _msgSender(), "NFTOracle: caller is not the operator");
-    require(assets.length > 0 && assets.length == prices.length);
+    Price storage cachePrice = _price;
+    uint32 currentTimestamp = uint32(block.timestamp);
+    if ((currentTimestamp - cachePrice.ts) >= minUpdateTime) {
+      uint32[7] memory newPrices = [
+        uint32(getNewPrice(cachePrice.v1, prices[0])),
+        uint32(getNewPrice(cachePrice.v2, prices[1])),
+        uint32(getNewPrice(cachePrice.v3, prices[2])),
+        uint32(getNewPrice(cachePrice.v4, prices[3])),
+        uint32(getNewPrice(cachePrice.v5, prices[4])),
+        uint32(getNewPrice(cachePrice.v6, prices[5])),
+        uint32(getNewPrice(cachePrice.v7, prices[6]))
+      ];
 
-    if ((block.timestamp - uint256(_price.ts)) < minUpdateTime) {
-      return;
+      cachePrice.v1 = newPrices[0];
+      cachePrice.v2 = newPrices[1];
+      cachePrice.v3 = newPrices[2];
+      cachePrice.v4 = newPrices[3];
+      cachePrice.v5 = newPrices[4];
+      cachePrice.v6 = newPrices[5];
+      cachePrice.v7 = newPrices[6];
+      cachePrice.ts = currentTimestamp;
+
+      emit SetAssetData(newPrices);
     }
-    uint256[7] memory newPrices;
-    for (uint256 i = 0; i < assets.length; i++) {
-      uint256 index = _addressIndexes[assets[i]];
-      newPrices[index - 1] = prices[i];
-    }
-    _setAssetPrice(newPrices);
   }
 }
