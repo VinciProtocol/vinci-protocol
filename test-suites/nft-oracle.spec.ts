@@ -2,6 +2,7 @@ import { makeSuite, TestEnv } from './helpers/make-suite';
 import { expect } from 'chai';
 import { deployNFTOracle } from '../helpers/contracts-deployments';
 import { convertToString } from '../helpers/contracts-helpers';
+import { ZERO_ADDRESS } from '../helpers/constants';
 
 
 makeSuite("NFTOracle - Oracle for NFT", (testEnv: TestEnv) => {
@@ -100,5 +101,17 @@ makeSuite("NFTOracle - Oracle for NFT", (testEnv: TestEnv) => {
         await expect(
             NFTOracle.batchSetAssetPrice(mockPrices[1])
         ).to.be.revertedWith('Pausable: paused');
+    });
+
+    it('NFTOracle: invalid admin', async () => {
+        await expect(
+            NFTOracle.setEmergencyAdmin(ZERO_ADDRESS, true)
+        ).to.be.revertedWith('NFTOracle: invalid admin');
+    });
+
+    it('NFTOracle: invalid operator', async () => {
+        await expect(
+            NFTOracle.setOperator(ZERO_ADDRESS)
+        ).to.be.revertedWith('NFTOracle: invalid operator');
     });
 });

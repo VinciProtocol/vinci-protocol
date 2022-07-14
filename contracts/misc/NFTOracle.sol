@@ -30,8 +30,8 @@ contract NFTOracle is INFTOracle, Ownable, Pausable {
   }
   Price private _price;
   uint256 private constant PRECISION = 1e18;
-  uint256 public maxPriceDeviation = 15 * 1e16;  // 15%
-  uint32 public minUpdateTime = 30 * 60; // 30 min
+  uint256 public constant maxPriceDeviation = 15 * 1e16;  // 15%
+  uint32 public constant minUpdateTime = 30 * 60; // 30 min
 
   event SetAssetData(uint32[7] prices);
   event ChangeOperator(address indexed oldOperator, address indexed newOperator);
@@ -87,12 +87,14 @@ contract NFTOracle is INFTOracle, Ownable, Pausable {
   }
 
   function setOperator(address newOperator) external onlyOwner {
+    require(newOperator != address(0), 'NFTOracle: invalid operator');
     address oldOperator = _operator;
     _operator = newOperator;
     emit ChangeOperator(oldOperator, newOperator);
   }
 
   function setEmergencyAdmin(address admin, bool enabled) external onlyOwner {
+    require(admin != address(0), 'NFTOracle: invalid admin');
     _emergencyAdmin[admin] = enabled;
     emit SetEmergencyAdmin(admin, enabled);
   }
@@ -113,6 +115,8 @@ contract NFTOracle is INFTOracle, Ownable, Pausable {
       return cachePrice.v6;
     } else if (index == 7) {
       return cachePrice.v7;
+    } else {
+      return 0;
     }
   }
 
