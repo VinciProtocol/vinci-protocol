@@ -30,8 +30,8 @@ contract NFTOracle is INFTOracle, Ownable, Pausable {
   }
   Price private _price;
   uint256 private constant PRECISION = 1e18;
-  uint256 public constant maxPriceDeviation = 15 * 1e16;  // 15%
-  uint32 public constant minUpdateTime = 30 * 60; // 30 min
+  uint256 public constant MAX_PRICE_DEVIATION = 15 * 1e16;  // 15%
+  uint32 public constant MIN_UPDATE_TIME = 30 * 60; // 30 min
 
   event SetAssetData(uint32[7] prices);
   event ChangeOperator(address indexed oldOperator, address indexed newOperator);
@@ -133,7 +133,7 @@ contract NFTOracle is INFTOracle, Ownable, Pausable {
   function getNewPrice(
     uint256 latestPrice,
     uint256 currentPrice
-  ) private view returns (uint256) {
+  ) private pure returns (uint256) {
 
     if (latestPrice == 0) {
       return currentPrice;
@@ -150,7 +150,7 @@ contract NFTOracle is INFTOracle, Ownable, Pausable {
       percentDeviation = ((currentPrice - latestPrice) * PRECISION) / latestPrice;
     }
 
-    if (percentDeviation > maxPriceDeviation) {
+    if (percentDeviation > MAX_PRICE_DEVIATION) {
       return latestPrice;
     }
     return currentPrice;
@@ -161,7 +161,7 @@ contract NFTOracle is INFTOracle, Ownable, Pausable {
     require(_operator == _msgSender(), "NFTOracle: caller is not the operator");
     Price storage cachePrice = _price;
     uint32 currentTimestamp = uint32(block.timestamp);
-    if ((currentTimestamp - cachePrice.ts) >= minUpdateTime) {
+    if ((currentTimestamp - cachePrice.ts) >= MIN_UPDATE_TIME) {
       uint32[7] memory newPrices = [
         uint32(getNewPrice(cachePrice.v1, prices[0])),
         uint32(getNewPrice(cachePrice.v2, prices[1])),
