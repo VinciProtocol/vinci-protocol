@@ -424,7 +424,7 @@ export interface IVinciConfigurationMAYCNoBorrowing extends ICommonConfiguration
 }
 
 export interface IVinciConfigurationAzuki extends ICommonConfiguration {
-  ReservesConfig: {};
+  ReservesConfig: iVinciPoolWETHAssets<IReserveParams>;
   NFTVaultConfig: iVinciPoolAzukiAssets<INFTVaultParams>;
 }
 
@@ -439,7 +439,7 @@ export interface IVinciConfigurationSandbox extends ICommonConfiguration {
 }
 
 export interface IVinciConfigurationCloneX extends ICommonConfiguration {
-  ReservesConfig: {};
+  ReservesConfig: iVinciPoolWETHAssets<IReserveParams>;
   NFTVaultConfig: iVinciPoolCloneXAssets<INFTVaultParams>;
 }
 
@@ -459,7 +459,7 @@ export interface IVinciConfigurationMeebits extends ICommonConfiguration {
 }
 
 export interface IVinciConfigurationMOONBIRD extends ICommonConfiguration {
-  ReservesConfig: {};
+  ReservesConfig: iVinciPoolWETHAssets<IReserveParams>;
   NFTVaultConfig: iVinciPoolMOONBIRDAssets<INFTVaultParams>;
 }
 
