@@ -174,7 +174,9 @@ import {DataTypes} from '../libraries/types/DataTypes.sol';
      }
      for(uint256 i = 0; i < tokenIds.length; ++i){
        uint256 id = tokenIds[i];
-       IERC721(_underlyingNFT).safeTransferFrom(address(this), receiverOfUnderlying, id, "");
+       if(amounts[i] != 0){
+        IERC721(_underlyingNFT).safeTransferFrom(address(this), receiverOfUnderlying, id, "");
+       }
      }
 
      for(uint256 i = 0; i < tokenIds.length; ++i){

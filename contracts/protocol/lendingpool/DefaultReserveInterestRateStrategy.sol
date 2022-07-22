@@ -223,32 +223,4 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
       vars.currentVariableBorrowRate
     );
   }
-
-  /**
-   * @dev Calculates the overall borrow rate as the weighted average between the total variable debt and total stable debt
-   * @param totalStableDebt The total borrowed from the reserve a stable rate
-   * @param totalVariableDebt The total borrowed from the reserve at a variable rate
-   * @param currentVariableBorrowRate The current variable borrow rate of the reserve
-   * @param currentAverageStableBorrowRate The current weighted average of all the stable rate loans
-   * @return The weighted averaged borrow rate
-   **/
-  function _getOverallBorrowRate(
-    uint256 totalStableDebt,
-    uint256 totalVariableDebt,
-    uint256 currentVariableBorrowRate,
-    uint256 currentAverageStableBorrowRate
-  ) internal pure returns (uint256) {
-    uint256 totalDebt = totalVariableDebt;
-
-    if (totalDebt == 0) return 0;
-
-    //uint256 weightedVariableRate = totalVariableDebt.wadToRay().rayMul(currentVariableBorrowRate);
-
-    //uint256 weightedStableRate = totalStableDebt.wadToRay().rayMul(currentAverageStableBorrowRate);
-
-    uint256 overallBorrowRate =
-      currentVariableBorrowRate;
-
-    return overallBorrowRate;
-  }
 }

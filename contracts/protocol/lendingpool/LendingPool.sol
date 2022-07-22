@@ -1104,7 +1104,7 @@ contract LendingPool is VersionedInitializable, ILendingPool, LendingPoolStorage
   function _addNFTVaultToList(address nft) internal {
     uint256 nftVaultsCount = _nftVaults.count;
 
-    require(nftVaultsCount < _maxNumberOfNFTVaults, Errors.LP_NO_MORE_RESERVES_ALLOWED);
+    require(nftVaultsCount < _maxNumberOfNFTVaults, Errors.LP_NO_MORE_NFT_VAULTS_ALLOWED);
 
     bool vaultAlreadyAdded = _nftVaults.data[nft].id != 0 || _nftVaults.list[0] == nft;
 

@@ -37,7 +37,7 @@ import {
   iMultiPoolsAssets,
   INFTVaultParams,
 } from './types';
-import { BigNumber } from 'BigNumber.js';
+import { BigNumber } from 'bignumber.js';
 import { MintableERC20 } from '../types/MintableERC20';
 import { ERC721Mocked } from '../types/ERC721Mocked';
 import { getEthersSigners, linkBytecode } from './contracts-helpers';

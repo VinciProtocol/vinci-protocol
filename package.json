@@ -41,6 +41,7 @@
     "@types/lowdb": "1.0.9",
     "@types/mocha": "^9.1.0",
     "@types/node": "^17.0.15",
+    "bignumber.js": "^9.0.2",
     "chai": "^4.3.4",
     "chai-bignumber": "^3.0.0",
     "defender-relay-client": "^1.7.0",

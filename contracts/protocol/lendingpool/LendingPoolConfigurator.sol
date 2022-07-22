@@ -441,7 +441,7 @@ contract LendingPoolConfigurator is VersionedInitializable, ILendingPoolConfigur
       //if the liquidation threshold is being set to 0,
       // the reserve is being disabled as collateral. To do so,
       //we need to ensure no liquidity is deposited
-      _checkNoLiquidity(nft);
+      _checkNFTVaultNoLiquidity(nft);
     }
 
     currentConfig.setLtv(ltv);

@@ -125,6 +125,7 @@ contract LendingPoolCollateralManager is
 
     vars.collateralNtoken = INToken(collateralVault.nTokenAddress);
     vars.collateralTokenData = IERC721WithStat(collateralVault.nTokenAddress);
+    vars.userCollateralBalance = vars.collateralTokenData.balanceOf(params.user);
 
     vars.maxLiquidatableDebt = vars.userVariableDebt.percentMul(
       LIQUIDATION_CLOSE_FACTOR_PERCENT
@@ -150,6 +151,11 @@ contract LendingPoolCollateralManager is
         debtReserve,
         callparams
       );
+      if(vars.actualDebtToLiquidate == 0){
+        return(
+          uint256(Errors.CollateralManagerErrors.NO_COLLATERAL_AVAILABLE),
+          Errors.LCPM_NO_COLLATERAL_AVAILABLE);
+      }
     }
 
     // If debtAmountNeeded < actualDebtToLiquidate, there isn't enough
@@ -195,7 +201,7 @@ contract LendingPoolCollateralManager is
 
     // If the collateral being liquidated is equal to the user balance,
     // we set the currency as not being used as collateral anymore
-    if (vars.totalCollateralToLiquidate == vars.collateralTokenData.balanceOf(params.user)) {
+    if (vars.totalCollateralToLiquidate == vars.userCollateralBalance) {
       userConfig.setUsingNFTVaultAsCollateral(collateralVault.id, false);
       emit NFTVaultUsedAsCollateralDisabled(params.collateralAsset, params.user);
     }
