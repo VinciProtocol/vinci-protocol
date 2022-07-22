@@ -61,7 +61,7 @@ contract LendingPool is VersionedInitializable, ILendingPool, LendingPoolStorage
   using NFTVaultConfiguration for DataTypes.NFTVaultConfigurationMap;
   using UserConfiguration for DataTypes.UserConfigurationMap;
 
-  uint256 public constant LENDINGPOOL_REVISION = 0x2;
+  uint256 public constant LENDINGPOOL_REVISION = 0x3;
 
   modifier whenNotPaused() {
     _whenNotPaused();

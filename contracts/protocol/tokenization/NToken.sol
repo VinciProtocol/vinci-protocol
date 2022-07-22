@@ -39,7 +39,7 @@ import {DataTypes} from '../libraries/types/DataTypes.sol';
     using Strings for uint256;
     using SafeERC721 for IERC721;
 
-    uint256 public constant NTOKEN_REVISION = 0x2;
+    uint256 public constant NTOKEN_REVISION = 0x3;
     bytes public constant EIP712_REVISION = bytes('1');
 
     bytes32 internal constant EIP712_DOMAIN =
