@@ -189,6 +189,8 @@ contract LendingPoolCollateralManager is
         emit NFTVaultUsedAsCollateralEnabled(params.collateralAsset, msg.sender);
       }
     } else {
+      INFTXEligibility(collateralVault.nftEligibility).afterLiquidationHook(params.tokenIds, vars.maxCollateralAmountsToLiquidate);
+
       // Burn the equivalent amount of nToken, sending the underlying to the liquidator
       vars.collateralNtoken.burnBatch(
         params.user,
@@ -196,7 +198,6 @@ contract LendingPoolCollateralManager is
         params.tokenIds,
         vars.maxCollateralAmountsToLiquidate
       );
-      INFTXEligibility(collateralVault.nftEligibility).afterLiquidationHook(params.tokenIds, vars.maxCollateralAmountsToLiquidate);
     }
 
     // If the collateral being liquidated is equal to the user balance,
