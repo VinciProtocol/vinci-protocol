@@ -177,6 +177,13 @@ contract LendingPoolCollateralManager is
       0
     );
 
+    // If the collateral being liquidated is equal to the user balance,
+    // we set the currency as not being used as collateral anymore
+    if (vars.totalCollateralToLiquidate == vars.userCollateralBalance) {
+      userConfig.setUsingNFTVaultAsCollateral(collateralVault.id, false);
+      emit NFTVaultUsedAsCollateralDisabled(params.collateralAsset, params.user);
+    }
+
     if (params.receiveNToken) {
       vars.liquidatorPreviousNTokenBalance = vars.collateralTokenData.balanceOf(msg.sender);
       vars.collateralNtoken.transferOnLiquidation(params.user, msg.sender, params.tokenIds, vars.maxCollateralAmountsToLiquidate);
@@ -198,13 +205,6 @@ contract LendingPoolCollateralManager is
         params.tokenIds,
         vars.maxCollateralAmountsToLiquidate
       );
-    }
-
-    // If the collateral being liquidated is equal to the user balance,
-    // we set the currency as not being used as collateral anymore
-    if (vars.totalCollateralToLiquidate == vars.userCollateralBalance) {
-      userConfig.setUsingNFTVaultAsCollateral(collateralVault.id, false);
-      emit NFTVaultUsedAsCollateralDisabled(params.collateralAsset, params.user);
     }
 
     // Transfers the debt asset being repaid to the vToken, where the liquidity is kept

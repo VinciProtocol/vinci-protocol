@@ -61,7 +61,7 @@ contract LendingPool is VersionedInitializable, ILendingPool, LendingPoolStorage
   using NFTVaultConfiguration for DataTypes.NFTVaultConfigurationMap;
   using UserConfiguration for DataTypes.UserConfigurationMap;
 
-  uint256 public constant LENDINGPOOL_REVISION = 0x3;
+  uint256 public constant LENDINGPOOL_REVISION = 0x4;
 
   modifier whenNotPaused() {
     _whenNotPaused();
@@ -316,9 +316,10 @@ contract LendingPool is VersionedInitializable, ILendingPool, LendingPoolStorage
       emit NFTVaultUsedAsCollateralDisabled(nft, msg.sender);
     }
 
+    INFTXEligibility(vault.nftEligibility).afterRedeemHook(tokenIds);
+
     INToken(nToken).burnBatch(msg.sender, to, tokenIds, amountsToWithdraw);
     
-    INFTXEligibility(vault.nftEligibility).afterRedeemHook(tokenIds);
     emit WithdrawNFT(nft, msg.sender, to, tokenIds, amountsToWithdraw);
 
     return amountsToWithdraw;
