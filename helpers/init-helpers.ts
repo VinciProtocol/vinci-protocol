@@ -5,6 +5,7 @@ import {
   INFTVaultParams,
   IReserveParams,
   tEthereumAddress,
+  ICommonConfiguration,
 } from './types';
 import { chunk, getDb, waitForTx } from './misc-utils';
 import {
@@ -120,6 +121,40 @@ export const initNFTVaultByHelper = async (
     console.log(`  - Reserve ready for: ${chunkedSymbols[chunkIndex].join(', ')}`);
     console.log('    * gasUsed', tx3.gasUsed.toString());
   }
+};
+
+
+export const updateNToken = async (
+  tokenAddresses: { [symbol: string]: tEthereumAddress },
+  ntokenGetter: (INFTVaultParams) => Promise<any>,
+  poolName: ConfigNames,
+) => {
+  const poolConfig = loadPoolConfig(poolName);
+  const {
+    NTokenNamePrefix,
+    MarketId,
+    NFTVaultConfig,
+    BaseURI,
+  } = poolConfig as ICommonConfiguration;
+
+  const configurator = await getLendingPoolConfiguratorProxy(MarketId);
+
+  for(let [symbol, params] of Object.entries(NFTVaultConfig)){
+    const ntoken = await ntokenGetter(params);
+    const updateNTokenInput = {
+      asset: tokenAddresses[symbol],
+      name: `${NTokenNamePrefix} ${params.name}`,
+      symbol: `v${params.symbol}`,
+      implementation: ntoken.address,
+      params: await getNTokenExtraParams(tokenAddresses[symbol], ntoken.address),
+      baseURI: BaseURI,
+    };
+    console.log(`--- Update NToken for : ${symbol} ---`);
+    console.log(updateNTokenInput);
+    await waitForTx(
+      await configurator.updateNToken(updateNTokenInput)
+    );
+  };
 };
 
 
