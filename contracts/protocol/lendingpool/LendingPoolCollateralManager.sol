@@ -184,6 +184,10 @@ contract LendingPoolCollateralManager is
       emit NFTVaultUsedAsCollateralDisabled(params.collateralAsset, params.user);
     }
 
+    if (vars.actualDebtToLiquidate == vars.userVariableDebt) {
+      userConfig.setBorrowing(debtReserve.id, false);
+    }
+
     if (params.receiveNToken) {
       vars.liquidatorPreviousNTokenBalance = vars.collateralTokenData.balanceOf(msg.sender);
       vars.collateralNtoken.transferOnLiquidation(params.user, msg.sender, params.tokenIds, vars.maxCollateralAmountsToLiquidate);
