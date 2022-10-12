@@ -54,6 +54,7 @@ export const etherscan = {
   apiKey: {
     kovan: process.env.ETHERSCAN_KEY,
     rinkeby: process.env.ETHERSCAN_KEY,
+    goerli: process.env.ETHERSCAN_KEY,
     mainnet: process.env.ETHERSCAN_KEY,
   }
 };

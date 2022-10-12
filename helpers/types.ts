@@ -19,6 +19,7 @@ export enum eEthereumNetwork {
   hardhat = 'hardhat',
   rinkeby = 'rinkeby',
   mainnet = 'mainnet',
+  goerli = 'goerli',
 }
 
 export enum eContractid {
@@ -489,6 +490,7 @@ export interface iEthereumParamsPerNetwork<T> {
   [eEthereumNetwork.buidlerevm]: T;
   [eEthereumNetwork.rinkeby]: T;
   [eEthereumNetwork.mainnet]: T;
+  [eEthereumNetwork.goerli]: T;
 }
 
 export interface iParamsBuilderPerNetwork<T> {
@@ -499,6 +501,7 @@ export interface iParamsBuilderPerNetwork<T> {
   [eEthereumNetwork.buidlerevm]?: T;
   [eEthereumNetwork.rinkeby]?: T;
   [eEthereumNetwork.mainnet]?: T;
+  [eEthereumNetwork.goerli]?: T;
 }
 
 export interface ITokenAddress {
