@@ -15,6 +15,7 @@ A more detailed and technical description of the protocol can be found in this r
 ## Audit
 
 * Armors Lab (03/2022): [report](/audits/Armors-vinci-03-2022.pdf)
+* Certik (08/2022): [report](/audits/Certik-final-20220826T184220Z.pdf)
 
 ## Community
 
